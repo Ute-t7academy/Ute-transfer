@@ -1,0 +1,417 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minis - T7 Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Open+Sans:wght@600;700;800&amp;family=Antonio:wght@500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;family=Garet+W05+Bold&amp;display=swap" rel="stylesheet">
+<link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
+<link href="https://ute-laureo.github.io/t7academy-widgets/t7-minis.css" rel="stylesheet">
+
+
+<!-- === TOP NAV === -->
+<nav class="topnav">
+  <div class="nav-logo">
+    <a href="/"><img src="https://github.com/Ute-t7academy/Assets/blob/main/logo_t7academy.png" alt="T7 Academy"></a>
+  </div>
+  <div class="nav-links">
+    <a href="https://www.laureo.at/" class="nav-link">Home</a>
+    <a href="https://www.laureo.at/sterne/" class="nav-link">Sterne</a>
+    <a href="https://www.laureo.at/sevens/" class="nav-link">Sevens</a>
+    <a href="https://www.laureo.at/challenges/" class="nav-link">Challenges</a>
+    <a href="#" class="nav-link active">Minis</a>
+  </div>
+  <div class="nav-right">
+    <button class="mute-toggle" id="muteBtn" title="Ton an/aus">🔊</button>
+    <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
+  </div>
+</nav>
+
+<!-- === HERO === -->
+<div class="hero">
+  <div class="hero-text">
+    <div class="hero-eye"><span data-av-emoji="">🦁</span> T7 Minis Academy</div>
+    <h1>Hi! Ich bin <span class="accent" data-av-name="">Keon</span>!</h1>
+    <p>Komm, wir lernen <strong>coole Fussball-Tricks</strong>! Du schaust ein Video, übst, und sammelst <strong>Punkte und Sticker</strong>. 🌟</p>
+    <div class="hero-stats" id="hero-fortschritt">
+      <div class="hero-stat"><div class="hero-stat-num" id="kf-total">0</div><div class="hero-stat-label">Gesamt XP</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" id="kf-week">0</div><div class="hero-stat-label">Diese Woche</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" id="hero-sticker-count">0 / 30</div><div class="hero-stat-label">Sticker gesammelt</div></div>
+    </div>
+  </div>
+  <div class="hero-image">
+    <img class="hero-overlay-avatar av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+  </div>
+</div>
+
+<!-- === MAIN LAYOUT === -->
+<div class="ch-layout">
+
+  <div class="ch-main">
+    <section class="ch-section">
+
+      <!-- Banner -->
+      <div class="kh-wrap">
+        <div class="kh-topline"></div>
+        <div class="kh-orb1"></div>
+        <div class="kh-orb2"></div>
+        <img class="kh-mascot av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+        <div class="kh-content">
+          <div class="kh-title">T7 <span>Minis Academy</span></div>
+          <div class="kh-intro"><span data-av-name="">Keon</span> zeigt dir die <strong>coolsten Tricks</strong>! Schau das Video an, probiere es selbst — und sammle <strong>Punkte und Sticker</strong>! Jeder Versuch zählt. 🎉</div>
+          <div class="kh-pills">
+            <div class="kh-pill p-gold">⭐ Punkte und Sticker sammeln</div>
+            <div class="kh-pill p-pink"><span data-av-emoji="">🦁</span> Mit <span data-av-name="">Keon</span> lernen</div>
+            <div class="kh-pill p-cyan">🎉 Spass haben</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === VIEW SYSTEM === -->
+      <div class="views">
+
+        <!-- VIEW 1: LANDING -->
+        <div class="view view-landing active" id="view-landing">
+          <div class="landing-grid">
+
+            <div class="landing-card lc-spielplatz" data-goto="spielplatz" role="button" tabindex="0">
+              <img class="lc-mascot av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+              <div class="lc-step">01</div>
+              <div class="lc-eye">🦁 5 Stationen</div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                <div>
+                  <div class="lc-emoji">⚽</div>
+                  <div class="lc-title" style="margin-top:8px">Spielplatz</div>
+                </div>
+              </div>
+              <div class="lc-desc">Such dir eine Station aus und lerne <strong style="color:var(--lp-red)">coole Tricks</strong> mit <span data-av-name="">Keon</span>!</div>
+              <div class="lc-preview">
+                <div class="lc-mini-circle">
+                  <div class="lc-mini-station">⚽</div>
+                  <div class="lc-mini-station">🇧🇷</div>
+                  <div class="lc-mini-station">👣</div>
+                  <div class="lc-mini-station">✨</div>
+                  <div class="lc-mini-station">🤹</div>
+                </div>
+              </div>
+              <div class="lc-pills">
+                <div class="kh-pill p-gold">5 Stationen</div>
+                <div class="kh-pill p-pink">10 Tricks</div>
+              </div>
+              <button class="lc-cta" type="button">Los geht's! →</button>
+            </div>
+
+            <div class="landing-card lc-trickpfad" data-goto="trickpfad" role="button" tabindex="0">
+              <img class="lc-mascot av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+              <div class="lc-step">02</div>
+              <div class="lc-eye">🛤️ Dein Weg</div>
+              <div>
+                <div class="lc-emoji">🏁</div>
+                <div class="lc-title" style="margin-top:8px">Trick-<em>Pfad</em></div>
+              </div>
+              <div class="lc-desc">Lerne <strong style="color:var(--accent-text)">Schritt für Schritt</strong> — vom ersten Trick bis zum grossen Ziel!</div>
+              <div class="lc-preview">
+                <div class="lc-mini-path">
+                  <div class="lc-mini-dot done"></div>
+                  <div class="lc-mini-line"></div>
+                  <div class="lc-mini-dot done"></div>
+                  <div class="lc-mini-line"></div>
+                  <div class="lc-mini-dot"></div>
+                  <div class="lc-mini-line"></div>
+                  <div class="lc-mini-dot"></div>
+                  <div class="lc-mini-line"></div>
+                  <div class="lc-mini-dot star"></div>
+                </div>
+              </div>
+              <div class="lc-pills">
+                <div class="kh-pill p-cyan">10 Schritte</div>
+                <div class="kh-pill p-gold">Bis ans Ziel</div>
+              </div>
+              <button class="lc-cta" type="button">Pfad starten →</button>
+            </div>
+
+            <div class="landing-card lc-stadien" data-goto="stadien" role="button" tabindex="0">
+              <div class="lc-bonus-badge">⭐ Bonus</div>
+              <img class="lc-mascot av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+              <div class="lc-eye" style="margin-top:32px">✈️ Bonus-Reise</div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                <div>
+                  <div class="lc-emoji">🏟️</div>
+                  <div class="lc-title" style="margin-top:8px">Stadien</div>
+                </div>
+              </div>
+              <div class="lc-desc"><strong style="color:var(--lp-green)">Lass uns zu den weltberühmten Stadien reisen!</strong> Schwerere 2⭐ und 3⭐ Tricks warten auf dich.</div>
+              <div class="lc-preview">
+                <div class="lc-stadia-row">
+                  <div class="lc-stadium-mini" style="--st-c:var(--lp-red)">🍁</div>
+                  <div class="lc-stadium-mini" style="--st-c:#00BCD4">🏔️</div>
+                  <div class="lc-stadium-mini" style="--st-c:var(--lp-green)">🌶️</div>
+                  <div class="lc-stadium-mini" style="--st-c:var(--accent2)">🗽</div>
+                  <div class="lc-stadium-mini" style="--st-c:var(--lp-brazil)">🌴</div>
+                </div>
+              </div>
+              <div class="lc-pills">
+                <div class="kh-pill p-gold">5 Stadien</div>
+                <div class="kh-pill p-cyan">2⭐ &amp; 3⭐ Tricks</div>
+              </div>
+              <button class="lc-cta" type="button">Reise starten →</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- VIEW 2: SPIELPLATZ -->
+        <div class="view view-spielplatz" id="view-spielplatz">
+          <button class="view-back" data-goto="landing" type="button">← Zurück</button>
+          <div class="pt-section-eye"><span data-av-emoji="">🦁</span> Spielplatz</div>
+          <div class="pt-section-title">Wähle eine <em>Station</em></div>
+          <div class="pg-circle">
+            <div class="pg-ring"></div>
+            <div class="pg-center">
+              <img class="pg-center-avatar av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+            </div>
+            <button class="pg-station pg-pos-1" data-station="st1" type="button">
+              <div class="pg-st-num">#1</div>
+              <img class="pg-st-avatar" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="">
+              <div class="pg-st-name">Keons Sitz-Tricks</div>
+              <div class="pg-st-count" data-proglabel="st1">0/2</div>
+            </button>
+            <button class="pg-station pg-pos-2" data-station="st2" type="button">
+              <div class="pg-st-num">#2</div>
+              <img class="pg-st-avatar" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="">
+              <div class="pg-st-name">Keons Ballkontrolle</div>
+              <div class="pg-st-count" data-proglabel="st2">0/2</div>
+            </button>
+            <button class="pg-station pg-pos-3" data-station="st3" type="button">
+              <div class="pg-st-num">#3</div>
+              <img class="pg-st-avatar" src="https://github.com/Ute-t7academy/Assets/blob/main/Coco_Avatar.png" alt="">
+              <div class="pg-st-name">Cocos 1 gegen 1</div>
+              <div class="pg-st-count" data-proglabel="st3">0/2</div>
+            </button>
+            <button class="pg-station pg-pos-4" data-station="st4" type="button">
+              <div class="pg-st-num">#4</div>
+              <img class="pg-st-avatar" src="https://github.com/Ute-t7academy/Assets/blob/main/Coco_Avatar.png" alt="">
+              <div class="pg-st-name">Cocos Dribbeln</div>
+              <div class="pg-st-count" data-proglabel="st4">0/2</div>
+            </button>
+            <button class="pg-station pg-pos-5" data-station="st5" type="button">
+              <div class="pg-st-num">#5</div>
+              <img class="pg-st-avatar" src="https://github.com/Ute-t7academy/Assets/blob/main/Leya_Avatar.png" alt="">
+              <div class="pg-st-name">Leyas Ballkontrolle</div>
+              <div class="pg-st-count" data-proglabel="st5">0/2</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW 3: STATION FOCUSED -->
+        <div class="view view-station" id="view-station">
+          <button class="view-back" id="view-back-station" type="button">← Zum Spielplatz</button>
+          <div class="station-hero" id="station-hero">
+            <img class="station-avatar" id="station-emoji" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="">
+            <div class="station-info">
+              <div class="station-num" id="station-num">Station 1</div>
+              <div class="station-title" id="station-title">Loading…</div>
+              <div class="station-meta">
+                <div class="station-meta-pill" id="station-count">0/2 geschafft</div>
+                <div class="station-meta-pill" id="station-trickcount">2 Tricks</div>
+              </div>
+            </div>
+          </div>
+          <div class="drills-list">
+            <div class="drills-list-label">Wähle einen Trick</div>
+            <div id="drills-list-target"></div>
+          </div>
+        </div>
+
+        <!-- VIEW 4: TRICKPFAD -->
+        <div class="view view-trickpfad" id="view-trickpfad">
+          <button class="view-back" data-goto="landing" type="button">← Zurück</button>
+          <div class="pt-section-eye">🛤️ Trick-Pfad</div>
+          <div class="pt-section-title">Schritt für <em>Schritt</em></div>
+          <div class="tp-wrap">
+            <div class="tp-start">Los geht's!</div>
+            <div class="tp-path" id="tp-path"></div>
+            <div class="tp-end" id="tp-end">Ziel</div>
+          </div>
+        </div>
+
+        <!-- VIEW 5: STADIEN -->
+        <div class="view view-stadien" id="view-stadien">
+          <button class="view-back" data-goto="landing" type="button">← Zurück</button>
+          <div class="pt-section-eye">✈️ Bonus-Reise</div>
+          <div class="pt-section-title">Reise zu den <em>weltberühmten</em> Stadien</div>
+          <div class="stadia-grid">
+            <button class="stadium-card" data-station="sd1" type="button" style="--st-c:#E4002B">
+              <div class="stadium-flag">🇨🇦</div>
+              <div class="stadium-emoji">🍁</div>
+              <div class="stadium-name">BMO Field</div>
+              <div class="stadium-city">Toronto</div>
+              <div class="stadium-count" data-proglabel="sd1">0/2</div>
+            </button>
+            <button class="stadium-card" data-station="sd2" type="button" style="--st-c:#00BCD4">
+              <div class="stadium-flag">🇨🇦</div>
+              <div class="stadium-emoji">🏔️</div>
+              <div class="stadium-name">BC Place</div>
+              <div class="stadium-city">Vancouver</div>
+              <div class="stadium-count" data-proglabel="sd2">0/2</div>
+            </button>
+            <button class="stadium-card" data-station="sd3" type="button" style="--st-c:#22C55E">
+              <div class="stadium-flag">🇲🇽</div>
+              <div class="stadium-emoji">🌶️</div>
+              <div class="stadium-name">Estadio Azteca</div>
+              <div class="stadium-city">Mexico City</div>
+              <div class="stadium-count" data-proglabel="sd3">0/2</div>
+            </button>
+            <button class="stadium-card" data-station="sd4" type="button" style="--st-c:#1f80ff">
+              <div class="stadium-flag">🇺🇸</div>
+              <div class="stadium-emoji">🗽</div>
+              <div class="stadium-name">MetLife Stadium</div>
+              <div class="stadium-city">New York</div>
+              <div class="stadium-count" data-proglabel="sd4">0/2</div>
+            </button>
+            <button class="stadium-card" data-station="sd5" data-st-text="dark" type="button" style="--st-c:#F7DC1F;--st-text:#0a1530">
+              <div class="stadium-flag">🇺🇸</div>
+              <div class="stadium-emoji">🌴</div>
+              <div class="stadium-name">SoFi Stadium</div>
+              <div class="stadium-city">Los Angeles</div>
+              <div class="stadium-count" data-proglabel="sd5">0/2</div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- === SIDEBAR === -->
+  <div class="ch-sidebar">
+
+    <div class="sb-card yip-card">
+      <div class="sb-label">⭐ Mit wem möchtest du heute üben?</div>
+      <div class="av-picker">
+        <button class="av-opt" data-av-pick="keon" type="button" aria-pressed="false">
+          <img src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Keon">
+          <div class="av-opt-name">Keon</div>
+        </button>
+        <button class="av-opt" data-av-pick="coco" type="button" aria-pressed="false">
+          <img src="https://github.com/Ute-t7academy/Assets/blob/main/Coco_Avatar.png" alt="Coco">
+          <div class="av-opt-name">Coco</div>
+        </button>
+        <button class="av-opt" data-av-pick="leya" type="button" aria-pressed="false">
+          <img src="https://github.com/Ute-t7academy/Assets/blob/main/Leya_Avatar.png" alt="Leya">
+          <div class="av-opt-name">Leya</div>
+        </button>
+      </div>
+      <div class="yip-greeting">Hallo <span id="kid-name">Champion</span>!</div>
+      <div class="yip-sub">Bereit für coole Tricks mit <span data-av-name="">Keon</span>? ⚽✨</div>
+    </div>
+
+    <div class="sb-card sb-card-stickers">
+      <div class="sb-label gold">🌟 Meine Sticker</div>
+      <div class="sticker-count" id="sticker-count">0 / 10 Sticker</div>
+      <div class="sticker-pager" id="sticker-pager" role="tablist" aria-label="Sticker-Seiten"></div>
+      <div class="sticker-grid" id="sticker-grid"></div>
+    </div>
+
+    <div class="sb-card sb-card-cert">
+      <div class="sb-label gold">🏅 Mein Zertifikat</div>
+      <div class="cert-teaser">
+        <div class="cert-teaser-seal">🏆</div>
+        <p>Dein persönliches Zertifikat mit allen gesammelten Stickern — jederzeit ansehen und ausdrucken!</p>
+      </div>
+      <button class="cert-open-btn" id="cert-open-btn" type="button">Zertifikat ansehen →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- === DRILL MODAL === -->
+<div class="kmodal-overlay" id="kmodal">
+  <div class="kmodal">
+    <button class="kmodal-close" id="kmodal-close">×</button>
+    <div class="kmodal-content">
+
+      <div class="kmodal-step" id="kstep-watch">
+        <div class="kmodal-title" id="kmodal-title">…</div>
+        <div class="kmodal-sub">Schau dir das Video an, dann probiere es selbst!</div>
+        <div class="kembed"><iframe id="kembed" src="" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen=""></iframe></div>
+        <div class="speech-with-mascot">
+          <img class="speech-mascot-img av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+          <div class="speech"><strong><span data-av-name="">Keon</span> sagt:</strong> Schau gut zu! Achte auf die Füße. Du schaffst das! 🎉</div>
+        </div>
+        <button class="kbig-btn" id="kbtn-tried">Ich habs probiert! 🎯</button>
+      </div>
+
+      <div class="kmodal-step" id="kstep-rate">
+        <div class="kmodal-title">Wie war's?</div>
+        <div class="kmodal-sub">Klick auf das Bild, das zu dir passt 😊</div>
+        <div class="krate-grid">
+          <div class="krate" data-rate="2"><div class="krate-emoji">😅</div><div class="krate-label">Schwierig</div></div>
+          <div class="krate" data-rate="3"><div class="krate-emoji">🙂</div><div class="krate-label">Geht so</div></div>
+          <div class="krate" data-rate="4"><div class="krate-emoji">😄</div><div class="krate-label">Gut!</div></div>
+          <div class="krate" data-rate="5"><div class="krate-emoji">🤩</div><div class="krate-label">Super!</div></div>
+        </div>
+      </div>
+
+      <div class="kmodal-step" id="kstep-success">
+        <div class="ksuccess">
+          <img class="ksuccess-mascot av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+          <div class="ksuccess-title" id="ksuccess-title">Super!</div>
+          <div class="ksticker-reveal" id="ksticker-reveal">⭐</div>
+          <div class="ksuccess-msg" id="ksuccess-msg">Du hast einen neuen Sticker bekommen!</div>
+          <button class="kbig-btn gold" id="kbtn-continue">Weiter 🚀</button>
+        </div>
+      </div>
+
+      <div class="kmodal-step" id="kstep-tryagain">
+        <div class="ktryagain">
+          <div class="speech-with-mascot" style="max-width:380px;margin:0 auto 20px">
+            <img class="speech-mascot-img av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+            <div class="speech"><strong><span data-av-name="">Keon</span> sagt:</strong> Kein Problem! Niemand kann alles sofort. Probiere es nochmal! 🎉</div>
+          </div>
+          <button class="kbig-btn" id="kbtn-retry">Nochmal versuchen 🔁</button>
+          <button class="kbig-btn gold" id="kbtn-skip" style="margin-top:10px">Andere Übung wählen</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- === CERTIFICATE MODAL === -->
+<div class="cert-overlay" id="certificate-modal">
+  <div class="cert-sheet" id="cert-sheet">
+    <button class="kmodal-close cert-close" id="cert-back-btn" title="Schliessen">×</button>
+    <div class="cert-frame" id="cert-frame">
+      <div class="cert-eye"><span data-av-emoji="">🦁</span> T7 Minis Academy</div>
+      <div class="cert-heading">Zertifikat</div>
+      <div class="cert-ribbon">🏅 Sticker-Sammlung 🏅</div>
+      <div class="cert-awarded">Dieses Zertifikat gehört</div>
+      <div class="cert-name" id="cert-name">Champion</div>
+      <div class="cert-wall" id="cert-sticker-wall"></div>
+      <div class="cert-count" id="cert-count">0 von 30 Stickern gesammelt</div>
+      <div class="cert-foot">
+        <div class="cert-foot-block">
+          <div class="cert-foot-label">Datum</div>
+          <div class="cert-foot-val" id="cert-date">–</div>
+        </div>
+        <div class="cert-seal">🏆</div>
+        <div class="cert-foot-block">
+          <div class="cert-foot-label">Code</div>
+          <div class="cert-foot-val cert-code" id="cert-code">T7-0000-0000</div>
+        </div>
+      </div>
+    </div>
+    <button class="kbig-btn gold cert-print" id="cert-print-btn" type="button">⬇️ Zertifikat herunterladen</button>
+  </div>
+</div>
+
+<!-- Name overlay -->
+<div class="t7-overlay" id="t7-id-overlay" style="display:none">
+  <img class="t7-overlay-mascot av-img" src="https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png" alt="Avatar">
+  <h2>Willkommen bei T7!</h2>
+  <p>Wie heisst du? <span data-av-name="">Keon</span> möchte dich kennenlernen!</p>
+  <input id="t7-id-input" type="text" placeholder="Dein Vorname" autocomplete="given-name">
+  <div class="ov-hint" id="t7-id-hint"></div>
+  <button onclick="T7Identity._submit()">Los geht's! 🚀</button>
+</div>
+
+<script src="https://github.com/Ute-t7academy/Ute-transfer/t7-widget-engine.js"></script>
+<script src="https://github.com/Ute-t7academy/Ute-transfer/t7-minis.js"></script>
