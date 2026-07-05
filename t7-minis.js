@@ -121,9 +121,9 @@ try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon'
 
 /* --- AVATARS --- */
 var AVATARS = {
-  keon:  { name:'Keon',  emoji:'🐆', species:'Der Gepard', img:'https://github.com/Ute-t7academy/Assets/blob/main/Keon_Avatar.png',  alt:'Keon der Gepard' },
-  coco:  { name:'Coco',  emoji:'🦎', species:'Der Gecko',  img:'https://github.com/Ute-t7academy/Assets/blob/main/Coco_Avatar.png',  alt:'Coco der Gecko' },
-  leya: { name:'Leya', emoji:'🐈‍⬛', species:'Der Panther',  img:'https://github.com/Ute-t7academy/Assets/blob/main/Leya_Avatar.png', alt:'Leya der Panther' }
+  keon:  { name:'Keon',  emoji:'🐆', species:'Der Gepard', img:'https://ute-t7academy.github.io/Assets/Keon_Avatar.png',  alt:'Keon der Gepard' },
+  coco:  { name:'Coco',  emoji:'🦎', species:'Der Gecko',  img:'https://ute-t7academy.github.io/Assets/Coco_Avatar.png',  alt:'Coco der Gecko' },
+  leya: { name:'Leya', emoji:'🐈‍⬛', species:'Der Panther',  img:'https://ute-t7academy.github.io/Assets/Leya_Avatar.png', alt:'Leya der Panther' }
 };
 function applyAvatar(key){
   var a = AVATARS[key]; if (!a) return;
