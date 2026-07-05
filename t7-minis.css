@@ -64,7 +64,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .hero h1 .accent{font-family:'Fraunces','Fredoka',serif;font-style:italic;font-weight:700;color:var(--accent-text);padding-right:.04em}
 .hero p{font-size:clamp(15px,1.3vw,18px);line-height:1.6;color:var(--lp-muted);max-width:520px;font-weight:500}
 .hero p strong{color:var(--lp-red);font-weight:700}
-.hero-image{position:relative;background:url('https://github.com/Ute-t7academy/Assets/blob/main/Minis_Hero_Pic.png') center/cover no-repeat;overflow:hidden}
+.hero-image{position:relative;background:url('https://ute-t7academy.github.io/Assets/Minis_Hero_Pic.png') center/cover no-repeat;overflow:hidden}
 .hero-image::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,15,30,.7) 0%,rgba(8,15,30,.2) 30%,transparent 60%)}
 [data-theme="light"] .hero-image::after{background:linear-gradient(90deg,rgba(232,237,243,.6) 0%,rgba(232,237,243,.15) 30%,transparent 60%)}
 .hero-overlay-avatar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:62%;max-width:260px;height:auto;z-index:2;pointer-events:none;filter:drop-shadow(0 8px 22px rgba(0,0,0,.45))}
