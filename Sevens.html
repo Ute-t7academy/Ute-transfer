@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sevens – T7 Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;family=Antonio:wght@400;500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;display=swap" rel="stylesheet">
+<link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
+<link rel="stylesheet" href="https://Ute-t7academy.github.io/Ute-transfer/t7-base.css?v=5">
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-logo">
+    <a href="/"><img src="https://Ute-t7academy.github.io/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
+  </div>
+  <div class="nav-links">
+    <a href="https://www.laureo.at/" class="nav-link">Home</a>
+    <a href="https://www.laureo.at/sterne/" class="nav-link">Sterne</a>
+    <a href="https://www.laureo.at/sevens/" class="nav-link active">Sevens</a>
+    <a href="https://www.laureo.at/challenges/" class="nav-link">Challenges</a>
+    <a href="https://www.laureo.at/minis/" class="nav-link">Minis</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">🌙</button>
+    <div class="nav-avatar" id="navAvatar">?</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-text">
+    <h1>Sevens. Deine <em>ständigen Begleiter!</em></h1>
+    <p>Übe wann immer Du Zeit hast. Damit perfektionierst Du Deine Technik und erreichst die 4- und 5-Sterne!</p>
+  </div>
+  <div class="hero-image hero-sevens"></div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"></circle><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></line></svg></span>
+    <input type="text" id="searchInput" placeholder="Suche Dein Sevens-Video…">
+  </div>
+  <div class="pill-filters">
+    <div class="pill-wrap" id="pillWrap1">
+      <button class="pill-toggle" id="pillToggle1">Schwierigkeitsgrad<span class="pill-arrow"></span></button>
+      <div class="pill-dropdown" id="pillDrop1">
+        <button class="pill-option active" data-level="all" data-diff="all">Alle</button>
+        <div class="pill-divider"></div>
+        <button class="pill-option" data-level="1" data-diff="all">7️⃣ 1 Seven</button>
+        <button class="pill-option" data-level="2" data-diff="all">7️⃣7️⃣ 2 Sevens</button>
+        <button class="pill-option" data-level="3" data-diff="all">7️⃣7️⃣7️⃣ 3 Sevens</button>
+        <div class="pill-divider"></div>
+        <button class="pill-option" data-level="all" data-diff="Einfach">🟢 Einfach</button>
+        <button class="pill-option" data-level="all" data-diff="Mittel">🟡 Mittel</button>
+        <button class="pill-option" data-level="all" data-diff="Schwierig">🔴 Schwierig</button>
+      </div>
+    </div>
+    <div class="pill-wrap" id="pillWrap2">
+      <button class="pill-toggle" id="pillToggle2">Kategorien<span class="pill-arrow"></span></button>
+      <div class="pill-dropdown" id="pillDrop2">
+        <button class="pill-option active" data-cat="all">Alle Kategorien</button>
+        <div class="pill-divider" id="catDivider"></div>
+      </div>
+    </div>
+    <div class="pill-wrap" id="pillWrap3">
+      <button class="pill-toggle" id="pillToggle3">Persönliche Filter<span class="pill-arrow"></span></button>
+      <div class="pill-dropdown" id="pillDrop3">
+        <button class="pill-option active" data-personal="all">Alle</button>
+        <div class="pill-divider"></div>
+        <button class="pill-option" data-personal="liked"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>Liked</button>
+        <button class="pill-option" data-personal="vorgemerkt"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path></svg>Vorgemerkt</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GRID -->
+<div id="grid" class="grid"><div class="loading">Lade Videos…</div></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-inner">
+    <button class="modal-back" id="modalBack">Zurück</button>
+    <div class="video-wrap" id="modalVideo"></div>
+    <div class="modal-title-bar"><div class="modal-title" id="modalTitle"></div></div>
+    <div class="modal-subtitles" id="modalSubtitles" style="display:none"></div>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div id="modalDesc"></div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script>
+  // Page config is set BEFORE the widget loads, so script order never matters.
+  window.T7_CONFIG = {
+    field: 'sevens',
+    emoji: '7️⃣',
+    unit: { one: 'Seven', many: 'Sevens' },
+    order: 'category.asc,nr.asc',
+    grouping: 'category',
+    groupIcon: '⚽',
+    cardHeader: 'count',   // card badge shows the Sevens count
+    categoryOrder: ['Jonglieren', 'Sitdowns', 'Sitdown', 'Ballannahme', 'Ballmitnahme', 'Passtechnik', 'Schusstechnik'],
+    categoryDisplay: { Sitdown: 'Sitdowns' },
+    diffOrder: ['Einfach', 'Mittel', 'Schwierig']
+  };
+</script>
+<script src="https://Ute-t7academy.github.io/Ute-transfer/t7-vimeo-tracker.js"></script>
+<script src="https://Ute-t7academy.github.io/Ute-transfer/t7-sternesevens.js?v=2"></script>
