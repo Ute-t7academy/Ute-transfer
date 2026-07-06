@@ -1,0 +1,1499 @@
+/* ============================================================
+   T7 ACADEMY — t7-home.css
+   ------------------------------------------------------------
+   Home-specific overrides for the subscribed environment.
+   Loaded AFTER t7-base.css so it can override.
+
+   Builds on the lp-* primitives that already live in t7-base.css
+   (and are documented in t7-outside.css):
+     .lp-section / .lp-wrap / .lp-eye / .lp-title / .lp-sub
+     .lp-hero / .lp-hero-grid / .lp-hero-text / .lp-hero-image
+     .lp-hero-stats / .lp-hero-stat / .lp-hero-stat-num / .lp-hero-stat-label
+
+   Scope:
+     1.  Make the inside (subscribed) home page speak the same
+         visual language as the outside (marketing) page.
+     2.  Add components that are unique to the inside home:
+           - home-hero-stars        (Sterne-Zertifikat badge, hero right)
+           - home-layout / -main /
+             -side / -block         (75/25 page grid below the hero)
+           - home-avatar-side       (sidebar photo uploader)
+           - home-prog / home-prog-* (progress cards, lp-prog vocab)
+           - myvids-*                (private clip uploads, IndexedDB)
+           - diary-*                 (player reflection, localStorage)
+           - home-actions /
+             home-action-btn        (download / upload backup toolbar)
+     3.  Restyle the existing news-card to fit the lp-* world.
+   ============================================================ */
+
+
+/* ============================================================
+   0. PRIMITIVES NOT IN t7-base.css
+   ------------------------------------------------------------
+   t7-base.css exposes lp-section / lp-wrap / lp-eye / lp-title /
+   lp-sub — but not the hero block or the Fraunces <em> rule.
+   We vendor only what the home page needs, rather than loading
+   the full t7-outside.css (which carries marketing-only blocks
+   like .lp-prog / .lp-theory / .alumni-roll the inside doesn't
+   need).
+============================================================ */
+
+/* Fraunces italic emphasis inside section titles */
+.lp-title em {
+  font-family: 'Fraunces', 'Garet W05 Bold', serif;
+  font-style: italic;
+  font-weight: 700;
+  padding-right: .04em;
+}
+.lp-title em.accent { color: var(--accent); }
+.lp-title em.gold   { color: var(--lp-gold); }
+
+/* Hero — mirrors .lp-hero from t7-outside.css */
+.lp-hero {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--lp-rule);
+}
+.lp-hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  min-height: 480px;
+  /* Match the centered 1400px column used by .home-layout so the
+     hero text lines up on the left with "Mein Fortschritt" /
+     "Nur für mich" on large screens.  The .lp-hero band itself stays
+     full-bleed (border, background); only its content is centered. */
+  max-width: 1400px;
+  margin-inline: auto;
+}
+.lp-hero-text {
+  padding: 72px clamp(24px, 5vw, 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+.lp-hero-eye {
+  font-family: 'Antonio', 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.lp-hero-eye::before {
+  content: '';
+  width: 36px;
+  height: 1px;
+  background: var(--accent);
+}
+.lp-hero h1 {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 900;
+  font-size: clamp(36px, 5.6vw, 68px);
+  line-height: 1.0;
+  letter-spacing: -.018em;
+  color: var(--text);
+  margin-bottom: 22px;
+}
+.lp-hero h1 em {
+  font-family: 'Fraunces', 'Garet W05 Bold', serif;
+  font-style: italic;
+  font-weight: 700;
+  color: var(--accent);
+  padding-right: .08em;
+}
+.lp-hero p {
+  font-size: clamp(15px, 1.4vw, 19px);
+  line-height: 1.55;
+  color: var(--lp-muted);
+  max-width: 520px;
+  margin-bottom: 32px;
+}
+.lp-hero p strong { color: var(--text); font-weight: 700; }
+
+.lp-hero-stats {
+  display: flex;
+  gap: 28px 34px;
+  flex-wrap: wrap;
+  padding-top: 24px;
+  border-top: 1px solid var(--lp-rule);
+  max-width: 640px;
+}
+.lp-hero-stat { display: flex; flex-direction: column; }
+.lp-hero-stat-num {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: clamp(38px, 3.8vw, 48px);
+  line-height: 1;
+  color: var(--lp-gold);
+  margin-bottom: 8px;
+}
+.lp-hero-stat-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}
+
+/* Sterne-Zertifikat sits inline with the other hero stats — the
+   star count in gold, followed by a small ★ glyph. */
+.lp-hero-stat-star {
+  font-size: .52em;
+  color: var(--lp-gold);
+  margin-left: .14em;
+  vertical-align: baseline;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, .4));
+}
+
+.lp-hero-image {
+  background: url('https://ute-t7academy.github.io/Assets/Home_Hero_Pic.png') center/cover no-repeat;
+  position: relative;
+}
+.lp-hero-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(8,15,30,.65) 0%, rgba(8,15,30,.15) 30%, transparent 60%);
+  pointer-events: none;
+}
+body[data-theme="light"] .lp-hero-image::after {
+  background: linear-gradient(90deg, rgba(232,237,243,.55) 0%, rgba(232,237,243,.15) 30%, transparent 60%) !important;
+}
+
+@media (max-width: 880px) {
+  .lp-hero-grid { grid-template-columns: 1fr; min-height: auto; }
+  .lp-hero-image { height: 280px; order: -1; }
+  .lp-hero-text  { padding: 48px 24px; }
+}
+
+
+/* ============================================================
+   1. KILL THE OLD BOXY SECTION HEAD
+   The previous design wrapped every section in a gradient-
+   bordered box.  The outside vocabulary uses naked typography
+   (lp-eye + lp-title + lp-sub) instead.  We hide the old
+   wrapper if it ever appears.
+============================================================ */
+.home-wrap,
+.home-section-head { all: unset; display: revert; }
+.home-section-head.player,
+.home-section-head.news,
+.home-section-head.theory { background-image: none; border: none; }
+
+
+/* ============================================================
+   2. HERO RIGHT COLUMN — STERNE-ZERTIFIKAT BADGE
+   The hero photo moved out to the sidebar (see §4).  The right
+   column now showcases the player's Sterne-Zertifikat — fed by
+   player_stats.stars from the certs Supabase query.
+============================================================ */
+.home-hero-stars {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 48px 32px;
+  position: relative;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 215, 0, .08) 0%, transparent 70%);
+  border-left: 1px solid var(--lp-rule);
+  text-align: center;
+}
+.home-hero-stars-eye {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}
+.home-hero-stars-big {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 6px 0;
+}
+.home-hero-stars-num {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: clamp(80px, 12vw, 140px);
+  line-height: .85;
+  color: var(--lp-gold);
+}
+.home-hero-stars-icon {
+  font-size: clamp(40px, 6vw, 64px);
+  color: var(--lp-gold);
+  filter: drop-shadow(0 0 18px rgba(255, 215, 0, .45));
+  line-height: 1;
+}
+.home-hero-stars-row {
+  display: flex;
+  gap: 10px;
+  font-size: clamp(20px, 2.4vw, 28px);
+  line-height: 1;
+}
+.home-hero-stars-row .s {
+  color: var(--lp-faint);
+  opacity: .3;
+  transition: color .25s, opacity .25s, filter .25s;
+}
+.home-hero-stars-row .s.earned {
+  color: var(--lp-gold);
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, .45));
+}
+.home-hero-stars-sub {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+  margin-top: 6px;
+  max-width: 280px;
+}
+
+@media (max-width: 880px) {
+  .home-hero-stars {
+    border-left: none;
+    border-top: 1px solid var(--lp-rule);
+    padding: 36px 24px;
+  }
+}
+
+/* ---- Hero right column: PROFILBILD (moved up from the sidebar) ---- */
+.home-hero-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 48px clamp(24px, 4vw, 56px);
+  border-left: 1px solid var(--lp-rule);
+  position: relative;
+}
+.home-hero-avatar-eye {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}
+/* The uploader keeps its own component styles; only size + reset margin here */
+.home-hero-avatar .home-avatar-side {
+  width: 100%;
+  max-width: 300px;
+  margin-top: 0;
+}
+@media (max-width: 880px) {
+  .home-hero-avatar {
+    border-left: none;
+    border-top: 1px solid var(--lp-rule);
+    padding: 36px 24px;
+  }
+}
+
+
+/* ============================================================
+   3. TWO-COLUMN LAYOUT — 75% main, 25% sidebar
+   Replaces the previous single-column vertical flow.  Each
+   "section" inside a column is a .home-block; dividers between
+   stacked blocks come from .home-block + .home-block.
+============================================================ */
+.home-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(40px, 5vw, 68px) clamp(24px, 5vw, 64px);
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  gap: clamp(32px, 4vw, 56px);
+  align-items: start;
+}
+.home-main, .home-side {
+  min-width: 0;       /* prevent grid blowout when content has long words */
+  display: flex;
+  flex-direction: column;
+}
+.home-block { display: flex; flex-direction: column; }
+.home-block + .home-block {
+  margin-top: clamp(40px, 5vw, 68px);
+  padding-top: clamp(40px, 5vw, 68px);
+  border-top: 1px solid var(--lp-rule);
+}
+
+/* Sidebar variants: smaller titles, no big sub line */
+.home-block-title-sm {
+  font-size: clamp(22px, 2.6vw, 30px) !important;
+  margin-bottom: 14px !important;
+}
+.home-block-side .lp-sub { display: none; }
+
+/* Stack columns on tablet & smaller — sidebar moves below */
+@media (max-width: 1000px) {
+  .home-layout { grid-template-columns: 1fr; }
+  .home-side {
+    margin-top: clamp(40px, 5vw, 68px);
+    padding-top: clamp(40px, 5vw, 68px);
+    border-top: 1px solid var(--lp-rule);
+  }
+}
+
+
+/* ============================================================
+   4. SIDEBAR — PROFILBILD UPLOADER (small, replaces old hero
+   overlay treatment).  Square photo + a clear CTA button.
+============================================================ */
+.home-avatar-side {
+  margin-top: 8px;
+  outline: none;
+  cursor: pointer;
+}
+.home-avatar-side-img {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  background: var(--surface2);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--lp-rule);
+  transition: filter .15s, border-color .15s;
+}
+.home-avatar-side:hover .home-avatar-side-img,
+.home-avatar-side:focus-visible .home-avatar-side-img {
+  filter: brightness(.94);
+  border-color: rgba(0, 229, 255, .35);
+}
+.home-avatar-side-img.has-photo .home-avatar-side-placeholder { display: none; }
+.home-avatar-side-placeholder {
+  font-size: 56px;
+  font-weight: 200;
+  color: var(--lp-faint);
+}
+.home-avatar-side-cta {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid rgba(0, 229, 255, .3);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .15s;
+}
+.home-avatar-side-cta:hover {
+  background: rgba(0, 229, 255, .08);
+  border-color: var(--accent);
+}
+body[data-theme="light"] .home-avatar-side-cta {
+  border-color: rgba(8, 145, 178, .4);
+}
+body[data-theme="light"] .home-avatar-side-cta:hover {
+  background: rgba(8, 145, 178, .08);
+  border-color: rgba(8, 145, 178, .7);
+}
+.home-avatar-side.uploading .home-avatar-side-cta {
+  opacity: .55;
+  pointer-events: none;
+}
+.home-avatar-side.uploading .home-avatar-side-cta::after { content: ' …'; }
+
+/* Nav avatar — small circular thumb that mirrors the photo */
+.nav-avatar {
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.nav-avatar.has-photo { color: transparent; font-size: 0; }
+
+
+/* ============================================================
+   5. ACTION BUTTON ROW — download / upload backup
+   Used at the bottom of Videos and Tagebuch sections.
+============================================================ */
+.home-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--lp-rule);
+}
+.home-action-btn {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 6px;
+  color: var(--lp-muted);
+  cursor: pointer;
+  transition: all .15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.home-action-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(0, 229, 255, .04);
+}
+.home-action-btn[disabled] { opacity: .5; cursor: wait; }
+.home-action-icon { font-size: 14px; line-height: 1; }
+
+.home-actions-status {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  margin-left: 4px;
+}
+.home-actions-status.ok    { color: var(--lp-green); }
+.home-actions-status.error { color: var(--lp-red); }
+
+/* Friendly "your stuff lives on this device — make a backup" hint,
+   shown inside the local-only feature modals so kids don't lose
+   their entries, goals, or videos. */
+.home-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 22px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(0, 229, 255, .06);
+  border: 1px solid rgba(0, 229, 255, .22);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--lp-muted);
+}
+body[data-theme="light"] .home-hint {
+  background: rgba(8, 145, 178, .06);
+  border-color: rgba(8, 145, 178, .25);
+}
+.home-hint-ico { font-size: 18px; line-height: 1.35; flex-shrink: 0; }
+.home-hint strong { color: var(--text); font-weight: 800; }
+
+
+/* ============================================================
+   3. PROGRESS CARDS — adopt the lp-prog vocabulary
+   Transparent backgrounds, colored eyebrow per card, Antonio
+   uppercase labels, big Garet title.  Each card carries its
+   own --p-c (program color) just like .lp-prog on the outside.
+============================================================ */
+.home-prog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.home-prog {
+  background: transparent;
+  padding: 12px 4px 24px;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s;
+}
+.home-prog:hover { transform: translateY(-2px); }
+
+.home-prog.p-sevens     { --p-c: var(--accent); }
+.home-prog.p-sterne     { --p-c: var(--lp-gold); }
+.home-prog.p-challenges { --p-c: #1bcb26; }
+body[data-theme="light"] .home-prog.p-challenges { --p-c: #15803D; }
+.home-prog.p-certs      { --p-c: var(--lp-gold); }
+
+.home-prog-age {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--p-c);
+  margin-bottom: 14px;
+}
+.home-prog-icon { font-size: 38px; line-height: 1; margin-bottom: 14px; }
+.home-prog-h {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.home-prog-body { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.home-prog-link {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--p-c);
+  margin-top: 18px;
+}
+.home-prog-link::after { content: ' →'; }
+
+/* Progress bar + module rows  (the actual data viz inside the card) */
+.po-mod-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.po-mod-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.po-mod-stat { font-size: 11px; color: var(--lp-faint); font-weight: 700; font-family: 'Antonio', sans-serif; letter-spacing: .04em; }
+.po-bar { height: 4px; background: rgba(128,140,160,.16); border-radius: 99px; overflow: hidden; }
+.po-bar-fill { height: 100%; border-radius: 99px; transition: width .5s cubic-bezier(.34,1.56,.64,1); }
+.po-bar-fill.gold { background: var(--lp-gold); }
+.po-bar-fill.cyan { background: var(--accent); }
+.po-bar-fill.green { background: var(--lp-green); }
+
+/* Stat-tile pair (used by Sevens + Sterne for "Videos gesehen" / "Watch Time") */
+.po-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.po-stat-tile { padding: 4px 0; }
+.po-stat-num {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--p-c, var(--accent));
+  margin-bottom: 6px;
+}
+.po-stat-num.gold { color: var(--lp-gold); }
+.po-stat-label {
+  font-family: 'Antonio', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}
+.po-empty {
+  font-size: 13px;
+  color: var(--lp-muted);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.home-loading {
+  font-family: 'Antonio', sans-serif;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  padding: 12px 0;
+}
+
+
+/* ============================================================
+   4. MEINE VIDEOS — upload + private clip list
+============================================================ */
+.myvids { margin-top: 18px; display: flex; flex-direction: column; gap: 18px; }
+
+.myvids-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1.5px dashed rgba(0,229,255,.35);
+  border-radius: 14px;
+  background: rgba(0,229,255,.04);
+  cursor: pointer;
+  transition: all .18s;
+}
+.myvids-upload:hover {
+  border-color: var(--accent);
+  background: rgba(0,229,255,.08);
+  transform: translateY(-1px);
+}
+body[data-theme="light"] .myvids-upload {
+  border-color: rgba(8,145,178,.4);
+  background: rgba(8,145,178,.04);
+}
+body[data-theme="light"] .myvids-upload:hover {
+  border-color: rgba(8,145,178,.7);
+  background: rgba(8,145,178,.08);
+}
+.myvids-upload-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 300;
+  flex-shrink: 0;
+}
+.myvids-upload-h {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.myvids-upload-sub {
+  font-size: 13px;
+  color: var(--lp-muted);
+}
+
+.myvids-progress {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 12px 18px;
+  background: rgba(0,229,255,.06);
+  border-radius: 10px;
+}
+.myvids-progress-bar { height: 4px; background: rgba(128,140,160,.18); border-radius: 99px; overflow: hidden; }
+.myvids-progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width .2s; }
+.myvids-progress-label {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+}
+
+.myvids-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.myvid-card {
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  position: relative;
+}
+.myvid-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface2);
+  cursor: pointer;
+}
+.myvid-thumb video,
+.myvid-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.myvid-play {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, transparent 0%, rgba(8,15,30,.4) 100%);
+  pointer-events: none;
+  transition: background .2s;
+}
+.myvid-thumb:hover .myvid-play { background: rgba(8,15,30,.55); }
+.myvid-play::before {
+  content: '▶';
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,.92);
+  color: #000;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  padding-left: 3px;
+}
+.myvid-meta {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px;
+  padding: 10px 2px 0;
+}
+.myvid-title {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.myvid-date {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  flex-shrink: 0;
+}
+.myvid-del {
+  background: none; border: none;
+  color: var(--lp-faint);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+}
+.myvid-del:hover { color: var(--lp-red); background: rgba(228,0,43,.08); }
+
+.myvids-empty {
+  grid-column: 1 / -1;
+  padding: 32px 0;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--lp-muted);
+  text-align: center;
+}
+
+/* Fullscreen-ish player overlay when a clip is tapped */
+.myvid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0,0,0,.88);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.myvid-overlay video { width: 100%; max-width: 1100px; max-height: 80vh; border-radius: 8px; }
+.myvid-overlay-close {
+  position: absolute; top: 18px; right: 22px;
+  background: rgba(255,255,255,.1); color: #fff; border: 0;
+  width: 40px; height: 40px; border-radius: 50%;
+  font-size: 22px; cursor: pointer;
+}
+.myvid-overlay-close:hover { background: rgba(255,255,255,.18); }
+
+
+/* ============================================================
+   5. TAGEBUCH — the signature section
+   Notebook-feel input.  Past entries stack as dated cards.
+   Each entry has two columns: gold (good) + amber (watch).
+============================================================ */
+.diary {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.diary-input { position: relative; }
+.diary-input-date {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.diary-input-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 720px) { .diary-input-cols { grid-template-columns: 1fr; } }
+
+.diary-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 14px;
+  border-left: 3px solid var(--diary-c);
+}
+.diary-col-good  { --diary-c: var(--lp-gold); }
+.diary-col-watch { --diary-c: #E89B1F; }
+body[data-theme="light"] .diary-col-watch { --diary-c: #C2410C; }
+
+.diary-col-label {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--diary-c);
+}
+
+.diary-col textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  padding: 4px 0;
+}
+.diary-col textarea::placeholder {
+  color: var(--lp-faint);
+  font-style: italic;
+}
+
+/* Voice notes — record instead of type.  The recorder inherits the
+   column's --diary-c accent (gold for good, amber for watch). */
+.diary-voice {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+.diary-voice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 8px 15px;
+  border-radius: 99px;
+  border: 1px solid var(--diary-c);
+  color: var(--diary-c);
+  background: transparent;
+  cursor: pointer;
+  transition: background .15s, filter .15s;
+}
+.diary-voice-btn:hover { background: rgba(255,255,255,.05); filter: brightness(1.1); }
+.diary-voice-ico { font-size: 15px; line-height: 1; }
+.diary-voice-btn.recording {
+  border-color: var(--lp-red);
+  color: #fff;
+  background: var(--lp-red);
+  animation: diaryVoicePulse 1.2s ease-in-out infinite;
+}
+@keyframes diaryVoicePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(228,0,43,.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(228,0,43,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diary-voice-btn.recording { animation: none; }
+}
+.diary-voice-time {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--lp-red);
+}
+.diary-voice-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.diary-voice-audio { height: 36px; flex: 1; min-width: 0; max-width: 280px; }
+.diary-voice-del {
+  background: none;
+  border: none;
+  color: var(--lp-faint);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 5px 7px;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+}
+.diary-voice-del:hover { color: var(--lp-red); background: rgba(228,0,43,.08); }
+
+.diary-input-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+.diary-save {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  cursor: pointer;
+  transition: all .18s;
+}
+.diary-save:hover {
+  background: #1ce6ff;
+  box-shadow: 0 0 18px rgba(0,229,255,.3);
+}
+.diary-save:disabled { opacity: .5; cursor: wait; }
+.diary-save-status {
+  font-family: 'Antonio', sans-serif;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-green);
+  opacity: 0;
+  transition: opacity .25s;
+}
+.diary-save-status.show { opacity: 1; }
+.diary-save-status.error { color: var(--lp-red); }
+
+/* History feed */
+.diary-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-top: 24px;
+  border-top: 1px solid var(--lp-rule);
+}
+.diary-entry {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .diary-entry { grid-template-columns: 1fr; gap: 8px; }
+}
+.diary-entry-date {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  padding-top: 4px;
+}
+.diary-entry-date .weekday {
+  display: block;
+  font-family: 'Antonio', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  margin-top: 4px;
+}
+.diary-entry-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 720px) { .diary-entry-cols { grid-template-columns: 1fr; gap: 14px; } }
+.diary-entry-col {
+  padding-left: 14px;
+  border-left: 2px solid var(--diary-c);
+}
+.diary-entry-col.good  { --diary-c: var(--lp-gold); }
+.diary-entry-col.watch { --diary-c: #E89B1F; }
+body[data-theme="light"] .diary-entry-col.watch { --diary-c: #C2410C; }
+.diary-entry-col-label {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--diary-c);
+  margin-bottom: 6px;
+}
+.diary-entry-col-text {
+  font-size: 14px;
+  color: var(--lp-muted);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.diary-entry-col-text.empty {
+  font-style: italic;
+  opacity: .5;
+}
+.diary-entry-audio {
+  display: block;
+  margin-top: 8px;
+  height: 36px;
+  width: 100%;
+  max-width: 300px;
+}
+.diary-entry-audio-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.diary-entry-audio-wrap .diary-entry-audio { margin-top: 0; }
+.diary-entry-audio-del {
+  background: none;
+  border: none;
+  color: var(--lp-faint);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 5px 7px;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+  flex-shrink: 0;
+}
+.diary-entry-audio-del:hover { color: var(--lp-red); background: rgba(228,0,43,.08); }
+
+.diary-empty {
+  padding: 24px 0;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--lp-muted);
+  text-align: center;
+}
+
+
+/* ============================================================
+   5b. MEINE ZIELE — 3-column goals list (Ziel / Bis wann /
+   Fortschritt), styled like the Tagebuch.  Local-only, with
+   download / upload backup.  Each saved goal keeps an inline
+   progress control so it can be updated over time.
+============================================================ */
+.goals {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.goals-input { position: relative; }
+.goals-input-cols {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 720px) { .goals-input-cols { grid-template-columns: 1fr; } }
+
+.goals-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 14px;
+  border-left: 3px solid var(--goals-c);
+}
+.goals-col-goal { --goals-c: var(--accent); }
+.goals-col-when { --goals-c: var(--lp-gold); }
+.goals-col-prog { --goals-c: var(--lp-green); }
+
+.goals-col-label {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--goals-c);
+}
+
+.goals-col textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: vertical;
+  min-height: 84px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  padding: 4px 0;
+}
+.goals-col textarea::placeholder {
+  color: var(--lp-faint);
+  font-style: italic;
+}
+
+/* Date + select need a subtle surface so they read as controls,
+   while keeping the colored left border of the column. */
+.goals-col input[type="date"],
+.goals-col select {
+  width: 100%;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface2);
+  border: 1px solid var(--lp-rule);
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.goals-col input[type="date"]:focus,
+.goals-col select:focus { border-color: var(--goals-c); }
+.goals-col input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .7; }
+body[data-theme="dark"] .goals-col input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+.goals-input-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+/* Feed of saved goals — each row echoes the three columns as
+   labeled cells, plus an inline progress bar + updater. */
+.goals-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--lp-rule);
+}
+.goal-entry {
+  display: grid;
+  grid-template-columns: 1.7fr .9fr 1.3fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--lp-rule);
+}
+.goal-entry:last-child { border-bottom: none; }
+@media (max-width: 640px) {
+  .goal-entry { grid-template-columns: 1fr; gap: 12px; }
+}
+
+.goal-cell { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.goal-cell-label {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}
+.goal-cell-goal .goal-text {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+/* Completed goals get a green check instead of a strikethrough. */
+.goal-check {
+  color: var(--lp-green);
+  font-weight: 900;
+  margin-right: 6px;
+}
+.goal-when {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: .04em;
+  color: var(--text);
+}
+.goal-when.none { color: var(--lp-faint); }
+.goal-when.overdue { color: var(--lp-red); }
+
+.goal-prog { display: flex; flex-direction: column; gap: 8px; }
+.goal-prog-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.goal-prog-pct {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--lp-green);
+}
+.goal-prog select {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--lp-muted);
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 6px;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+.goal-del {
+  background: none; border: none;
+  color: var(--lp-faint);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+  justify-self: end;
+}
+.goal-del:hover { color: var(--lp-red); background: rgba(228,0,43,.08); }
+
+.goals-empty {
+  padding: 24px 0;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--lp-muted);
+  text-align: center;
+}
+
+
+/* ============================================================
+   6. NEWS — restyle the existing news-card to fit the lp world
+   The component lives in t7-base.css; we just override the
+   surface treatment to match the transparent-card vocabulary.
+============================================================ */
+.news-feed {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* When news lives in the sidebar, it's the entire column — let it
+   grow as tall as needed.  We keep an upper bound on very long
+   feeds to avoid an absurd page. */
+.home-block-side .news-feed {
+  max-height: 720px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.home-block-side .news-feed::-webkit-scrollbar { width: 5px; }
+.home-block-side .news-feed::-webkit-scrollbar-track { background: transparent; }
+.home-block-side .news-feed::-webkit-scrollbar-thumb { background: rgba(128,140,160,.25); border-radius: 99px; }
+
+.news-card {
+  display: flex;
+  gap: 12px;
+  padding: 12px 4px;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--lp-rule);
+  transition: transform .15s;
+  background: transparent;
+  border-radius: 0;
+}
+.news-card:last-child { border-bottom: none; }
+.news-card:hover { transform: translateX(3px); }
+.news-thumb {
+  width: 52px; height: 52px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), #0080FF);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: rgba(0,0,0,.8);
+  overflow: hidden;
+}
+.news-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.news-body { flex: 1; min-width: 0; }
+.news-date {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.news-title {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.news-excerpt {
+  font-size: 12px;
+  color: var(--lp-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.news-loading,
+.news-empty {
+  padding: 24px 0;
+  text-align: center;
+  font-family: 'Antonio', sans-serif;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}
+
+
+/* ============================================================
+   7. CARD TEASERS — collapsed home-page entry points for
+   "Meine Aufnahmen" and "Mein Tagebuch".  Clicking opens the
+   matching .home-modal (see §8) with the full feature.
+============================================================ */
+.home-card-teaser {
+  margin-top: 18px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px;
+  background: transparent;
+  border: 1.5px solid var(--lp-rule);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: all .18s;
+}
+.home-card-teaser:hover,
+.home-card-teaser:focus-visible {
+  border-color: var(--accent);
+  background: rgba(0, 229, 255, .05);
+  transform: translateY(-1px);
+}
+.home-card-teaser-icon {
+  width: 52px; height: 52px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+.home-card-teaser-body { flex: 1; min-width: 0; }
+.home-card-teaser-h {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.home-card-teaser-sub {
+  font-size: 13px;
+  color: var(--lp-muted);
+}
+.home-card-teaser-cta {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.home-card-teaser-cta::after { content: ' →'; }
+
+/* "Nur für mich" — three teasers next to each other.  The cards go
+   vertical (icon on top) so three fit comfortably in a row. */
+.home-analyse-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.home-analyse-grid .home-card-teaser { margin-top: 0; height: 100%; }
+.home-card-teaser-v {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+.home-card-teaser-v .home-card-teaser-body { width: 100%; flex: 1 1 auto; }
+.home-card-teaser-v .home-card-teaser-cta { align-self: flex-start; }
+
+@media (max-width: 1180px) {
+  .home-analyse-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 1000px) {
+  .home-analyse-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 680px) {
+  .home-analyse-grid { grid-template-columns: 1fr; }
+  .home-card-teaser-v {
+    flex-direction: row;
+    align-items: center;
+  }
+  .home-card-teaser-v .home-card-teaser-cta { align-self: center; }
+}
+
+
+/* ============================================================
+   8. MODALS — the opened-up "Meine Aufnahmen" repository and
+   "Mein Tagebuch" journal.  Re-uses the myvids-* / diary-*
+   component styles defined above (§4 / §5); only the modal
+   chrome (backdrop, panel, close button) is new here.
+   Archiving (.home-actions "Sichern" / "Wiederherstellen")
+   only ever renders inside .home-modal-body — never on the
+   teaser card — so it only becomes visible once the card is
+   open.
+============================================================ */
+.home-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 48px);
+}
+.home-modal[hidden] { display: none; }
+.home-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 8, 18, .72);
+  backdrop-filter: blur(2px);
+}
+body[data-theme="light"] .home-modal-backdrop {
+  background: rgba(20, 26, 38, .55);
+}
+.home-modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  max-height: min(88vh, 900px);
+  overflow-y: auto;
+  background: var(--surface2, #0b1220);
+  border: 1px solid var(--lp-rule);
+  border-radius: 18px;
+  padding: clamp(28px, 4vw, 44px);
+  box-shadow: 0 24px 64px rgba(0,0,0,.4);
+}
+.home-modal-close {
+  position: absolute;
+  top: 18px; right: 18px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(128,140,160,.14);
+  border: 1px solid var(--lp-rule);
+  color: var(--text);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+}
+.home-modal-close:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.home-modal-head { padding-right: 40px; }
+.home-modal-head .lp-title { margin-top: 6px; }
+.home-modal-body { margin-top: 8px; }
+
+body.home-modal-open { overflow: hidden; }
+
+@media (max-width: 640px) {
+  .home-modal { padding: 0; }
+  .home-modal-panel {
+    max-width: none;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    padding: 24px 20px 32px;
+  }
+}

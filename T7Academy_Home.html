@@ -1,0 +1,419 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home — T7 Academy</title>
+
+<!-- Fonts: same family the outside page uses (Open Sans + Antonio + Fraunces + Garet) -->
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;family=Antonio:wght@400;500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;display=swap" rel="stylesheet">
+<link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
+
+<!-- Base widget stylesheet (lp-* primitives, theme tokens, topnav) -->
+<link rel="stylesheet" href="https://ute-t7academy.github.io/Ute-transfer/t7-base.css?v=1">
+<!-- Home-specific overrides + personalization components -->
+<link rel="stylesheet" href="https://ute-t7academy.github.io/Ute-transfer/t7academy-widgets/t7-home.css?v=3">
+
+
+<!-- TOP NAV (subscribed environment: real page links + theme + avatar) -->
+<nav class="topnav">
+  <div class="nav-logo">
+    <a href="/"><img src="https://ute-t7academy.github.io/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
+  </div>
+  <div class="nav-links">
+    <a href="https://www.laureo.at/" class="nav-link active">Home</a>
+    <a href="https://www.laureo.at/sterne/" class="nav-link">Sterne</a>
+    <a href="https://www.laureo.at/sevens/" class="nav-link">Sevens</a>
+    <a href="https://www.laureo.at/challenges/" class="nav-link">Challenges</a>
+    <a href="https://www.laureo.at/minis/" class="nav-link">Minis</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
+    <div class="nav-avatar" id="navAvatar" title="Mein Profilbild">?</div>
+  </div>
+</nav>
+
+
+<!-- ============================================================
+     HERO — identity + at-a-glance stats on the LEFT.
+     The Sterne-Zertifikat badge on the RIGHT.  The avatar
+     uploader has moved OUT of the hero into the right sidebar
+     below.
+============================================================ -->
+<section class="lp-hero">
+  <div class="lp-hero-grid">
+    <div class="lp-hero-text">
+      <div class="lp-hero-eye">Willkommen zurück</div>
+      <h1>Werde der <em>beste Spieler</em>, der <em>du</em> sein kannst.</h1>
+      <p>Jeder Skill, jede Challenge, jeder Stern macht dich besser. <strong>Wir zeigen dir den Weg.</strong> Du brauchst nur den Ball, ein bisschen Platz und viel Freude beim Spiel.</p>
+      <div class="lp-hero-stats" id="hero-stats">
+        <div class="lp-hero-stat">
+          <div class="lp-hero-stat-num" id="stat-videos">—</div>
+          <div class="lp-hero-stat-label">Videos gesehen</div>
+        </div>
+        <div class="lp-hero-stat">
+          <div class="lp-hero-stat-num" id="stat-watchtime">—</div>
+          <div class="lp-hero-stat-label">Watch Time</div>
+        </div>
+        <div class="lp-hero-stat">
+          <div class="lp-hero-stat-num" id="stat-xp">—</div>
+          <div class="lp-hero-stat-label">XP</div>
+        </div>
+        <div class="lp-hero-stat lp-hero-stat-stars">
+          <div class="lp-hero-stat-num">
+            <span id="hero-stars-num">0</span><span class="lp-hero-stat-star">★</span>
+          </div>
+          <div class="lp-hero-stat-label">Sterne-Zertifikat</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profilbild — moved up from the sidebar into the hero.
+         Still the same avatar uploader (avatarSide / avatarInput …),
+         just given a hero-scaled treatment. -->
+    <div class="home-hero-avatar" aria-label="Dein Profilbild">
+      <div class="home-hero-avatar-eye">Dein Profilbild</div>
+      <div class="home-avatar-side" id="avatarSide" role="button" tabindex="0"
+           aria-label="Profilbild hochladen oder ersetzen">
+        <input type="file" id="avatarInput" accept="image/*" hidden>
+        <div class="home-avatar-side-img" id="avatarSideImg">
+          <span class="home-avatar-side-placeholder">+</span>
+        </div>
+        <button class="home-avatar-side-cta" id="avatarSideCta" type="button">Bild hochladen</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     TWO-COLUMN LAYOUT (75 / 25 on desktop, stacked on mobile)
+     Left:  Fortschritt → Meine Aufnahmen → Tagebuch
+     Right: Profilbild   → Was ist neu
+============================================================ -->
+<div class="home-layout">
+
+  <main class="home-main">
+
+    <!-- FORTSCHRITT -->
+    <section class="home-block">
+      <div class="lp-eye">Mein Fortschritt</div>
+      <h2 class="lp-title">Wo du gerade <em class="accent">stehst</em>.</h2>
+      <p class="lp-sub">Quer durch alle Module — wie viel hast du gesehen, wie weit bist du in den Challenges, welche Sterne hast du schon?</p>
+
+      <div class="home-prog-grid">
+        <a class="home-prog p-sevens" href="https://www.t7academy.com/sevens/">
+          <div class="home-prog-age">Die Grundlagen</div>
+          <div class="home-prog-icon">7️⃣</div>
+          <div class="home-prog-h">Sevens</div>
+          <div id="po-sevens-body" class="home-prog-body">
+            <div class="home-loading">Lade…</div>
+          </div>
+          <div class="home-prog-link">Zu den Sevens</div>
+        </a>
+
+        <a class="home-prog p-sterne" href="https://www.t7academy.com/sterne/">
+          <div class="home-prog-age">Alle Skills der Profis</div>
+          <div class="home-prog-icon">⭐</div>
+          <div class="home-prog-h">Sterne</div>
+          <div id="po-sterne-body" class="home-prog-body">
+            <div class="home-loading">Lade…</div>
+          </div>
+          <div class="home-prog-link">Zu den Sternen</div>
+        </a>
+
+        <a class="home-prog p-challenges" href="https://www.t7academy.com/challenges/">
+          <div class="home-prog-age">Trainiere &amp; Sammle XP</div>
+          <div class="home-prog-icon">⚡</div>
+          <div class="home-prog-h">Challenges</div>
+          <div id="po-challenges-body" class="home-prog-body">
+            <div class="home-loading">Lade…</div>
+          </div>
+          <div class="home-prog-link">Zu den Challenges</div>
+        </a>
+
+        <a class="home-prog p-certs" href="https://www.t7academy.com/challenges/#cert-container">
+          <div class="home-prog-age">1- bis 5-Sterne</div>
+          <div class="home-prog-icon">🏆</div>
+          <div class="home-prog-h">Zertifikate</div>
+          <div id="po-certs-body" class="home-prog-body">
+            <div class="home-loading">Lade…</div>
+          </div>
+          <div class="home-prog-link">Zu den Zertifikaten</div>
+        </a>
+      </div>
+    </section>
+
+
+    <!-- NUR FÜR MICH — "Meine eigene Analyse".  Three teaser cards
+         side by side: Meine Ziele (new), Mein Tagebuch, Meine
+         Aufnahmen.  Each opens its full feature in a modal below.
+         All three are local-only (no cloud) and offer download /
+         upload backup inside their opened card. -->
+    <section class="home-block">
+      <div class="lp-eye">Nur für mich</div>
+      <h2 class="lp-title">Meine eigene <em class="accent">Analyse</em>.</h2>
+      <p class="lp-sub">Deine Ziele, deine Gedanken, deine Videos — alles an einem Ort und nur auf diesem Gerät.</p>
+
+      <div class="home-analyse-grid">
+
+        <!-- MEINE ZIELE (new) — 3-Spalten-Liste (Ziel / Bis wann /
+             Fortschritt), lokal, mit Sichern & Wiederherstellen. -->
+        <button class="home-card-teaser home-card-teaser-v" id="goalsCardOpen" type="button"
+                aria-haspopup="dialog" aria-controls="goalsModal">
+          <div class="home-card-teaser-icon">🎯</div>
+          <div class="home-card-teaser-body">
+            <div class="home-card-teaser-h">Meine Ziele</div>
+            <div class="home-card-teaser-sub" id="goalsTeaserSub">Lade…</div>
+          </div>
+          <div class="home-card-teaser-cta">Öffnen</div>
+        </button>
+
+        <!-- MEIN TAGEBUCH -->
+        <button class="home-card-teaser home-card-teaser-v" id="diaryCardOpen" type="button"
+                aria-haspopup="dialog" aria-controls="diaryModal">
+          <div class="home-card-teaser-icon">📓</div>
+          <div class="home-card-teaser-body">
+            <div class="home-card-teaser-h">Mein Tagebuch</div>
+            <div class="home-card-teaser-sub" id="diaryTeaserSub">Lade…</div>
+          </div>
+          <div class="home-card-teaser-cta">Öffnen</div>
+        </button>
+
+        <!-- MEINE AUFNAHMEN -->
+        <button class="home-card-teaser home-card-teaser-v" id="myvidsCardOpen" type="button"
+                aria-haspopup="dialog" aria-controls="myvidsModal">
+          <div class="home-card-teaser-icon">🎬</div>
+          <div class="home-card-teaser-body">
+            <div class="home-card-teaser-h">Meine Aufnahmen</div>
+            <div class="home-card-teaser-sub" id="myvidsTeaserSub">Lade…</div>
+          </div>
+          <div class="home-card-teaser-cta">Öffnen</div>
+        </button>
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <aside class="home-side">
+
+    <!-- NEWS -->
+    <section class="home-block home-block-side">
+      <div class="lp-eye">Was ist neu</div>
+      <h2 class="lp-title home-block-title-sm">Aus der <em class="gold">Academy</em>.</h2>
+
+      <div class="news-feed" id="news-feed">
+        <div class="news-loading">Lade Neuigkeiten…</div>
+      </div>
+    </section>
+
+  </aside>
+</div>
+
+
+<!-- ============================================================
+     MODALS — full "Meine Aufnahmen" repository and "Mein
+     Tagebuch" journal.  Both stay closed (hidden) until their
+     teaser card above is clicked.  The backup/restore
+     ("Sichern" / "Wiederherstellen") controls only appear here,
+     inside the opened card — never on the collapsed teaser.
+============================================================ -->
+
+<div class="home-modal" id="goalsModal" role="dialog" aria-modal="true" aria-labelledby="goalsModalTitle" hidden>
+  <div class="home-modal-backdrop" data-modal-close></div>
+  <div class="home-modal-panel">
+    <button class="home-modal-close" type="button" data-modal-close aria-label="Schließen">✕</button>
+
+    <div class="home-modal-head">
+      <div class="lp-eye">Meine Ziele</div>
+      <h2 id="goalsModalTitle" class="lp-title home-block-title-sm">Wo willst du <em class="accent">hin</em>?</h2>
+      <p class="lp-sub">Setz dir ein klares Ziel, ein Datum bis wann — und halt fest, wie weit du schon bist. Bleibt auf diesem Gerät — nutze „Sichern“ und „Wiederherstellen“, um auf ein anderes Gerät zu wechseln.</p>
+    </div>
+
+    <div class="home-modal-body">
+      <div class="goals">
+        <div class="goals-input">
+          <div class="goals-input-cols">
+            <div class="goals-col goals-col-goal">
+              <label class="goals-col-label" for="goalText">Ziel</label>
+              <textarea id="goalText" placeholder="Z. B. „Beidfüßig sicher passen.“" rows="3"></textarea>
+            </div>
+            <div class="goals-col goals-col-when">
+              <label class="goals-col-label" for="goalWhen">Bis wann</label>
+              <input type="date" id="goalWhen">
+            </div>
+            <div class="goals-col goals-col-prog">
+              <label class="goals-col-label" for="goalProgress">Fortschritt</label>
+              <select id="goalProgress">
+                <option value="0">0 %</option>
+                <option value="25">25 %</option>
+                <option value="50">50 %</option>
+                <option value="75">75 %</option>
+                <option value="100">100 %</option>
+              </select>
+            </div>
+          </div>
+          <div class="goals-input-actions">
+            <button id="goalSave" class="diary-save">Ziel hinzufügen</button>
+            <div class="diary-save-status" id="goalSaveStatus"></div>
+          </div>
+        </div>
+
+        <div class="goals-feed" id="goalsFeed">
+          <div class="home-loading">Lade Ziele…</div>
+        </div>
+
+        <div class="home-hint">
+          <span class="home-hint-ico">💾</span>
+          <div><strong>Wichtig:</strong> Deine Ziele liegen nur auf diesem Gerät. Tipp ab und zu auf „Ziele sichern“ und speichere die Datei gut ab — so geht nichts verloren.</div>
+        </div>
+
+        <div class="home-actions">
+          <button class="home-action-btn" id="goalsExportBtn" title="Ziele als Datei speichern">
+            <span class="home-action-icon">↓</span> Ziele sichern
+          </button>
+          <button class="home-action-btn" id="goalsImportBtn" title="Backup-Datei einspielen">
+            <span class="home-action-icon">↑</span> Backup wiederherstellen
+          </button>
+          <input type="file" id="goalsImportInput" accept="application/json,.json" hidden>
+          <span class="home-actions-status" id="goalsActionsStatus"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="home-modal" id="myvidsModal" role="dialog" aria-modal="true" aria-labelledby="myvidsModalTitle" hidden>
+  <div class="home-modal-backdrop" data-modal-close></div>
+  <div class="home-modal-panel">
+    <button class="home-modal-close" type="button" data-modal-close aria-label="Schließen">✕</button>
+
+    <div class="home-modal-head">
+      <div class="lp-eye">Meine Aufnahmen</div>
+      <h2 id="myvidsModalTitle" class="lp-title home-block-title-sm">Deine Video-Sammlung.</h2>
+      <p class="lp-sub">Lade beliebig viele Videos hoch und schau sie dir später an. Bleibt auf diesem Gerät — nutze „Sichern“ und „Wiederherstellen“, um auf ein anderes Gerät zu wechseln.</p>
+    </div>
+
+    <div class="home-modal-body">
+      <div class="myvids">
+        <label class="myvids-upload" id="myvidsUpload">
+          <input type="file" id="myvidsInput" accept="video/*" multiple hidden>
+          <div class="myvids-upload-icon">＋</div>
+          <div>
+            <div class="myvids-upload-h">Neue Videos hochladen</div>
+            <div class="myvids-upload-sub">Match, Training oder Trick — auch mehrere auf einmal.</div>
+          </div>
+        </label>
+        <div class="myvids-progress" id="myvidsProgress" hidden>
+          <div class="myvids-progress-bar"><div class="myvids-progress-fill" id="myvidsProgressFill"></div></div>
+          <div class="myvids-progress-label" id="myvidsProgressLabel">Speichere…</div>
+        </div>
+
+        <div class="myvids-list" id="myvidsList">
+          <div class="home-loading">Lade Videos…</div>
+        </div>
+
+        <div class="home-hint">
+          <span class="home-hint-ico">💾</span>
+          <div><strong>Wichtig:</strong> Deine Videos liegen nur auf diesem Gerät. Tipp ab und zu auf „Videos sichern“ und speichere die Datei gut ab — so geht nichts verloren.</div>
+        </div>
+
+        <div class="home-actions">
+          <button class="home-action-btn" id="clipsExportBtn" title="Alle Videos als Datei speichern">
+            <span class="home-action-icon">↓</span> Videos sichern
+          </button>
+          <button class="home-action-btn" id="clipsImportBtn" title="Backup-Datei einspielen">
+            <span class="home-action-icon">↑</span> Backup wiederherstellen
+          </button>
+          <input type="file" id="clipsImportInput" accept="application/json,.json" hidden>
+          <span class="home-actions-status" id="clipsActionsStatus"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="home-modal" id="diaryModal" role="dialog" aria-modal="true" aria-labelledby="diaryModalTitle" hidden>
+  <div class="home-modal-backdrop" data-modal-close></div>
+  <div class="home-modal-panel">
+    <button class="home-modal-close" type="button" data-modal-close aria-label="Schließen">✕</button>
+
+    <div class="home-modal-head">
+      <div class="lp-eye">Mein Tagebuch</div>
+      <h2 id="diaryModalTitle" class="lp-title home-block-title-sm">Deine Einträge.</h2>
+      <p class="lp-sub">Schreib auf oder sprich ein, was heute hängen geblieben ist — beides geht. Deine Einträge stehen chronologisch darunter.</p>
+    </div>
+
+    <div class="home-modal-body">
+      <div class="diary">
+        <div class="diary-input">
+          <div class="diary-input-date" id="diaryDate"></div>
+          <div class="diary-input-cols">
+            <div class="diary-col diary-col-good">
+              <label class="diary-col-label">Was lief gut</label>
+              <textarea id="diaryGood" placeholder="Z. B. „Mein erster Touch hat im ganzen Spiel gepasst.“" rows="4"></textarea>
+              <div class="diary-voice" id="diaryVoiceGood" data-col="good">
+                <button type="button" class="diary-voice-btn">
+                  <span class="diary-voice-ico">🎤</span>
+                  <span class="diary-voice-txt">Sprachnotiz aufnehmen</span>
+                </button>
+                <span class="diary-voice-time" hidden>0:00</span>
+                <div class="diary-voice-player" hidden>
+                  <audio class="diary-voice-audio" controls></audio>
+                  <button type="button" class="diary-voice-del" title="Aufnahme löschen" aria-label="Aufnahme löschen">✕</button>
+                </div>
+              </div>
+            </div>
+            <div class="diary-col diary-col-watch">
+              <label class="diary-col-label">Worauf achten</label>
+              <textarea id="diaryWatch" placeholder="Z. B. „Bei Druck nicht zu früh den Ball verlieren.“" rows="4"></textarea>
+              <div class="diary-voice" id="diaryVoiceWatch" data-col="watch">
+                <button type="button" class="diary-voice-btn">
+                  <span class="diary-voice-ico">🎤</span>
+                  <span class="diary-voice-txt">Sprachnotiz aufnehmen</span>
+                </button>
+                <span class="diary-voice-time" hidden>0:00</span>
+                <div class="diary-voice-player" hidden>
+                  <audio class="diary-voice-audio" controls></audio>
+                  <button type="button" class="diary-voice-del" title="Aufnahme löschen" aria-label="Aufnahme löschen">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="diary-input-actions">
+            <button id="diarySave" class="diary-save">Eintragen</button>
+            <div class="diary-save-status" id="diarySaveStatus"></div>
+          </div>
+        </div>
+
+        <div class="diary-feed" id="diaryFeed">
+          <div class="home-loading">Lade Einträge…</div>
+        </div>
+
+        <div class="home-hint">
+          <span class="home-hint-ico">💾</span>
+          <div><strong>Wichtig:</strong> Deine Einträge und Sprachnotizen liegen nur auf diesem Gerät. Tipp ab und zu auf „Tagebuch sichern“ und speichere die Datei gut ab — so verlierst du nichts und kannst alles auf ein anderes Gerät mitnehmen.</div>
+        </div>
+
+        <div class="home-actions">
+          <button class="home-action-btn" id="diaryExportBtn" title="Tagebuch als Datei speichern">
+            <span class="home-action-icon">↓</span> Tagebuch sichern
+          </button>
+          <button class="home-action-btn" id="diaryImportBtn" title="Backup-Datei einspielen">
+            <span class="home-action-icon">↑</span> Backup wiederherstellen
+          </button>
+          <input type="file" id="diaryImportInput" accept="application/json,.json" hidden>
+          <span class="home-actions-status" id="diaryActionsStatus"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     SCRIPTS — engine for identity/Supabase (avatar URL only),
+     vimeo tracker, and the single centralised home-page script.
+============================================================ -->
+<script src="https://ute-t7academy.github.io/Ute-transfer/t7-widget-engine.js"></script>
+<script src="https://ute-t7academy.github.io/Ute-transfer/t7-vimeo-tracker.js"></script>
+<script src="https://ute-t7academy.github.io/Ute-transfer/t7-home.js?v=3"></script>
