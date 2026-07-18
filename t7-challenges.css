@@ -1,0 +1,1018 @@
+/* ============================================================
+   T7 ACADEMY — t7-challenges.css
+   ------------------------------------------------------------
+   Challenges-page overrides. Loaded AFTER t7-base.css (and
+   after it, if present, t7-home.css — order doesn't matter
+   between those two since they don't touch the same selectors).
+
+   Purpose: bring the Challenges page's page-specific chrome
+   (4-tab category grid, section banners, Builder filter UI,
+   Monats hint, widget rows/buttons, sidebar cards, Sterne-
+   Zertifikat identity) in line with the flat visual language
+   used on Home (t7-home.css) — hairline dividers, transparent
+   surfaces, and Home's actual Antonio-uppercase eyebrow/label
+   system (.lp-eye: 14px, .22em tracking, uppercase — the same
+   pattern behind .home-prog-age, .diary-voice-btn, .news-date,
+   etc.) instead of the earlier neon gradient-bordered / boxed-
+   card style. Banner titles are sized to match the page's own
+   .hero h1 (same clamp, same line-height) instead of a larger
+   custom scale, and their highlighted word borrows the hero's
+   own italic Fraunces <em> accent treatment (see §1). Also fixes
+   light-mode contrast on several accent colors that were tuned
+   for the dark theme only, and resets native button chrome
+   (outline/appearance) so the four custom `<button>` families
+   here — .ch-cat, .bf-pill/.bf-build/.bf-reset, .t7w .cr-btn —
+   render identically across Firefox/Chromium/Safari instead of
+   picking up a browser default focus outline that only some
+   engines suppress automatically.
+
+   Widget-internal sub-labels that t7-base.css already sets
+   uppercase (.rl-title, .t7f-stat-label, .pbadge, etc.) are left
+   alone here on purpose — they already match Home's convention,
+   no override needed.
+
+   Also overrides .t7h-wrap / .shz-wrap / .t7w .* / .t7a-wrap /
+   .t7b-wrap / .nav-link.active / .sb-card, all of which are baked
+   into t7-base.css itself, so the whole page — tabs, banners,
+   module rows, sidebar — reads as one consistent family with Home.
+   ============================================================ */
+
+
+/* ============================================================
+   1. SECTION BANNERS — Technikschule / Zertifikate / Builder /
+   Monats. Each keeps its own identity color via --cat-c. Title
+   is sized to match the page's own .hero h1 exactly (same clamp,
+   line-height, margin) — these banners sit right below the hero
+   in the same page, so they should read as the same typographic
+   scale, not a larger one. The highlighted word within each title
+   (the <span>, e.g. "Zertifikate" in "T7 Academy Zertifikate")
+   borrows the hero's own italic Fraunces <em> treatment (t7-base.css:
+   .hero h1 em — font-family:'Fraunces','Garet W05 Bold',serif;
+   font-style:italic;font-weight:700) so the section header echoes
+   the hero's handwritten-highlight accent — only the font changes,
+   the existing --cat-c color stays exactly as it was. Pills are
+   Antonio-uppercase, matching .diary-voice-btn / .home-avatar-side-cta.
+============================================================ */
+
+/* Kill the old neon decorations outright — topline + both orbs,
+   on all four banners. */
+.t7h-topline, .shz-topline, .shb-topline, .shm-topline,
+.t7h-orb1,    .shz-orb1,    .shb-orb1,    .shm-orb1,
+.t7h-orb2,    .shz-orb2,    .shb-orb2,    .shm-orb2 {
+  display: none;
+}
+
+.t7h-wrap, .shz-wrap, .shb-wrap, .shm-wrap {
+  --cat-c: var(--accent);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  overflow: visible;
+  border: none;
+  border-radius: 0;
+  background: none;
+  background-image: none;
+  padding: 30px 4px 28px;
+  margin-top: 4px;
+  border-bottom: 1px solid var(--lp-rule);
+}
+.shz-wrap { --cat-c: var(--lp-gold); }
+.shb-wrap { --cat-c: #A855F7; }
+.shm-wrap { --cat-c: #FF6B35; }
+
+[data-theme="light"] .t7h-wrap,
+[data-theme="light"] .shz-wrap,
+[data-theme="light"] .shb-wrap,
+[data-theme="light"] .shm-wrap {
+  background: none;
+  background-image: none;
+  border-color: transparent;
+}
+/* Light-mode identity colors are deliberately darker than their
+   dark-mode counterparts (#0E7490 vs cyan #00E5FF, #9A6708 vs
+   gold #FFD700) — the bright versions drop under 3:1 contrast
+   against white cards. See §7 for the full contrast rationale. */
+[data-theme="light"] .t7h-wrap { --cat-c: #0E7490; }
+[data-theme="light"] .shz-wrap { --cat-c: #9A6708; }
+[data-theme="light"] .shb-wrap { --cat-c: #7C3AED; }
+[data-theme="light"] .shm-wrap { --cat-c: #C2410C; }
+
+.t7h-icon, .shz-icon, .shb-icon, .shm-icon {
+  position: static;
+  transform: none;
+  flex-shrink: 0;
+  font-size: 36px;
+  line-height: 1;
+  margin-top: 4px;
+  filter: none;
+}
+
+.t7h-content, .shz-content, .shb-content, .shm-content {
+  position: static;
+  z-index: auto;
+  flex: 1;
+  min-width: 0;
+  padding-right: 0;
+}
+
+/* Same font-size clamp, line-height, letter-spacing and margin as
+   the page's own .hero h1 (t7-base.css) — these banners are
+   secondary headers on the same page as that hero, so they share
+   its scale rather than a larger one. */
+.t7h-title, .shz-title, .shb-title, .shm-title {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 900;
+  line-height: 1.04;
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: -.01em;
+  color: var(--text);
+  white-space: normal;
+  margin-bottom: 14px;
+}
+/* The highlighted word — same italic Fraunces accent as the
+   hero's <em>. Color is untouched (still var(--cat-c), each
+   section's own identity color); only the typeface changes. */
+.t7h-title span, .shz-title span, .shb-title span, .shm-title span {
+  color: var(--cat-c);
+  font-family: 'Fraunces', 'Garet W05 Bold', serif;
+  font-style: italic;
+  font-weight: 700;
+}
+[data-theme="light"] .t7h-title,
+[data-theme="light"] .shz-title,
+[data-theme="light"] .shb-title,
+[data-theme="light"] .shm-title {
+  color: var(--text);
+}
+[data-theme="light"] .t7h-title span,
+[data-theme="light"] .shz-title span,
+[data-theme="light"] .shb-title span,
+[data-theme="light"] .shm-title span {
+  color: var(--cat-c);
+}
+
+.t7h-intro, .shz-intro, .shb-intro, .shm-intro {
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.6;
+  color: var(--lp-muted);
+  max-width: 640px;
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+.t7h-intro strong, .shz-intro strong, .shb-intro strong, .shm-intro strong {
+  color: var(--cat-c);
+  font-weight: 700;
+}
+[data-theme="light"] .t7h-intro,
+[data-theme="light"] .shz-intro,
+[data-theme="light"] .shb-intro,
+[data-theme="light"] .shm-intro {
+  color: var(--lp-muted);
+}
+[data-theme="light"] .t7h-intro strong,
+[data-theme="light"] .shz-intro strong,
+[data-theme="light"] .shb-intro strong,
+[data-theme="light"] .shm-intro strong {
+  color: var(--cat-c);
+}
+
+/* Pills: Antonio, uppercase, .1em tracking — the same recipe as
+   Home's .diary-voice-btn / .home-avatar-side-cta pill buttons.
+   Zertifikate's own star-count pills (.shz-pills) are hidden here
+   — see §6, their visual style has moved onto each cert row's
+   badge instead of sitting as a static row in the banner. */
+.t7h-pills, .shz-pills, .shb-pills, .shm-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.shz-pills { display: none; }
+.t7h-pill, .shz-pill, .shb-pill, .shm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--cat-c);
+  color: var(--cat-c);
+  background: transparent;
+  box-shadow: none;
+}
+[data-theme="light"] .t7h-pill,
+[data-theme="light"] .shz-pill,
+[data-theme="light"] .shb-pill,
+[data-theme="light"] .shm-pill {
+  background: transparent;
+  border-color: var(--cat-c);
+  color: var(--cat-c);
+}
+
+@media (max-width: 640px) {
+  .t7h-wrap, .shz-wrap, .shb-wrap, .shm-wrap { gap: 14px; padding: 24px 2px 22px; }
+  .t7h-icon, .shz-icon, .shb-icon, .shm-icon { font-size: 28px; }
+}
+
+
+/* ============================================================
+   2. 4-CARD CATEGORY TAB GRID
+   Same family as Home's .home-prog cards: icon, Garet title,
+   Antonio-uppercase eyebrow meta — flat, hover-lift, no gradient
+   border box. Background is a translucent tint of the tab's OWN
+   identity color at rest (not neutral gray), strengthening on
+   hover/active — this needs an explicit --cat-rgb per tab since
+   rgba() can't take a hex custom property directly.
+
+   Each tile is a <button>, so it picks up the browser's native
+   focus outline / appearance — Safari suppresses this by default
+   on mouse interaction, Firefox and Chromium (Edge) don't, which
+   is why the same page showed a visible rectangle around the tile
+   in some browsers and not others. Reset explicitly below so the
+   look is identical everywhere, with a deliberate on-brand ring
+   only for keyboard focus (:focus-visible).
+
+   (See §9 for the mobile single-column layout.)
+============================================================ */
+.ch-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: 10px;
+  border-top: 1px solid var(--lp-rule);
+  border-bottom: 1px solid var(--lp-rule);
+}
+@media (max-width: 880px) { .ch-cat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .ch-cat-grid { grid-template-columns: 1fr; } }
+
+.ch-cat {
+  --cat-color: var(--accent);
+  --cat-rgb: 0, 229, 255;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  padding: 20px 18px 18px;
+  margin: 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: rgba(var(--cat-rgb), .05);
+  color: var(--text);
+  font-family: 'Open Sans', sans-serif;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  transition: background .15s, border-color .15s;
+}
+.ch-cat::-moz-focus-inner { border: 0; }
+.ch-cat:hover { background: rgba(var(--cat-rgb), .09); }
+.ch-cat:focus { outline: none; }
+.ch-cat:focus-visible {
+  outline: 2px solid var(--cat-color);
+  outline-offset: -2px;
+}
+.ch-cat.active {
+  border-bottom-color: var(--cat-color);
+  background: rgba(var(--cat-rgb), .13);
+}
+
+.ch-cat-icon { font-size: 30px; line-height: 1; color: var(--cat-color); }
+.ch-cat-title {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -.01em;
+  color: var(--text);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+.ch-cat-sub { font-size: 12px; color: var(--lp-muted); line-height: 1.4; }
+/* Eyebrow-style meta, matching .home-prog-age exactly. */
+.ch-cat-count {
+  margin-top: auto;
+  padding-top: 10px;
+  font-family: 'Antonio', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--cat-color);
+}
+
+.ch-cat-tech    { --cat-color: var(--accent);  --cat-rgb: 0, 229, 255; }
+.ch-cat-cert    { --cat-color: var(--lp-gold); --cat-rgb: 255, 215, 0; }
+.ch-cat-build   { --cat-color: #A855F7;        --cat-rgb: 168, 85, 247; }
+.ch-cat-monats  { --cat-color: #FF6B35;        --cat-rgb: 255, 107, 53; }
+
+[data-theme="light"] .ch-cat-tech   { --cat-color: #0E7490; --cat-rgb: 14, 116, 144; }
+[data-theme="light"] .ch-cat-cert   { --cat-color: #9A6708; --cat-rgb: 154, 103, 8; }
+[data-theme="light"] .ch-cat-build  { --cat-color: #7C3AED; --cat-rgb: 124, 58, 237; }
+[data-theme="light"] .ch-cat-monats { --cat-color: #C2410C; --cat-rgb: 194, 65, 12; }
+
+/* Tab panel reveal — unchanged, purely functional */
+.ch-panel { display: none; }
+.ch-panel.active { display: flex; }
+
+
+/* ============================================================
+   3. BUILDER FILTER UI
+   Hairline card matching .home-card-teaser's surface treatment;
+   labels and buttons use Home's Antonio-uppercase system
+   (.diary-col-label / .diary-voice-btn) rather than plain text.
+   Same native-button-chrome reset as §2 on every <button> here.
+============================================================ */
+.bf-card {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 14px;
+  padding: 22px 22px 18px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.bf-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.bf-label {
+  font-family: 'Antonio', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  min-width: 110px;
+}
+.bf-pills { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; min-width: 0; }
+.bf-pill {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'Open Sans', sans-serif;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  transition: all .15s;
+}
+.bf-pill::-moz-focus-inner { border: 0; }
+.bf-pill:focus { outline: none; }
+.bf-pill:focus-visible { outline: 2px solid #A855F7; outline-offset: -2px; }
+.bf-pill:hover { border-color: #A855F7; color: #C084FC; }
+.bf-pill.active {
+  background: rgba(168, 85, 247, .12);
+  border-color: #A855F7;
+  color: #C084FC;
+}
+.bf-search {
+  flex: 1;
+  min-width: 200px;
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 99px;
+  padding: 9px 16px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: 'Open Sans', sans-serif;
+}
+.bf-search:focus { outline: none; border-color: #A855F7; }
+.bf-search::placeholder { color: var(--lp-faint); }
+
+.bf-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--lp-rule);
+  flex-wrap: wrap;
+}
+.bf-count { font-size: 13px; color: var(--lp-muted); font-weight: 600; }
+.bf-count strong { color: #C084FC; }
+.bf-btnrow { display: flex; gap: 10px; flex-wrap: wrap; }
+.bf-build {
+  background: transparent;
+  border: 1px solid #A855F7;
+  border-radius: 99px;
+  padding: 10px 20px;
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #C084FC;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  transition: all .15s;
+}
+.bf-build::-moz-focus-inner { border: 0; }
+.bf-build:focus { outline: none; }
+.bf-build:focus-visible { outline: 2px solid #A855F7; outline-offset: -2px; }
+.bf-build:hover:not(:disabled) { background: rgba(168, 85, 247, .1); }
+.bf-build:disabled { opacity: .4; cursor: not-allowed; }
+.bf-reset {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 99px;
+  padding: 10px 20px;
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  transition: all .15s;
+}
+.bf-reset::-moz-focus-inner { border: 0; }
+.bf-reset:focus { outline: none; }
+.bf-reset:focus-visible { outline: 2px solid var(--lp-rule); outline-offset: -2px; }
+.bf-reset:hover { border-color: var(--text); color: var(--text); }
+
+/* Result preview grid (compact thumbnails before "start") */
+.bf-preview {
+  display: none;
+  border: 1px solid var(--lp-rule);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 14px;
+  background: transparent;
+}
+.bf-preview.open { display: block; }
+.bf-preview-title {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  margin-bottom: 12px;
+}
+.bf-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.bf-vid {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bf-vid-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bf-vid-meta {
+  font-family: 'Antonio', sans-serif;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}
+
+
+/* ============================================================
+   4. MONATS EDITOR HINT — same soft-tinted callout pattern as
+   .home-hint on the Home page (see t7-home.css §5), recolored to
+   the Monats orange identity.
+============================================================ */
+.monats-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255, 107, 53, .06);
+  border: 1px solid rgba(255, 107, 53, .22);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--lp-muted);
+}
+.monats-hint code {
+  background: rgba(0, 0, 0, .3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #FF6B35;
+  font-size: 12px;
+}
+[data-theme="light"] .monats-hint {
+  background: rgba(194, 65, 12, .06);
+  border-color: rgba(194, 65, 12, .25);
+  color: var(--lp-muted);
+}
+[data-theme="light"] .monats-hint code { color: #C2410C; }
+
+
+/* ============================================================
+   5. MODULE-LIST WIDGET (.t7w) — flatten the row chrome, "Starten"
+   button and icon badge so Technikschule / Zertifikate look like
+   they belong to the same flat family as the Builder panel above,
+   instead of the earlier heavy gradient-fill / neon-glow rows.
+
+   Section colors (--wa / --wa2) are set per-widget-wrapper in
+   t7-base.css (.t7a-wrap = cyan default, .t7b-wrap = certs), so
+   this flattening automatically inherits the right identity color
+   everywhere: cyan rows in Technikschule, gold rows in Zertifikate,
+   violet rows in the Builder-built widget (see §10), and whatever
+   the Monats widget mounts with.
+
+   Row border-color is pinned to the neutral --lp-rule hairline
+   (same value in both themes) so every module row shares literally
+   the same resting-state chrome — only the badge / button /
+   progress-bar accents differ by section.
+============================================================ */
+
+/* Row header ("collapsed" module bar) — hairline border instead of
+   a filled gradient box; no glossy sheen sweep, no glow on hover. */
+.t7w .cr {
+  background: transparent;
+  border-color: var(--lp-rule);
+  box-shadow: none;
+}
+.t7w .cr::before { content: none; }
+.t7w .cr:hover {
+  box-shadow: none;
+  transform: none;
+  border-color: rgba(var(--wa-rgb), .5);
+  background: rgba(var(--wa-rgb), .03);
+}
+.t7w .cr.open { border-bottom-color: var(--lp-rule); }
+
+/* Expanded drill panel — same flat hairline treatment */
+.t7w .t7-panel {
+  background: transparent;
+  border-color: var(--lp-rule);
+}
+
+/* Zertifikate widget uses a gradient-clip border trick (a layered
+   background-image) for its gold frame in BOTH themes — including
+   a light-mode-specific version in t7-base.css that would otherwise
+   win by specificity and leave the cert rows on a solid white fill
+   while Technikschule stays transparent. Neutralize both. */
+.t7b-wrap .cr,
+.t7b-wrap .t7-panel {
+  background: transparent;
+  background-image: none;
+  border-color: var(--lp-rule);
+}
+[data-theme="light"] .t7b-wrap .cr,
+[data-theme="light"] .t7b-wrap .t7-panel {
+  background: transparent;
+  background-image: none;
+  border-color: var(--lp-rule);
+}
+.t7b-wrap .cr:hover { box-shadow: none !important; border-color: rgba(255, 215, 0, .5); }
+.t7b-wrap .cr.open { border-bottom-color: var(--lp-rule); }
+
+/* Module icon badge — was a solid gradient-filled square with a
+   heavy glow; now a soft tinted outline, same language as the
+   flattened .ch-cat-icon / banner icons above. Certificate rows
+   get a dedicated pill treatment instead — see §6. */
+.t7w .cr-badge {
+  background: rgba(var(--wa-rgb), .12);
+  border: 1px solid rgba(var(--wa-rgb), .4);
+  box-shadow: none;
+  color: var(--wa);
+}
+
+/* "Starten" button — flat outlined button. Radius and typography
+   match the neighboring XP pills (.cr-xp / .cr-xp-total: plain
+   Open Sans, bold, no letter-spacing) rather than the Antonio/pill
+   treatment used for the Builder's own filter buttons — those two
+   button families read as different components, so this one now
+   matches what's actually next to it in the row. Radius (8px) is
+   also much closer to the row's own 12px corner radius. Same
+   native-chrome reset as every other button on this page. */
+.t7w .cr-btn {
+  background: transparent;
+  border: 1px solid var(--wa);
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--wa);
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 8px 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+}
+.t7w .cr-btn::-moz-focus-inner { border: 0; }
+.t7w .cr-btn:focus { outline: none; }
+.t7w .cr-btn:focus-visible { outline: 2px solid var(--wa); outline-offset: -2px; }
+.t7w .cr-btn:hover {
+  background: rgba(var(--wa-rgb), .1);
+  box-shadow: none;
+  transform: none;
+}
+
+
+/* ============================================================
+   6. STERNE-ZERTIFIKAT — GOLD IDENTITY
+   The certificate badge (sidebar) and the Zertifikate module rows
+   were mixing gold (frame, progress bar) with cyan (badge, avatar,
+   button, XP pill, player name) — this makes both fully gold
+   instead of a mixed cyan/gold look.
+============================================================ */
+
+/* Sidebar "Sterne Zertifikat" card (T7Badge) — only the earned
+   player name was still cyan; everything else was already gold. */
+.t7-cert-name {
+  color: var(--lp-gold);
+  text-shadow: 0 0 18px rgba(255, 215, 0, .5);
+}
+[data-theme="light"] .t7-cert-name {
+  color: #9A6708;
+  text-shadow: 0 0 14px rgba(154, 103, 8, .3);
+}
+
+/* Zertifikate module-list widget — re-point its accent variables
+   from cyan to gold so badge / button / XP pill / avatar all pick
+   up the same color automatically (see §5, which reads
+   --wa / --wa-rgb rather than hardcoded hex). */
+.t7b-wrap {
+  --wa: #FFD700;
+  --wa2: #FF8C00;
+  --wa-rgb: 255, 215, 0;
+}
+[data-theme="light"] .t7b-wrap {
+  --wa: #9A6708;
+  --wa2: #FF8C00;
+  --wa-rgb: 154, 103, 8;
+}
+
+/* A few elements in the widget use a hardcoded cyan/gold FILL
+   instead of reading the --wa variables — override them directly
+   for the cert widget so nothing keeps its base.css default. */
+.t7b-wrap .cr-avatar {
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  box-shadow: 0 0 8px rgba(255, 215, 0, .35);
+}
+.t7b-wrap .cr-xp-total {
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  box-shadow: 0 0 10px rgba(255, 215, 0, .28);
+}
+/* Light mode has its own universal (cyan) override for .cr-xp on
+   .t7w — win it back for the cert widget specifically. */
+[data-theme="light"] .t7b-wrap .cr-xp {
+  color: #9A6708;
+  border-color: rgba(154, 103, 8, .4);
+  background: rgba(154, 103, 8, .1);
+}
+
+/* Per-row certificate badge — restyled to match the .shz-pill
+   look from the banner (§1): transparent fill, thin border in
+   the section's own color, fully rounded, colored icon instead
+   of a solid gradient-filled "coin" (the widget engine bakes an
+   inline background/box-shadow directly onto this div — see the
+   NOTE below — so it must be neutralized with !important to win
+   over an inline style, the only way an external stylesheet can
+   outrank inline styles without editing the HTML/JS itself). */
+.t7b-wrap .cr-badge {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 1px solid var(--wa);
+  border-radius: 99px;
+  width: auto;
+  min-width: 40px;
+  height: auto;
+  padding: 6px 14px;
+}
+[data-theme="light"] .t7b-wrap .cr-badge {
+  border-color: var(--wa);
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+/* The ★ glyph is a nested <span> with its own inline color/
+   text-shadow (white, drop-shadow) — override with !important
+   so it reads in the section's gold identity instead. */
+.t7b-wrap .cr-badge span {
+  color: var(--wa) !important;
+  text-shadow: none !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+}
+
+
+/* ============================================================
+   7. LIGHT-MODE CONTRAST FIXES
+   The dark-mode accent colors (--accent #00e0ff, --wa #00E5FF,
+   the Builder lavender #C084FC) read fine against near-black
+   dark surfaces, but drop well under WCAG AA (several under
+   3:1 — #00e0ff on white is only ~1.6:1) once the same colors
+   sit on the white light-mode cards. These re-point the same
+   elements to darker, higher-contrast tones for light mode only;
+   dark mode is untouched.
+============================================================ */
+
+/* Technikschule / Monats widget rows (.t7a-wrap is the generic,
+   non-cert widget wrapper) — badge tint, row border and the
+   "Starten" button all read var(--wa), so darkening it here fixes
+   all three at once, in light mode only. The Builder-built widget
+   is re-pointed to violet instead in §10 and gets its own
+   light-mode value there. */
+[data-theme="light"] .t7a-wrap {
+  --wa: #0E7490;
+  --wa2: #075985;
+  --wa-rgb: 14, 116, 144;
+}
+
+/* Top nav "Challenges" active tab was using the raw (very light)
+   --accent for its text color. Scoped to this page only. */
+[data-theme="light"] .nav-link.active { color: #0E7490; }
+
+/* Builder filter UI — the lavender accent text was tuned for the
+   dark panel background; swap it for the same darker violet
+   already used for the Builder identity elsewhere on this page. */
+[data-theme="light"] .bf-pill:hover,
+[data-theme="light"] .bf-pill.active,
+[data-theme="light"] .bf-build,
+[data-theme="light"] .bf-count strong {
+  color: #7C3AED;
+}
+[data-theme="light"] .bf-build { border-color: #7C3AED; }
+[data-theme="light"] .bf-build:hover:not(:disabled) { background: rgba(124, 58, 237, .08); }
+[data-theme="light"] .bf-pill.active { background: rgba(124, 58, 237, .1); border-color: #7C3AED; }
+
+/* Rangliste subtitle ("Top Spieler · T7 Academy") uses a
+   translucent cyan tuned for the dark card; solid + darker in
+   light mode for the same reason as everything else in this
+   section. */
+[data-theme="light"] .rl-sub { color: #0E7490; }
+
+
+/* ============================================================
+   8. SIDEBAR CARDS — Sterne Zertifikat / Fortschritt / Rangliste
+   These were still solid bordered boxes (white/dark fill + border
+   + radius) left over from t7-base.css — the one part of the page
+   that hadn't been brought into the flat, hairline-divider system
+   used everywhere else. Now transparent, stacked with a hairline
+   divider between them (same pattern as .home-block on the Home
+   page). The card label is now a genuine .lp-eye clone — same
+   14px / .22em / uppercase Antonio treatment and leading line
+   Home uses for every section eyebrow.
+============================================================ */
+.ch-sidebar .sb-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+.ch-sidebar .sb-card + .sb-card {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--lp-rule);
+}
+
+/* .lp-eye clone (t7-base.css primitive): Antonio 600, 14px,
+   .22em tracking, uppercase, leading 28px line. */
+.ch-sidebar .sb-label {
+  font-family: 'Antonio', 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.ch-sidebar .sb-label::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+}
+.ch-sidebar .sb-label.gold { color: var(--lp-gold); }
+[data-theme="light"] .ch-sidebar .sb-label { color: #0E7490; }
+[data-theme="light"] .ch-sidebar .sb-label.gold { color: #9A6708; }
+
+
+/* ============================================================
+   9. MOBILE CATEGORY TABS — Technikschule / Zertifikate / Builder
+   / Monats were indistinguishable once the grid collapses to a
+   single column: same padding, no divider between rows, and the
+   only "active" cue (a bottom border) doesn't read in a stacked
+   list. Below 520px this switches to a clear horizontal list —
+   icon + title on one line, a hairline divider between each row,
+   and the active tab marked with a left accent bar instead. The
+   resting-state color tint from §2 carries through automatically.
+============================================================ */
+@media (max-width: 520px) {
+  .ch-cat-grid { border-bottom: none; }
+  .ch-cat {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 4px 16px 12px;
+    border-bottom: 1px solid var(--lp-rule);
+    border-left: 3px solid transparent;
+  }
+  .ch-cat:last-child { border-bottom: none; }
+  .ch-cat.active {
+    border-bottom-color: var(--lp-rule);
+    border-left-color: var(--cat-color);
+    background: rgba(var(--cat-rgb), .13);
+  }
+  .ch-cat-icon { font-size: 24px; flex-shrink: 0; }
+  .ch-cat-title { margin-top: 0; }
+  .ch-cat-sub { display: none; }
+  .ch-cat-count {
+    margin-top: 0;
+    margin-left: auto;
+    padding-top: 0;
+    padding-left: 10px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+}
+
+
+/* ============================================================
+   10. "BAU DIR DEINE EIGENE CHALLENGE" — VIOLET, NOT CYAN
+   T7.challenge() always mounts the built widget with the default
+   cyan accent (.t7a-wrap's --wa), regardless of which tab built
+   it. The Builder panel's own chrome is violet, so the widget it
+   produces should carry that same identity through — re-point
+   --wa/--wa2/--wa-rgb specifically inside #builder-container
+   (higher specificity than the plain .t7a-wrap rule in t7-base.css
+   thanks to the ID, so it wins regardless of load order).
+
+   The --wa custom property covers most of the row (badge tint,
+   row border, "Starten"/"Schließen" button) automatically. But two
+   elements — the player avatar and the "total XP" pill — are
+   hardcoded to a solid cyan gradient fill directly in t7-base.css
+   (the exact same pattern already found and fixed for the gold
+   certificate widget in §6), completely bypassing --wa. Left
+   alone, those two stayed cyan while everything else around them
+   correctly went violet — the "mixed aqua and violet" look this
+   section fixes by giving them the same explicit violet gradient
+   override §6 gives the cert widget's gold one.
+============================================================ */
+#builder-container .t7w,
+#builder-container .t7a-wrap {
+  --wa: #A855F7;
+  --wa2: #EC4899;
+  --wa-rgb: 168, 85, 247;
+}
+[data-theme="light"] #builder-container .t7w,
+[data-theme="light"] #builder-container .t7a-wrap {
+  --wa: #7C3AED;
+  --wa2: #EC4899;
+  --wa-rgb: 124, 58, 237;
+}
+#builder-container .t7w .cr-avatar {
+  background: linear-gradient(135deg, #A855F7, #EC4899);
+  box-shadow: 0 0 8px rgba(168, 85, 247, .35);
+}
+#builder-container .t7w .cr-xp-total {
+  background: linear-gradient(135deg, #A855F7, #EC4899);
+  box-shadow: 0 0 10px rgba(168, 85, 247, .28);
+}
+
+
+/* ============================================================
+   11. INDIVIDUAL SKILL/DRILL ROWS (.prow) — SIMPLIFIED
+   Inside an expanded module (any tab — Technikschule, Zertifikate,
+   the Builder-built widget, Monats), each individual skill is a
+   .prow row. These still had the earlier heavier treatment
+   (translucent white fill, thicker border, 16px radius) that the
+   rest of the page moved away from — flattened here to match the
+   same hairline-bordered, transparent surface as the outer .cr
+   module rows (§5), just one level down.
+============================================================ */
+.t7w .prow {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 8px;
+  box-shadow: none;
+}
+.t7w .prow:hover:not(.plocked) {
+  background: rgba(var(--wa-rgb), .04);
+  border-color: rgba(var(--wa-rgb), .5);
+  box-shadow: none;
+  transform: none;
+}
+.t7w .prow.pdone { border-color: rgba(var(--wa-rgb), .35); }
+
+
+/* ============================================================
+   12. TECHNIKSCHULE — PURE AQUA (no blue mix)
+   The default widget palette (t7-base.css .t7a-wrap) blends aqua
+   (--wa #00E5FF) into a blue (--wa2 #0080FF) for gradient ends
+   and — most visibly — the "0 / 5" skill counter, since
+   .cr-prog-label reads var(--wa2). Pin --wa2 to the same aqua so
+   the whole Technikschule widget reads as one aqua identity:
+   progress fill, skill counter and "Starten" button all stay aqua
+   instead of trailing off into blue. Scoped to #ch-container so
+   only Technikschule is affected; Monats (§13), Builder (§10) and
+   the cert widget (§6) keep their own identities. Light mode picks
+   up the darker teal --wa already set for .t7a-wrap in §7.
+============================================================ */
+#ch-container .t7a-wrap,
+#ch-container .t7w {
+  --wa2: var(--wa);
+}
+/* Outcome "total XP" pill is hardcoded aqua->blue in base css —
+   flatten its blue end to aqua too. */
+#ch-container .t7w .xp-total-pill {
+  background: linear-gradient(135deg, #00E5FF, #00C8E8);
+}
+
+
+/* ============================================================
+   13. CHALLENGE DES MONATS — ORANGE, NOT AQUA
+   Monats mounts through T7.challenge() into #monats-container,
+   which inherits the default cyan --wa from .t7a-wrap. Re-point
+   --wa/--wa2/--wa-rgb to the same orange the Monats tab identity
+   uses (§2: #FF6B35 dark / #C2410C light) so the expandable module
+   rows ("dropdowns"), progress bar and the inverse XP pill
+   (.cr-xp, which reads --wa) all turn orange.
+
+   Three elements bypass --wa with a hardcoded cyan gradient in
+   base css (avatar, the full XP pill .cr-xp-total, and the outcome
+   .xp-total-pill) — same pattern §6/§10 handle for cert/Builder —
+   so they're re-pointed to orange explicitly here.
+============================================================ */
+#monats-container .t7w,
+#monats-container .t7a-wrap {
+  --wa: #FF6B35;
+  --wa2: #FF8C00;
+  --wa-rgb: 255, 107, 53;
+}
+[data-theme="light"] #monats-container .t7w,
+[data-theme="light"] #monats-container .t7a-wrap {
+  --wa: #C2410C;
+  --wa2: #9A3412;
+  --wa-rgb: 194, 65, 12;
+}
+#monats-container .t7w .cr-avatar {
+  background: linear-gradient(135deg, #FF6B35, #FF8C00);
+  box-shadow: 0 0 8px rgba(255, 107, 53, .35);
+}
+#monats-container .t7w .cr-xp-total {
+  background: linear-gradient(135deg, #FF6B35, #FF8C00);
+  box-shadow: 0 0 10px rgba(255, 107, 53, .28);
+}
+#monats-container .t7w .xp-total-pill {
+  background: linear-gradient(135deg, #FF6B35, #FF8C00);
+  box-shadow: 0 0 10px rgba(255, 107, 53, .28);
+}
+
+
+/* ============================================================
+   14. LIGHT-MODE INVERSE XP PILL (.cr-xp) — FOLLOW SECTION COLOR
+   In light mode t7-base.css hardcodes .cr-xp to aqua
+   ([data-theme="light"] .t7w .cr-xp { color:#00B8D4; ... }),
+   setting color/border/background directly instead of reading
+   --wa. That override wins over the --wa re-points in §10/§13, so
+   the inverse "XP" pill stayed aqua in light mode for the Builder
+   ("Deine eigene Challenge") and Monats widgets. Re-point it here
+   with higher (#id) specificity: violet for Builder, orange for
+   Monats — matching each section's light-mode identity.
+============================================================ */
+[data-theme="light"] #builder-container .t7w .cr-xp {
+  color: #7C3AED;
+  border-color: rgba(124, 58, 237, .4);
+  background: rgba(124, 58, 237, .1);
+}
+[data-theme="light"] #monats-container .t7w .cr-xp {
+  color: #C2410C;
+  border-color: rgba(194, 65, 12, .4);
+  background: rgba(194, 65, 12, .1);
+}

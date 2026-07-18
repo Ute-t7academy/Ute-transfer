@@ -575,7 +575,7 @@ function T7Cert(cfg){
     }).join('');
     return '<div class="t7w t7b-wrap" data-uid="'+uid+'">'+
       '<div class="cr" id="t7b-cr-'+uid+'">'+
-        '<div class="cr-badge" style="background:linear-gradient(135deg,#FFD700,#FF8C00);box-shadow:0 0 14px rgba(255,180,0,.4)"><span style="font-size:26px;line-height:1;color:#fff;font-weight:900;text-shadow:0 2px 4px rgba(140,80,0,.7),0 0 8px rgba(255,255,255,.4)">\u2605</span></div>'+
+        '<div class="cr-badge"><span>'+(cfg.badge||'\u2b50')+'</span></div>'+
         '<div class="cr-body"><div class="cr-title">'+(cfg.title||'Zertifikat')+'</div>'+
           '<div class="cr-sub"><span>Stern Zertifikat</span><div class="cr-prog"><div class="cr-prog-fill" id="t7b-pf-'+uid+'" style="width:0%"></div></div><span class="cr-prog-label" id="t7b-pl-'+uid+'">0 / '+nd+'</span></div></div>'+
         '<div class="cr-player"><div class="cr-avatar" id="t7b-av-'+uid+'">?</div>'+
@@ -690,7 +690,7 @@ function T7Rangliste(containerId){
   var allP=[];
   function ini(n){if(!n)return'?';return n.split(/\s+/).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);}
   function ai(n){return n?(n.charCodeAt(0)+n.length)%AC.length:0;}
-  cont.innerHTML='<div class="rl-header"><div class="rl-title">\uD83C\uDFC6 Rangliste</div><div class="rl-sub">Top Spieler \u00b7 T7 Academy</div></div><div id="t7rl-list-'+containerId+'"><div class="rl-loading">Lade\u2026</div></div>';
+  cont.innerHTML='<div id="t7rl-list-'+containerId+'"><div class="rl-loading">Lade\u2026</div></div>';
   var listEl=document.getElementById('t7rl-list-'+containerId);
   function renderList(){
     var med=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
@@ -896,8 +896,317 @@ function T7MobileSheet(){
   window.addEventListener('t7xpupdate',function(){if(st.id){st.fortLoaded=false;st.certLoaded=false;loadFort();if(st.rangLoaded){st.rangLoaded=false;loadRang();}}});
 }
 
-/* === PUBLIC API === */
-var T7={
-  challenge:function(cfg){cfg.containerId=cfg.containerId||'ch-container';new T7Challenge(cfg);},
-  certificate:function(cfg){cfg.containerId=cfg.containerId||'cert-container';new T7Cert(cfg);}
+
+/* ===========================================================
+   DYNAMIC LOADERS
+   T7LoadChallenges  — mounts all kind='challenge' modules from Supabase
+   T7LoadCerts       — mounts all kind='certificate' modules from Supabase
+   T7LoadMonats      — mounts the monthly challenge from a Google Sheet
+
+   Replaces hard-coded T7.challenge() / T7.certificate() blocks in
+   Challenges.html and absorbs what loadMonats.js used to do.
+   =========================================================== */
+
+/* --- Shared fetch cache (one round-trip for both loaders) --- */
+var _T7Cache={modules:null,videos:null,_cbs:null};
+function _T7FetchAll(cb){
+  if(_T7Cache.modules&&_T7Cache.videos){cb(_T7Cache.modules,_T7Cache.videos);return;}
+  if(_T7Cache._cbs){_T7Cache._cbs.push(cb);return;}
+  _T7Cache._cbs=[cb];
+  function hdr(){return{'apikey':T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY};}
+  Promise.all([
+    fetch(T7_SB_URL+'/rest/v1/modules?published=eq.true&order=sort_order.asc'
+      +'&select=key,label,icon,challenges,kind,stars,hero_text,unlock_msg,progressive',
+      {headers:hdr()}).then(function(r){return r.json();}),
+    fetch(T7_SB_URL+'/rest/v1/videos?vimeo_code=not.is.null'
+      +'&select=title_DE,title_EN,vimeo_code,difficulty,category,challenge_module',
+      {headers:hdr()}).then(function(r){return r.json();})
+  ]).then(function(out){
+    _T7Cache.modules=Array.isArray(out[0])?out[0]:[];
+    _T7Cache.videos =Array.isArray(out[1])?out[1]:[];
+    var cbs=_T7Cache._cbs;_T7Cache._cbs=null;
+    cbs.forEach(function(fn){fn(_T7Cache.modules,_T7Cache.videos);});
+  }).catch(function(e){
+    console.error('[T7] module/video fetch failed',e);
+    var cbs=_T7Cache._cbs||[];_T7Cache._cbs=null;
+    cbs.forEach(function(fn){fn([],[]);});
+  });
+}
+
+/* --- Title normalisation & similarity score (drill title → video title) ---
+   Handles German umlauts, compound words, and word-order differences.
+   Exact word match = 2pts, substring match = 1pt.
+   Greedy best-match then picks the highest-scoring video from the pool. */
+function _T7Norm(s){
+  return(s||'').toLowerCase()
+    .replace(/ü/g,'u').replace(/ö/g,'o').replace(/ä/g,'a')
+    .replace(/ß/g,'ss').replace(/[^a-z0-9\s]/g,'')
+    .split(/\s+/).filter(function(w){return w.length>1;});
+}
+function _T7Score(challengeTitle,de,en){
+  var cw=_T7Norm(challengeTitle),dw=_T7Norm(de).concat(_T7Norm(en)),s=0;
+  cw.forEach(function(c){dw.forEach(function(d){
+    if(c===d){s+=2;}
+    else if(c.length>2&&d.indexOf(c)>=0){s+=1;}
+    else if(d.length>2&&c.indexOf(d)>=0){s+=1;}
+  });});
+  return s;
+}
+
+/* --- Build the drills array for one module + the full video pool ---
+   progressive=true  → each drill unlocks the next  (star = idx+1)
+   progressive=false → all drills open from the start (star = 1)   */
+function _T7BuildDrills(mod,allVideos){
+  var key=mod.key;
+  /* Videos that list this module key in their (comma-separated) challenge_module */
+  var pool=allVideos.filter(function(v){
+    if(!v.challenge_module)return false;
+    return v.challenge_module.split(',').map(function(k){return k.trim();}).indexOf(key)>=0;
+  });
+  var challenges=[];
+  try{challenges=(typeof mod.challenges==='string'
+    ?JSON.parse(mod.challenges):(mod.challenges||[]));}catch(e){}
+  challenges=challenges.slice().sort(function(a,b){return a.idx-b.idx;});
+  var used=[];
+  return challenges.map(function(drill,i){
+    /* Greedy: highest score wins; shorter video title breaks ties */
+    var best=null,bestSc=-1,bestLen=99999;
+    pool.forEach(function(v,vi){
+      if(used.indexOf(vi)>=0)return;
+      var sc=_T7Score(drill.title,v.title_DE,v.title_EN);
+      var ln=(v.title_DE||v.title_EN||'').length;
+      if(sc>bestSc||(sc===bestSc&&ln<bestLen)){bestSc=sc;bestLen=ln;best={v:v,vi:vi};}
+    });
+    var vid='',hash='';
+    if(best){
+      used.push(best.vi);
+      var pts=(best.v.vimeo_code||'').split('/');
+      vid=(pts[0]||'').trim();hash=(pts[1]||'').trim();
+    }
+    var bv=best?best.v:{};
+    var meta=[(bv.difficulty||''),(bv.category||'')].filter(Boolean).join(' – ')||'Challenge';
+    var star=mod.progressive?(i+1):1;
+    var nd=challenges.length,last=(i===nd-1);
+    var next=last?('Alle '+nd+' Challenges abgeschlossen!'):
+      (mod.progressive?('Challenge '+(i+2)+' ist jetzt offen!'):('Weiter so!'));
+    return{title:drill.title,eye:'Challenge '+String(i+1).padStart(2,'0'),
+      meta:meta,vid:vid,hash:hash,type:'rate',xp:drill.xp||10,star:star,next:next};
+  });
+}
+
+/* === T7LoadChallenges ===
+   Fetches all published modules where kind='challenge', builds drills from
+   the videos table, and mounts each as a T7Challenge widget into containerId. */
+function T7LoadChallenges(containerId){
+  var cont=document.getElementById(containerId);if(!cont)return;
+  cont.innerHTML='<div style="padding:28px;text-align:center;color:var(--muted);font-size:13px">Lade Challenges…</div>';
+  _T7FetchAll(function(modules,videos){
+    cont.innerHTML='';
+    var list=modules.filter(function(m){return m.kind==='challenge';});
+    if(!list.length){
+      cont.innerHTML='<div style="padding:20px;color:var(--muted)">Keine Challenges gefunden.</div>';
+      return;
+    }
+    list.forEach(function(mod){
+      var drills=_T7BuildDrills(mod,videos);
+      if(!drills.length)return;
+      T7.challenge({containerId:containerId,title:mod.label,badge:mod.icon||'⚽',
+        moduleKey:mod.key,heroText:mod.hero_text||'',unlockMsg:mod.unlock_msg||'',
+        drills:drills});
+    });
+  });
+}
+
+/* === T7LoadCerts ===
+   Fetches all published modules where kind='certificate', builds drills from
+   the videos table, and mounts each as a T7Cert widget into containerId. */
+function T7LoadCerts(containerId){
+  var cont=document.getElementById(containerId);if(!cont)return;
+  cont.innerHTML='<div style="padding:28px;text-align:center;color:var(--muted);font-size:13px">Lade Zertifikate…</div>';
+  _T7FetchAll(function(modules,videos){
+    cont.innerHTML='';
+    var list=modules.filter(function(m){return m.kind==='certificate';});
+    if(!list.length){
+      cont.innerHTML='<div style="padding:20px;color:var(--muted)">Keine Zertifikate gefunden.</div>';
+      return;
+    }
+    list.forEach(function(mod){
+      var drills=_T7BuildDrills(mod,videos);
+      if(!drills.length)return;
+      T7.certificate({containerId:containerId,title:mod.label,badge:mod.icon||'⭐',
+        instanceKey:mod.key,stars:mod.stars||1,heroText:mod.hero_text||'',
+        drills:drills});
+    });
+  });
+}
+
+/* ============================================================
+   T7LoadMonats — Supabase edition (replaces the Google Sheets version)
+   ------------------------------------------------------------
+   HOW TO INSTALL
+   1. In t7-widget-engine.js, replace the whole existing
+      `function T7LoadMonats(containerId, sheetsUrl){ ... }`
+      with the function below.
+   2. In Challenges.html, change the call from:
+         T7.loadMonats('monats-container', 'https://docs.google.com/.../pubhtml?...');
+      to simply:
+         T7.loadMonats('monats-container');
+   3. Run monthly_challenges.sql once in Supabase.
+   No other changes needed — it reuses _T7FetchAll, _T7BuildDrills,
+   T7_SB_URL/T7_SB_KEY and T7.challenge exactly like before.
+============================================================ */
+/* ============================================================
+   T7LoadMonats — curated-drills edition (robust month matching)
+   ------------------------------------------------------------
+   Builds the Challenge des Monats from the current month's row in
+   monthly_challenges, using its hand-picked `drills` array
+   ({title, vid, hash, meta, xp}) curated in the Expert Admin.
+
+   Month resolution is forgiving: the canonical key is YYYY-MM, but
+   older rows may store the German month name ("Juli"), "Juli 2026",
+   "072026", etc. We fetch the table and match the current month
+   across those formats so a data-entry slip never blanks the panel.
+
+   If the matched row has no curated drills but still carries a
+   legacy module_key, we fall back to the old module-based build.
+============================================================ */
+function T7LoadMonats(containerId){
+  var cont=document.getElementById(containerId);if(!cont)return;
+  var MONTHS=['Januar','Februar','M\xe4rz','April','Mai','Juni',
+               'Juli','August','September','Oktober','November','Dezember'];
+  var now=new Date();
+  var monthIdx=now.getMonth();
+  var year=now.getFullYear();
+  var mk=year+'-'+String(monthIdx+1).padStart(2,'0');
+  var ml=MONTHS[monthIdx]+' '+year;
+  /* Set month label immediately so the tab chip is always current */
+  var elLabel=document.getElementById('monatsLabel');
+  if(elLabel)elLabel.textContent=ml;
+  cont.innerHTML='<div style="padding:28px;text-align:center;color:var(--muted);font-size:13px">Lade Challenge des Monats…</div>';
+  function hdr(){return{'apikey':T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY};}
+  function hint(msg){return '<div class="monats-hint">'+msg+'</div>';}
+
+  /* Does a stored month value refer to the current calendar month? */
+  function matchesCurrentMonth(raw){
+    var rm=String(raw==null?'':raw).toLowerCase().trim();
+    if(!rm)return false;
+    if(rm===mk)return true;                        /* 2026-07            */
+    if(rm.indexOf(mk+'-')===0)return true;         /* 2026-07-01 (ISO)   */
+    var g=MONTHS[monthIdx].toLowerCase();          /* "juli" / "märz" */
+    var gs=g.replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u');
+    if(rm===g||rm===gs)return true;                /* "Juli"             */
+    if(rm===g+' '+year||rm===gs+' '+year)return true;   /* "Juli 2026"   */
+    if(rm===g+year||rm===gs+year)return true;
+    var digits=rm.replace(/[^0-9]/g,'');
+    if(digits){
+      var y=String(year), m2=String(monthIdx+1).padStart(2,'0'), yy=y.slice(2);
+      var cand=[y+m2, m2+y, m2+yy, yy+m2];         /* 202607 / 072026 …  */
+      if(cand.indexOf(digits)>=0)return true;
+    }
+    return false;
+  }
+
+  /* Build + mount from a curated drills array. */
+  function mountCurated(row,name,badge,heroText,unlockMsg){
+    var raw=row.drills, curated=[];
+    try{curated=(typeof raw==='string'?JSON.parse(raw):(raw||[]));}catch(e){curated=[];}
+    if(!Array.isArray(curated)||!curated.length)return false;
+    var nd=curated.length;
+    var drills=curated.map(function(d,i){
+      var last=(i===nd-1);
+      return{
+        title:(d.title||('Video '+(i+1))),
+        eye:'Challenge '+String(i+1).padStart(2,'0'),
+        meta:(d.meta||'Challenge des Monats'),
+        vid:String(d.vid||''),
+        hash:String(d.hash||''),
+        type:'rate',
+        xp:(typeof d.xp==='number'?d.xp:10),
+        star:1,   /* every curated drill open from the start */
+        next:last?('Alle '+nd+' Challenges abgeschlossen!'):'Weiter zur n\xe4chsten Challenge!'
+      };
+    });
+    cont.innerHTML='';
+    T7.challenge({
+      containerId:containerId,
+      title:name,badge:badge,
+      moduleKey:'monats_'+mk.replace('-','_'),
+      heroText:heroText,unlockMsg:unlockMsg,
+      drills:drills
+    });
+    return true;
+  }
+
+  /* Back-compat: mount from a legacy module_key. */
+  function mountFromModule(modKey,name,badge,heroText,unlockMsg){
+    _T7FetchAll(function(modules,videos){
+      var mod=null;
+      for(var i=0;i<modules.length;i++){if(modules[i].key===modKey){mod=modules[i];break;}}
+      if(!mod){cont.innerHTML=hint('Modul <code>'+modKey+'</code> nicht in Supabase gefunden.');return;}
+      var drills=_T7BuildDrills(mod,videos);
+      cont.innerHTML='';
+      T7.challenge({
+        containerId:containerId,
+        title:name||mod.label,
+        badge:badge||mod.icon||'🔥',
+        moduleKey:'monats_'+mk.replace('-','_'),
+        heroText:heroText||mod.hero_text||'',
+        unlockMsg:unlockMsg||mod.unlock_msg||'',
+        drills:drills
+      });
+    });
+  }
+
+  /* One fetch, resolve the current-month row client-side (format-tolerant). */
+  fetch(T7_SB_URL+'/rest/v1/monthly_challenges?select=*&order=month.desc',{headers:hdr()})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(rows){
+      rows=Array.isArray(rows)?rows:[];
+      var row=null;
+      /* Prefer an exact canonical match, then any format that resolves to now. */
+      for(var i=0;i<rows.length;i++){if(String(rows[i].month).trim()===mk){row=rows[i];break;}}
+      if(!row){for(var j=0;j<rows.length;j++){if(matchesCurrentMonth(rows[j].month)){row=rows[j];break;}}}
+      if(!row){
+        cont.innerHTML=hint('Kein Eintrag f\xfcr <strong>'+ml+'</strong> gefunden.<br>'
+          +'Lege den Monat im <strong>Challenge-des-Monats</strong>-Formular an.');
+        return;
+      }
+      var name     =(row.name||'').trim()      ||'Challenge des Monats';
+      var badge    =(row.badge||'').trim()     ||'🔥';
+      var heroText =(row.hero_text||'').trim();
+      var unlockMsg=(row.unlock_msg||'').trim();
+      var elName=document.getElementById('monatsName');
+      if(elName)elName.textContent=name;
+
+      if(mountCurated(row,name,badge,heroText,unlockMsg))return;
+
+      var modKey=(row.module_key||'').trim();
+      if(!modKey){
+        cont.innerHTML=hint('F\xfcr <strong>'+ml+'</strong> sind noch keine Videos ausgew\xe4hlt.<br>'
+          +'\xd6ffne das <strong>Challenge-des-Monats</strong>-Formular und stelle die Challenge zusammen.');
+        return;
+      }
+      mountFromModule(modKey,name,badge,heroText,unlockMsg);
+    })
+    .catch(function(e){
+      console.error('[T7LoadMonats]',e);
+      cont.innerHTML=hint('Fehler beim Laden der Challenge des Monats.<br>Details: '+e.message);
+    });
+}
+
+/* ===========================================================
+   T7 PUBLIC NAMESPACE  (RESTORED)
+   ------------------------------------------------------------
+   Challenges.html (and the dynamic loaders above) call the
+   lowercase API: T7.loadChallenges / T7.loadCerts / T7.loadMonats
+   / T7.challenge / T7.certificate.
+   Without this object the page throws "T7 is not defined" on the
+   first call and NOTHING on the Challenges page renders.
+   =========================================================== */
+window.T7 = {
+  challenge:      T7Challenge,
+  certificate:    T7Cert,
+  loadChallenges: T7LoadChallenges,
+  loadCerts:      T7LoadCerts,
+  loadMonats:     T7LoadMonats
 };
