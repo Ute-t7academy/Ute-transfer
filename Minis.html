@@ -3,13 +3,25 @@
 <title>Minis - T7 Academy</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Open+Sans:wght@600;700;800&amp;family=Antonio:wght@500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;family=Garet+W05+Bold&amp;display=swap" rel="stylesheet">
 <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
-<link href="https://Ute-t7academy.github.io/Ute-transfer/t7-minis.css" rel="stylesheet">
+<link href="https://ute-t7academy.github.io/t7-minis.css" rel="stylesheet">
+<style>
+/* --- Minis mobile fixes (self-contained; can move to t7-minis.css) --- */
+/* Let the station/stadium title shrink & wrap inside the flex header instead of clipping */
+.station-info{ min-width:0; flex:1 1 auto; }
+.station-title{ overflow-wrap:break-word; word-break:normal; }
+@media (max-width:600px){
+  .station-title{ font-size:22px; line-height:1.12; }
+  .station-hero{ gap:10px; }
+}
+/* Trick-path node mascot */
+.tp-node-av{ display:none !important; }
+</style>
 
 
 <!-- === TOP NAV === -->
 <nav class="topnav">
   <div class="nav-logo">
-    <a href="/"><img src="https://ute-t7academy.github.io/Assets/logo_t7academy.png" alt="T7 Academy"></a>
+    <a href="/"><img src="https://ute-t7academy.github.io/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
   </div>
   <div class="nav-links">
     <a href="https://www.laureo.at/" class="nav-link">Home</a>
@@ -128,23 +140,23 @@
             </div>
 
             <div class="landing-card lc-stadien" data-goto="stadien" role="button" tabindex="0">
-              <div class="lc-bonus-badge">⭐ Bonus</div>
               <img class="lc-mascot av-img" src="https://ute-t7academy.github.io/Assets/Keon_Avatar.png" alt="Avatar">
-              <div class="lc-eye" style="margin-top:32px">✈️ Bonus-Reise</div>
+              <div class="lc-step">03</div>
+              <div class="lc-eye">✈️ Bonus-Reise</div>
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
                 <div>
                   <div class="lc-emoji">🏟️</div>
                   <div class="lc-title" style="margin-top:8px">Stadien</div>
                 </div>
               </div>
-              <div class="lc-desc"><strong style="color:var(--lp-green)">Lass uns zu den weltberühmten Stadien reisen!</strong> Schwerere 2⭐ und 3⭐ Tricks warten auf dich.</div>
+              <div class="lc-desc"><strong style="color:var(--lp-green)">Lass uns zu den weltberühmten Stadien reisen!</strong> Neue Tricks warten auf dich.</div>
               <div class="lc-preview">
                 <div class="lc-stadia-row">
-                  <div class="lc-stadium-mini" style="--st-c:var(--lp-red)">🍁</div>
-                  <div class="lc-stadium-mini" style="--st-c:#00BCD4">🏔️</div>
-                  <div class="lc-stadium-mini" style="--st-c:var(--lp-green)">🌶️</div>
-                  <div class="lc-stadium-mini" style="--st-c:var(--accent2)">🗽</div>
-                  <div class="lc-stadium-mini" style="--st-c:var(--lp-brazil)">🌴</div>
+                  <div class="lc-stadium-mini" style="--st-c:#009C3B">🌴</div>
+                  <div class="lc-stadium-mini" style="--st-c:#E4002B">🦁</div>
+                  <div class="lc-stadium-mini" style="--st-c:#EA580C">🥨</div>
+                  <div class="lc-stadium-mini" style="--st-c:#7C3AED">💃</div>
+                  <div class="lc-stadium-mini" style="--st-c:#0055A4">🗼</div>
                 </div>
               </div>
               <div class="lc-pills">
@@ -170,7 +182,7 @@
             <button class="pg-station pg-pos-1" data-station="st1" type="button">
               <div class="pg-st-num">#1</div>
               <img class="pg-st-avatar" src="https://ute-t7academy.github.io/Assets/Keon_Avatar.png" alt="">
-              <div class="pg-st-name">Keons Sitz-Tricks</div>
+              <div class="pg-st-name">Keons Sitdowns</div>
               <div class="pg-st-count" data-proglabel="st1">0/2</div>
             </button>
             <button class="pg-station pg-pos-2" data-station="st2" type="button">
@@ -188,7 +200,7 @@
             <button class="pg-station pg-pos-4" data-station="st4" type="button">
               <div class="pg-st-num">#4</div>
               <img class="pg-st-avatar" src="https://ute-t7academy.github.io/Assets/Coco_Avatar.png" alt="">
-              <div class="pg-st-name">Cocos Dribbeln</div>
+              <div class="pg-st-name">Cocos Dribbling</div>
               <div class="pg-st-count" data-proglabel="st4">0/2</div>
             </button>
             <button class="pg-station pg-pos-5" data-station="st5" type="button">
@@ -238,39 +250,39 @@
           <div class="pt-section-eye">✈️ Bonus-Reise</div>
           <div class="pt-section-title">Reise zu den <em>weltberühmten</em> Stadien</div>
           <div class="stadia-grid">
-            <button class="stadium-card" data-station="sd1" type="button" style="--st-c:#E4002B">
-              <div class="stadium-flag">🇨🇦</div>
-              <div class="stadium-emoji">🍁</div>
-              <div class="stadium-name">BMO Field</div>
-              <div class="stadium-city">Toronto</div>
+            <button class="stadium-card" data-station="sd1" type="button" style="--st-c:#009C3B">
+              <div class="stadium-flag">🇧🇷</div>
+              <div class="stadium-emoji">🌴</div>
+              <div class="stadium-name">Maracanã</div>
+              <div class="stadium-city">Rio de Janeiro</div>
               <div class="stadium-count" data-proglabel="sd1">0/2</div>
             </button>
-            <button class="stadium-card" data-station="sd2" type="button" style="--st-c:#00BCD4">
-              <div class="stadium-flag">🇨🇦</div>
-              <div class="stadium-emoji">🏔️</div>
-              <div class="stadium-name">BC Place</div>
-              <div class="stadium-city">Vancouver</div>
+            <button class="stadium-card" data-station="sd2" type="button" style="--st-c:#E4002B">
+              <div class="stadium-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div>
+              <div class="stadium-emoji">🦁</div>
+              <div class="stadium-name">Wembley</div>
+              <div class="stadium-city">London</div>
               <div class="stadium-count" data-proglabel="sd2">0/2</div>
             </button>
-            <button class="stadium-card" data-station="sd3" type="button" style="--st-c:#22C55E">
-              <div class="stadium-flag">🇲🇽</div>
-              <div class="stadium-emoji">🌶️</div>
-              <div class="stadium-name">Estadio Azteca</div>
-              <div class="stadium-city">Mexico City</div>
+            <button class="stadium-card" data-station="sd3" type="button" style="--st-c:#EA580C">
+              <div class="stadium-flag">🇩🇪</div>
+              <div class="stadium-emoji">🥨</div>
+              <div class="stadium-name">Allianz Arena</div>
+              <div class="stadium-city">Munich</div>
               <div class="stadium-count" data-proglabel="sd3">0/2</div>
             </button>
-            <button class="stadium-card" data-station="sd4" type="button" style="--st-c:#1f80ff">
-              <div class="stadium-flag">🇺🇸</div>
-              <div class="stadium-emoji">🗽</div>
-              <div class="stadium-name">MetLife Stadium</div>
-              <div class="stadium-city">New York</div>
+            <button class="stadium-card" data-station="sd4" type="button" style="--st-c:#7C3AED">
+              <div class="stadium-flag">🇪🇸</div>
+              <div class="stadium-emoji">💃</div>
+              <div class="stadium-name">Santiago Bernabéu</div>
+              <div class="stadium-city">Madrid</div>
               <div class="stadium-count" data-proglabel="sd4">0/2</div>
             </button>
-            <button class="stadium-card" data-station="sd5" data-st-text="dark" type="button" style="--st-c:#F7DC1F;--st-text:#0a1530">
-              <div class="stadium-flag">🇺🇸</div>
-              <div class="stadium-emoji">🌴</div>
-              <div class="stadium-name">SoFi Stadium</div>
-              <div class="stadium-city">Los Angeles</div>
+            <button class="stadium-card" data-station="sd5" type="button" style="--st-c:#0055A4">
+              <div class="stadium-flag">🇫🇷</div>
+              <div class="stadium-emoji">🗼</div>
+              <div class="stadium-name">Parc des Princes</div>
+              <div class="stadium-city">Paris</div>
               <div class="stadium-count" data-proglabel="sd5">0/2</div>
             </button>
           </div>
@@ -403,15 +415,7 @@
   </div>
 </div>
 
-<!-- Name overlay -->
-<div class="t7-overlay" id="t7-id-overlay" style="display:none">
-  <img class="t7-overlay-mascot av-img" src="https://ute-t7academy.github.io/Assets/Keon_Avatar.png" alt="Avatar">
-  <h2>Willkommen bei T7!</h2>
-  <p>Wie heisst du? <span data-av-name="">Keon</span> möchte dich kennenlernen!</p>
-  <input id="t7-id-input" type="text" placeholder="Dein Vorname" autocomplete="given-name">
-  <div class="ov-hint" id="t7-id-hint"></div>
-  <button onclick="T7Identity._submit()">Los geht's! 🚀</button>
-</div>
+<!-- Name overlay removed: v2.0 engine uses window.T7_PROFILE_ID. -->
 
-<script src="https://ute-t7academy.github.io/Ute-transfer/t7-widget-engine.js"></script>
-<script src="https://ute-t7academy.github.io/Ute-transfer/t7-minis.js"></script>
+<script src="https://ute-t7academy.github.io/t7-widget-engine.js"></script>
+<script src="https://ute-t7academy.github.io/t7-minis.js"></script>
