@@ -178,17 +178,21 @@ function playTap(){}
   var theme='dark'; try{theme=localStorage.getItem('t7_theme')||'dark';}catch(e){}
   document.body.setAttribute('data-theme', theme); document.documentElement.setAttribute('data-theme', theme);
   var tb = document.getElementById('themeToggle');
-  tb.innerHTML = theme==='dark' ? '&#9790;' : '&#9728;';
-  tb.onclick = function(){
-    theme = theme==='dark'?'light':'dark';
-    document.body.setAttribute('data-theme',theme); document.documentElement.setAttribute('data-theme',theme);
-    try{localStorage.setItem('t7_theme',theme);}catch(e){}
+  if (tb) {
     tb.innerHTML = theme==='dark' ? '&#9790;' : '&#9728;';
-  };
+    tb.onclick = function(){
+      theme = theme==='dark'?'light':'dark';
+      document.body.setAttribute('data-theme',theme); document.documentElement.setAttribute('data-theme',theme);
+      try{localStorage.setItem('t7_theme',theme);}catch(e){}
+      tb.innerHTML = theme==='dark' ? '&#9790;' : '&#9728;';
+    };
+  }
   var mb = document.getElementById('muteBtn');
-  function syncMute(){ mb.textContent = STATE.muted ? '🔇' : '🔊'; mb.classList.toggle('muted', STATE.muted); }
+  function syncMute(){ if(!mb) return; mb.textContent = STATE.muted ? '🔇' : '🔊'; mb.classList.toggle('muted', STATE.muted); }
   syncMute();
-  mb.onclick = function(){ STATE.muted=!STATE.muted; try{localStorage.setItem('t7kid_muted',STATE.muted?'1':'0');}catch(e){} syncMute(); };
+  if (mb) {
+    mb.onclick = function(){ STATE.muted=!STATE.muted; try{localStorage.setItem('t7kid_muted',STATE.muted?'1':'0');}catch(e){} syncMute(); };
+  }
 })();
 
 /* === VIEW NAVIGATION === */
