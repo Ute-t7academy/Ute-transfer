@@ -322,6 +322,11 @@
 /* Tab panel reveal — unchanged, purely functional */
 .ch-panel { display: none; }
 .ch-panel.active { display: flex; }
+/* Safety: t7-challenges.css is enqueued BEFORE t7-base.css, so a base
+   rule (e.g. .ch-section) can override .ch-panel{display:none} on equal
+   specificity and un-hide the inactive panels. !important guarantees
+   only the active tab's panel shows. */
+.ch-panel:not(.active) { display: none !important; }
 
 
 /* ============================================================
@@ -660,14 +665,14 @@
    up the same color automatically (see §5, which reads
    --wa / --wa-rgb rather than hardcoded hex). */
 .t7b-wrap {
-  --wa: #FFD700;
-  --wa2: #FF8C00;
-  --wa-rgb: 255, 215, 0;
+  --wa: #FFD700 !important;
+  --wa2: #FF8C00 !important;
+  --wa-rgb: 255, 215, 0 !important;
 }
 [data-theme="light"] .t7b-wrap {
-  --wa: #9A6708;
-  --wa2: #FF8C00;
-  --wa-rgb: 154, 103, 8;
+  --wa: #9A6708 !important;
+  --wa2: #FF8C00 !important;
+  --wa-rgb: 154, 103, 8 !important;
 }
 
 /* A few elements in the widget use a hardcoded cyan/gold FILL
@@ -681,19 +686,17 @@
   background: linear-gradient(135deg, #FFD700, #FF8C00);
   box-shadow: 0 0 10px rgba(255, 215, 0, .28);
 }
-/* Earned-XP pill (.cr-xp) reads a hardcoded cyan from base.css in dark
-   mode — repoint it to gold for the cert widget so it matches the rest. */
-.t7b-wrap .cr-xp {
-  color: var(--wa);
-  border-color: rgba(var(--wa-rgb), .45);
-  background: rgba(var(--wa-rgb), .1);
-}
 /* Light mode has its own universal (cyan) override for .cr-xp on
    .t7w — win it back for the cert widget specifically. */
+.t7b-wrap .cr-xp {
+  color: var(--wa) !important;
+  border-color: rgba(var(--wa-rgb), .45) !important;
+  background: rgba(var(--wa-rgb), .1) !important;
+}
 [data-theme="light"] .t7b-wrap .cr-xp {
-  color: #9A6708;
-  border-color: rgba(154, 103, 8, .4);
-  background: rgba(154, 103, 8, .1);
+  color: #9A6708 !important;
+  border-color: rgba(154, 103, 8, .4) !important;
+  background: rgba(154, 103, 8, .1) !important;
 }
 
 /* Per-row certificate badge — restyled to match the .shz-pill
@@ -731,9 +734,9 @@
   font-weight: 700 !important;
 }
 /* Always show exactly ONE star in the badge — the row title already
-   carries the number (1-Stern … 5-Sterne), so N stars just overflow
-   the small badge. font-size:0 above hides the original glyphs; this
-   injects a single gold star. */
+   carries the number (1-Stern … 5-Sterne), so N stars overflow the
+   small badge. font-size:0 above hides the original glyphs; this injects
+   a single star in the section's gold color. */
 .t7b-wrap .cr-badge span::before {
   content: '\2605';                 /* ★ */
   font-size: 18px;
