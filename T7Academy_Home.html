@@ -7,15 +7,15 @@
 <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
 
 <!-- Base widget stylesheet (lp-* primitives, theme tokens, topnav) -->
-<link rel="stylesheet" href="https://Ute-t7academy.github.io/Ute-transfer/t7-base.css?v=1">
+<link rel="stylesheet" href="https://ute-t7academy.github.io/t7-base.css?v=1">
 <!-- Home-specific overrides + personalization components -->
-<link rel="stylesheet" href="https://Ute-t7academy.github.io/Ute-transfer/t7-home.css?v=3">
+<link rel="stylesheet" href="https://ute-t7academy.github.io/t7-home.css?v=4">
 
 
 <!-- TOP NAV (subscribed environment: real page links + theme + avatar) -->
 <nav class="topnav">
   <div class="nav-logo">
-    <a href="/"><img src="https://Ute-t7academy.github.io/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
+    <a href="/"><img src="https://ute-t7academy.github.io/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
   </div>
   <div class="nav-links">
     <a href="https://www.laureo.at/" class="nav-link active">Home</a>
@@ -98,7 +98,8 @@
       <h2 class="lp-title">Wo du gerade <em class="accent">stehst</em>.</h2>
       <p class="lp-sub">Quer durch alle Module — wie viel hast du gesehen, wie weit bist du in den Challenges, welche Sterne hast du schon?</p>
 
-      <div class="home-prog-grid">
+      <!-- Row 1: the two learning paths -->
+      <div class="home-prog-grid home-prog-grid-top">
         <a class="home-prog p-sevens" href="https://www.t7academy.com/sevens/">
           <div class="home-prog-age">Die Grundlagen</div>
           <div class="home-prog-icon">7️⃣</div>
@@ -118,12 +119,15 @@
           </div>
           <div class="home-prog-link">Zu den Sternen</div>
         </a>
+      </div>
 
+      <!-- Row 2: the four challenge cards -->
+      <div class="home-prog-grid home-prog-grid-ch">
         <a class="home-prog p-challenges" href="https://www.t7academy.com/challenges/">
           <div class="home-prog-age">Trainiere &amp; Sammle XP</div>
           <div class="home-prog-icon">⚡</div>
-          <div class="home-prog-h">Challenges</div>
-          <div id="po-challenges-body" class="home-prog-body">
+          <div class="home-prog-h">Technik Challenges</div>
+          <div id="po-technik-body" class="home-prog-body">
             <div class="home-loading">Lade…</div>
           </div>
           <div class="home-prog-link">Zu den Challenges</div>
@@ -137,6 +141,26 @@
             <div class="home-loading">Lade…</div>
           </div>
           <div class="home-prog-link">Zu den Zertifikaten</div>
+        </a>
+
+        <a class="home-prog p-build" href="https://www.t7academy.com/challenges/#builder-container">
+          <div class="home-prog-age">Auswählen, los gehts!</div>
+          <div class="home-prog-icon">🔧</div>
+          <div class="home-prog-h">Deine eigene Challenge</div>
+          <div id="po-builder-body" class="home-prog-body">
+            <div class="home-loading">Lade…</div>
+          </div>
+          <div class="home-prog-link">Selbst zusammenstellen</div>
+        </a>
+
+        <a class="home-prog p-monats" href="https://www.t7academy.com/challenges/#monats-container">
+          <div class="home-prog-age">Vom T7 Expert kuratiert</div>
+          <div class="home-prog-icon">🔥</div>
+          <div class="home-prog-h">Challenge des Monats</div>
+          <div id="po-monats-body" class="home-prog-body">
+            <div class="home-loading">Lade…</div>
+          </div>
+          <div class="home-prog-link">Zur Monats-Challenge</div>
         </a>
       </div>
     </section>
@@ -194,19 +218,10 @@
   </main>
 
 
-  <aside class="home-side">
-
-    <!-- NEWS -->
-    <section class="home-block home-block-side">
-      <div class="lp-eye">Was ist neu</div>
-      <h2 class="lp-title home-block-title-sm">Aus der <em class="gold">Academy</em>.</h2>
-
-      <div class="news-feed" id="news-feed">
-        <div class="news-loading">Lade Neuigkeiten…</div>
-      </div>
-    </section>
-
-  </aside>
+  <!-- Right-hand news column removed. News will return as a floating
+       "New to the platform" pulldown by the hero avatar, sourced from
+       Supabase (managed via a News tab in expert-admin). The news code in
+       t7-home.js stays dormant (loadNews no-ops when #news-feed is absent). -->
 </div>
 
 
@@ -340,7 +355,7 @@
     <div class="home-modal-head">
       <div class="lp-eye">Mein Tagebuch</div>
       <h2 id="diaryModalTitle" class="lp-title home-block-title-sm">Deine Einträge.</h2>
-      <p class="lp-sub">Schreib auf oder sprich darüber, was du für dich festhalten möchtest.</p>
+      <p class="lp-sub">Schreib auf oder sprich ein, was heute hängen geblieben ist — beides geht. Deine Einträge stehen chronologisch darunter.</p>
     </div>
 
     <div class="home-modal-body">
@@ -414,6 +429,6 @@
      SCRIPTS — engine for identity/Supabase (avatar URL only),
      vimeo tracker, and the single centralised home-page script.
 ============================================================ -->
-<script src="https://Ute-t7academy.github.io/Ute-transfer/t7-widget-engine.js"></script>
-<script src="https://Ute-t7academy.github.io/Ute-transfer/t7-vimeo-tracker.js"></script>
-<script src="https://Ute-t7academy.github.io/Ute-transfer/t7-home.js?v=3"></script>
+<script src="https://ute-t7academy.github.io/t7-widget-engine.js"></script>
+<script src="https://ute-t7academy.github.io/t7-vimeo-tracker.js"></script>
+<script src="https://ute-t7academy.github.io/t7-home.js?v=5"></script>

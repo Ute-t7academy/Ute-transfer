@@ -395,13 +395,17 @@
       sbGet('video_progress?profile_id=eq.' + encodeURIComponent(profileId) + '&select=vimeo_id,total_seconds')
     ]).then(function(res){
       var videos = res[0] || [], progress = res[1] || [];
+      /* videos.vimeo_code can be "{id}/{hash}" for unlisted videos, but
+         video_progress.vimeo_id is just the bare numeric id — normalise both
+         to the numeric id so watch-time actually matches. */
+      function bareId(x){ return String(x == null ? '' : x).split('/')[0].trim(); }
       var ids = {};
-      videos.forEach(function(v){ if (v.vimeo_code) ids[v.vimeo_code] = true; });
+      videos.forEach(function(v){ var vid = bareId(v.vimeo_code); if (vid) ids[vid] = true; });
       var totalVideos = Object.keys(ids).length;
 
       var seen = 0, seconds = 0;
       progress.forEach(function(p){
-        if (!ids[p.vimeo_id]) return;
+        if (!ids[bareId(p.vimeo_id)]) return;
         var s = Number(p.total_seconds || 0);
         seconds += s;
         if (s >= SEEN_THRESHOLD_SEC) seen++;
@@ -428,65 +432,173 @@
     }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
   }
 
-  function renderChallenges(el, profileId){
-    if (!profileId) { renderEmpty(el, 'Anmelden, um Fortschritt zu sehen.'); return; }
-    sbGet('drill_attempts?profile_id=eq.' + encodeURIComponent(profileId) + '&select=module_key,drill_idx,rating')
+  /* ---- Challenge des Monats helpers ----
+     The monthly module_key is always 'monats_<currentYYYY_MM>' (built from
+     today's date on the Challenges page, independent of how the row stores
+     its month). We only read the monthly_challenges row for the drill TOTAL
+     and its display name. */
+  function currentMonthKey(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+  function monatsModuleKey(){
+    return 'monats_' + currentMonthKey().replace('-', '_');
+  }
+  function monthMatchesNow(raw){
+    var mk = currentMonthKey();
+    var rm = String(raw == null ? '' : raw).toLowerCase().trim();
+    if (!rm) return false;
+    if (rm === mk) return true;
+    if (rm.indexOf(mk + '-') === 0) return true;
+    var digits = rm.replace(/[^0-9]/g, '');
+    if (digits) {
+      var d = new Date(), y = String(d.getFullYear()),
+          m = String(d.getMonth() + 1).padStart(2, '0'), yy = y.slice(2);
+      if ([y + m, m + y, m + yy, yy + m].indexOf(digits) >= 0) return true;
+    }
+    return false;
+  }
+  function monatsDrillTotal(row){
+    if (!row) return 0;
+    var raw = row.drills, arr = [];
+    try { arr = (typeof raw === 'string' ? JSON.parse(raw) : (raw || [])); } catch (e) { arr = []; }
+    return Array.isArray(arr) ? arr.length : 0;
+  }
+
+  /* ---- Dynamic module list (mirrors the Challenges page) ----
+     Loads the `modules` table so the home cards never drift from Supabase.
+     Totals come from each module's `challenges` array. Falls back to the
+     hardcoded CHALLENGE_MODULES / CERT_MODULES if the fetch fails. */
+  var _modCache = null;
+  function countChallenges(raw){
+    var arr = [];
+    try { arr = (typeof raw === 'string' ? JSON.parse(raw) : (raw || [])); } catch (e) { arr = []; }
+    return Array.isArray(arr) ? arr.length : 0;
+  }
+  function loadModules(cb){
+    if (_modCache) { cb(_modCache); return; }
+    sbGet('modules?published=eq.true&order=sort_order.asc&select=key,label,kind,stars,challenges')
       .then(function(rows){
-        var best = {};
-        (rows || []).forEach(function(a){
+        rows = rows || [];
+        var ch = [], ce = [];
+        rows.forEach(function(m){
+          var total = countChallenges(m.challenges);
+          if (!total) return;
+          if (m.kind === 'certificate') ce.push({ key: m.key, label: m.label, stars: Number(m.stars || 0), total: total });
+          else if (m.kind === 'challenge') ch.push({ key: m.key, label: m.label, total: total });
+        });
+        _modCache = { challenges: ch.length ? ch : CHALLENGE_MODULES, certs: ce.length ? ce : CERT_MODULES };
+        cb(_modCache);
+      })
+      .catch(function(){ cb({ challenges: CHALLENGE_MODULES, certs: CERT_MODULES }); });
+  }
+
+  /* ---- Small render helpers for the challenge cards ---- */
+  function xpHeader(xp){
+    return '<div class="po-xp">⚡ ' + (xp || 0) + ' XP</div>';
+  }
+  function barRow(nameHtml, done, total, color){
+    var hasTotal = (typeof total === 'number' && total > 0);
+    var pct = hasTotal ? Math.round(done / total * 100) : 0;
+    return '<div>' +
+      '<div class="po-mod-row"><span class="po-mod-name">' + nameHtml + '</span>' +
+        '<span class="po-mod-stat">' + done + '/' + total + '</span></div>' +
+      '<div class="po-bar"><div class="po-bar-fill ' + color + '" style="width:' + pct + '%"></div></div>' +
+    '</div>';
+  }
+
+  /* ============================================================
+     CHALLENGE CARDS — four separate cards, each with its own XP:
+       Technik (po-technik-body), Zertifikate (po-certs-body),
+       Eigene Challenges (po-builder-body), Challenge des Monats
+       (po-monats-body). XP per card = sum of that category's
+       drill_attempts.xp, so the four add up to the hero total.
+     Also feeds the hero Sterne-Zertifikat badge + total XP.
+  ============================================================ */
+  function renderChallengeCards(profileId){
+    var elTech = $('po-technik-body'), elCert = $('po-certs-body'),
+        elBuild = $('po-builder-body'), elMon = $('po-monats-body');
+    var cards = [elTech, elCert, elBuild, elMon];
+    if (!profileId) { cards.forEach(function(e){ if (e) renderEmpty(e, 'Anmelden, um Fortschritt zu sehen.'); }); return; }
+
+    loadModules(function(mods){
+      Promise.all([
+        sbGet('drill_attempts?profile_id=eq.' + encodeURIComponent(profileId) + '&select=module_key,drill_idx,rating,xp'),
+        sbGet('monthly_challenges?select=*&order=month.desc'),
+        sbGet('player_stats?id=eq.' + encodeURIComponent(profileId) + '&select=stars,total_xp')
+      ]).then(function(res){
+        var attempts = res[0] || [], monthly = res[1] || [], statsRow = (res[2] || [])[0] || {};
+
+        /* Feed hero: stars + total XP */
+        var earnedStars = Number(statsRow.stars || 0);
+        renderHeroStars(earnedStars);
+        if (typeof statsRow.total_xp === 'number') { cumulativeHeroStats.xp = statsRow.total_xp; flushHeroStats(); }
+
+        /* best rating per drill + summed xp per module key */
+        var best = {}, xpByKey = {};
+        attempts.forEach(function(a){
           if (!best[a.module_key]) best[a.module_key] = {};
           var cur = best[a.module_key][a.drill_idx] || 0;
           if (a.rating > cur) best[a.module_key][a.drill_idx] = a.rating;
+          xpByKey[a.module_key] = (xpByKey[a.module_key] || 0) + Number(a.xp || 0);
         });
-        el.innerHTML = CHALLENGE_MODULES.map(function(m){
-          var mb = best[m.key] || {};
-          var done = Object.keys(mb).filter(function(k){ return mb[k] >= 4; }).length;
-          var pct  = Math.round(done / m.total * 100);
-          return '<div>' +
-            '<div class="po-mod-row"><span class="po-mod-name">' + esc(m.label) + '</span>' +
-              '<span class="po-mod-stat">' + done + '/' + m.total + '</span></div>' +
-            '<div class="po-bar"><div class="po-bar-fill cyan" style="width:' + pct + '%"></div></div>' +
-          '</div>';
-        }).join('');
-      }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
-  }
+        function doneCount(key){
+          var mb = best[key] || {};
+          return Object.keys(mb).filter(function(k){ return mb[k] >= 4; }).length;
+        }
+        function catXP(pred){
+          var t = 0;
+          Object.keys(xpByKey).forEach(function(k){ if (pred(k)) t += xpByKey[k]; });
+          return t;
+        }
+        var challengeKeys = {}, certKeys = {};
+        mods.challenges.forEach(function(m){ challengeKeys[m.key] = 1; });
+        mods.certs.forEach(function(m){ certKeys[m.key] = 1; });
+        var isBuilder = function(k){ return k === 'builder' || k.indexOf('builder_') === 0; };
+        var isMonats  = function(k){ return k.indexOf('monats_') === 0; };
 
-  function renderCerts(el, profileId){
-    if (!profileId) { renderEmpty(el, 'Anmelden, um Fortschritt zu sehen.'); return; }
-    Promise.all([
-      sbGet('drill_attempts?profile_id=eq.' + encodeURIComponent(profileId) + '&select=module_key,drill_idx,rating'),
-      sbGet('player_stats?id=eq.' + encodeURIComponent(profileId) + '&select=stars,xp')
-    ]).then(function(res){
-      var attempts = res[0] || [];
-      var statsRow = (res[1] || [])[0] || {};
-      var earnedStars = Number(statsRow.stars || 0);
+        /* --- Technik --- */
+        if (elTech) {
+          elTech.innerHTML = xpHeader(catXP(function(k){ return challengeKeys[k]; })) +
+            mods.challenges.map(function(m){ return barRow(esc(m.label), doneCount(m.key), m.total, 'cyan'); }).join('');
+        }
 
-      /* Feed hero — XP and Sterne-Zertifikat both flow from here */
-      renderHeroStars(earnedStars);
-      if (typeof statsRow.xp === 'number') {
-        cumulativeHeroStats.xp = statsRow.xp;
-        flushHeroStats();
-      }
+        /* --- Zertifikate --- */
+        if (elCert) {
+          elCert.innerHTML = xpHeader(catXP(function(k){ return certKeys[k]; })) +
+            mods.certs.map(function(m){
+              var star = earnedStars >= m.stars ? ' <span style="color:var(--lp-gold);font-weight:800">★</span>' : '';
+              return barRow(esc(m.label) + star, doneCount(m.key), m.total, 'gold');
+            }).join('');
+        }
 
-      var best = {};
-      attempts.forEach(function(a){
-        if (!best[a.module_key]) best[a.module_key] = {};
-        var cur = best[a.module_key][a.drill_idx] || 0;
-        if (a.rating > cur) best[a.module_key][a.drill_idx] = a.rating;
+        /* --- Eigene Challenges (Builder) --- */
+        if (elBuild) {
+          var builtKeys = {}, mastered = 0;
+          Object.keys(best).forEach(function(k){
+            if (isBuilder(k)) { builtKeys[k] = 1; var db = best[k]; Object.keys(db).forEach(function(d){ if (db[d] >= 4) mastered++; }); }
+          });
+          elBuild.innerHTML = xpHeader(catXP(isBuilder)) +
+            '<div class="po-mod-row"><span class="po-mod-name">🔧 Challenges gebaut</span><span class="po-mod-stat">' + Object.keys(builtKeys).length + '</span></div>' +
+            '<div class="po-mod-row"><span class="po-mod-name">★ Drills gemeistert</span><span class="po-mod-stat">' + mastered + '</span></div>';
+        }
+
+        /* --- Challenge des Monats --- */
+        if (elMon) {
+          var mRow = null;
+          for (var i = 0; i < monthly.length; i++) { if (String(monthly[i].month).trim() === currentMonthKey()) { mRow = monthly[i]; break; } }
+          if (!mRow) { for (var j = 0; j < monthly.length; j++) { if (monthMatchesNow(monthly[j].month)) { mRow = monthly[j]; break; } } }
+          var mDone = doneCount(monatsModuleKey()), mTotal = monatsDrillTotal(mRow);
+          var mName = (mRow && (mRow.name || '').trim()) || 'Challenge des Monats';
+          elMon.innerHTML = xpHeader(catXP(isMonats)) +
+            ((mTotal || mDone)
+              ? barRow('🔥 ' + esc(mName), mDone, (mTotal || '?'), 'cyan')
+              : '<div class="po-empty">Diesen Monat noch keine Challenge.</div>');
+        }
+      }).catch(function(){
+        cards.forEach(function(e){ if (e) renderEmpty(e, 'Fehler beim Laden.'); });
       });
-      el.innerHTML = CERT_MODULES.map(function(m){
-        var mb = best[m.key] || {};
-        var done = Object.keys(mb).filter(function(k){ return mb[k] >= 4; }).length;
-        var pct  = Math.round(done / m.total * 100);
-        var cert = earnedStars >= m.stars
-          ? ' <span style="color:var(--lp-gold);font-weight:800">★</span>' : '';
-        return '<div>' +
-          '<div class="po-mod-row"><span class="po-mod-name">' + esc(m.label) + cert + '</span>' +
-            '<span class="po-mod-stat">' + done + '/' + m.total + '</span></div>' +
-          '<div class="po-bar"><div class="po-bar-fill gold" style="width:' + pct + '%"></div></div>' +
-        '</div>';
-      }).join('');
-    }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
+    });
   }
 
 
@@ -535,14 +647,14 @@
     renderHeroStars(0);                  /* placeholder until renderCerts resolves */
     renderVideoCard($('po-sevens-body'),    profileId, 'sevens');
     renderVideoCard($('po-sterne-body'),    profileId, 'sterne');
-    renderChallenges($('po-challenges-body'), profileId);
-    renderCerts($('po-certs-body'),       profileId);
+    renderChallengeCards(profileId);
 
     window.addEventListener('t7xpupdate', function(){
       var info = window.T7Identity && T7Identity.get();
       if (info && info.id) {
-        renderChallenges($('po-challenges-body'), info.id);
-        renderCerts($('po-certs-body'), info.id);
+        renderVideoCard($('po-sevens-body'), info.id, 'sevens');
+        renderVideoCard($('po-sterne-body'), info.id, 'sterne');
+        renderChallengeCards(info.id);
       }
     });
   }
@@ -1761,10 +1873,10 @@
 
   function renderNewsFallback(el){
     var items = [
-      { date: '14. Mai 2026', title: 'Neue Challenges sind online!',  excerpt: 'Schau dir die brandneuen First Touch Air und Ginga Advanced Challenges an.', link: 'https://www.t7academy.com/challenges/', emoji: '\u26A1' },
-      { date: '10. Mai 2026', title: '1-Sterne Zertifikate verfügbar', excerpt: 'Vom 1-Stern bis zum 5-Sterne Zertifikat — zeige was du wirklich drauf hast.',   link: 'https://www.t7academy.com/challenges/', emoji: '\u2B50' },
-      { date: '5. Mai 2026',  title: 'Wochen-Streak Belohnungen',      excerpt: 'Sammle XP und steige in der Rangliste auf — jede Woche zählt.',                link: 'https://www.t7academy.com/challenges/', emoji: '🔥' },
-      { date: '1. Mai 2026',  title: 'Willkommen zur T7 Academy',      excerpt: 'Werde der beste Spieler, der du sein kannst — mit Plan und Leidenschaft.',    link: 'https://www.t7academy.com/',           emoji: '⚽' }
+      { date: '14. Mai 2026', title: 'Neue Challenges sind online!',  excerpt: 'Schau dir die brandneuen First Touch Air und Ginga Advanced Challenges an.', link: 'https://www.laureo.at/challenges/', emoji: '\u26A1' },
+      { date: '10. Mai 2026', title: '1-Sterne Zertifikate verfügbar', excerpt: 'Vom 1-Stern bis zum 5-Sterne Zertifikat — zeige was du wirklich drauf hast.',   link: 'https://www.laureo.at/challenges/', emoji: '\u2B50' },
+      { date: '5. Mai 2026',  title: 'Wochen-Streak Belohnungen',      excerpt: 'Sammle XP und steige in der Rangliste auf — jede Woche zählt.',                link: 'https://www.laureo.at/challenges/', emoji: '🔥' },
+      { date: '1. Mai 2026',  title: 'Willkommen zur T7 Academy',      excerpt: 'Werde der beste Spieler, der du sein kannst — mit Plan und Leidenschaft.',    link: 'https://www.laureo.at/',           emoji: '⚽' }
     ];
     el.innerHTML = items.map(renderNewsCard).join('');
   }

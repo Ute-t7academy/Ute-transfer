@@ -313,7 +313,7 @@ body[data-theme="light"] .lp-hero-image::after {
   margin: 0 auto;
   padding: clamp(40px, 5vw, 68px) clamp(24px, 5vw, 64px);
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  grid-template-columns: 1fr;   /* single column — right-hand news column removed */
   gap: clamp(32px, 4vw, 56px);
   align-items: start;
 }
@@ -513,21 +513,41 @@ body[data-theme="light"] .home-hint {
 
 .home-prog {
   background: transparent;
-  padding: 12px 4px 24px;
+  padding: 20px 22px 22px;
+  border: 1.5px solid var(--lp-rule);
+  border-radius: 14px;
   text-decoration: none;
   color: inherit;
   position: relative;
   display: flex;
   flex-direction: column;
-  transition: transform .2s;
+  transition: transform .2s, border-color .18s, background .18s;
 }
-.home-prog:hover { transform: translateY(-2px); }
+.home-prog:hover {
+  transform: translateY(-2px);
+  border-color: var(--p-c, var(--accent));
+  background: rgba(128, 140, 160, .04);
+}
 
 .home-prog.p-sevens     { --p-c: var(--accent); }
 .home-prog.p-sterne     { --p-c: var(--lp-gold); }
 .home-prog.p-challenges { --p-c: #1bcb26; }
 body[data-theme="light"] .home-prog.p-challenges { --p-c: #15803D; }
 .home-prog.p-certs      { --p-c: var(--lp-gold); }
+.home-prog.p-build      { --p-c: #A855F7; }
+body[data-theme="light"] .home-prog.p-build   { --p-c: #7C3AED; }
+.home-prog.p-monats     { --p-c: #FF6B35; }
+body[data-theme="light"] .home-prog.p-monats  { --p-c: #C2410C; }
+
+/* Per-card XP figure shown at the top of each challenge card body */
+.po-xp {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: .02em;
+  color: var(--p-c, var(--accent));
+  margin-bottom: 10px;
+}
 
 .home-prog-age {
   font-family: 'Antonio', sans-serif;
