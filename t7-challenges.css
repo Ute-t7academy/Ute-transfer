@@ -322,6 +322,10 @@
 /* Tab panel reveal — unchanged, purely functional */
 .ch-panel { display: none; }
 .ch-panel.active { display: flex; }
+/* Safety: force inactive panels hidden even if another rule sets display on
+   .ch-section (panels carry both .ch-section and .ch-panel). Prevents all
+   panels stacking into one long list if a lower rule wins on specificity/order. */
+.ch-panel:not(.active) { display: none !important; }
 
 
 /* ============================================================
