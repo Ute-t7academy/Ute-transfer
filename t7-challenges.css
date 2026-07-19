@@ -322,10 +322,6 @@
 /* Tab panel reveal — unchanged, purely functional */
 .ch-panel { display: none; }
 .ch-panel.active { display: flex; }
-/* Safety: force inactive panels hidden even if another rule sets display on
-   .ch-section (panels carry both .ch-section and .ch-panel). Prevents all
-   panels stacking into one long list if a lower rule wins on specificity/order. */
-.ch-panel:not(.active) { display: none !important; }
 
 
 /* ============================================================
@@ -685,6 +681,13 @@
   background: linear-gradient(135deg, #FFD700, #FF8C00);
   box-shadow: 0 0 10px rgba(255, 215, 0, .28);
 }
+/* Earned-XP pill (.cr-xp) reads a hardcoded cyan from base.css in dark
+   mode — repoint it to gold for the cert widget so it matches the rest. */
+.t7b-wrap .cr-xp {
+  color: var(--wa);
+  border-color: rgba(var(--wa-rgb), .45);
+  background: rgba(var(--wa-rgb), .1);
+}
 /* Light mode has its own universal (cyan) override for .cr-xp on
    .t7w — win it back for the cert widget specifically. */
 [data-theme="light"] .t7b-wrap .cr-xp {
@@ -724,8 +727,17 @@
 .t7b-wrap .cr-badge span {
   color: var(--wa) !important;
   text-shadow: none !important;
-  font-size: 18px !important;
+  font-size: 0 !important;          /* hide the module's N-star icon text */
   font-weight: 700 !important;
+}
+/* Always show exactly ONE star in the badge — the row title already
+   carries the number (1-Stern … 5-Sterne), so N stars just overflow
+   the small badge. font-size:0 above hides the original glyphs; this
+   injects a single gold star. */
+.t7b-wrap .cr-badge span::before {
+  content: '\2605';                 /* ★ */
+  font-size: 18px;
+  color: var(--wa);
 }
 
 
