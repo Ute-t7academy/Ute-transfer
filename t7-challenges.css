@@ -686,17 +686,27 @@
   background: linear-gradient(135deg, #FFD700, #FF8C00);
   box-shadow: 0 0 10px rgba(255, 215, 0, .28);
 }
-/* Light mode has its own universal (cyan) override for .cr-xp on
-   .t7w — win it back for the cert widget specifically. */
-.t7b-wrap .cr-xp {
+/* Earned-XP pill, total-XP pill and avatar use hardcoded fills that
+   base.css overrides — likely with !important too. Win with higher
+   specificity (.t7w.t7b-wrap) + !important so the whole cert widget
+   reads gold, not cyan. */
+.t7w.t7b-wrap .cr-xp {
   color: var(--wa) !important;
   border-color: rgba(var(--wa-rgb), .45) !important;
   background: rgba(var(--wa-rgb), .1) !important;
 }
-[data-theme="light"] .t7b-wrap .cr-xp {
+[data-theme="light"] .t7w.t7b-wrap .cr-xp {
   color: #9A6708 !important;
   border-color: rgba(154, 103, 8, .4) !important;
   background: rgba(154, 103, 8, .1) !important;
+}
+.t7w.t7b-wrap .cr-xp-total {
+  background: linear-gradient(135deg, #FFD700, #FF8C00) !important;
+  box-shadow: 0 0 10px rgba(255, 215, 0, .28) !important;
+}
+.t7w.t7b-wrap .cr-avatar {
+  background: linear-gradient(135deg, #FFD700, #FF8C00) !important;
+  box-shadow: 0 0 8px rgba(255, 215, 0, .35) !important;
 }
 
 /* Per-row certificate badge — restyled to match the .shz-pill
@@ -734,9 +744,8 @@
   font-weight: 700 !important;
 }
 /* Always show exactly ONE star in the badge — the row title already
-   carries the number (1-Stern … 5-Sterne), so N stars overflow the
-   small badge. font-size:0 above hides the original glyphs; this injects
-   a single star in the section's gold color. */
+   carries the number (1-Stern … 5-Sterne). font-size:0 above hides the
+   original glyphs; this injects a single gold star. */
 .t7b-wrap .cr-badge span::before {
   content: '\2605';                 /* ★ */
   font-size: 18px;
