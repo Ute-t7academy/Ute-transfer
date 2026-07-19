@@ -984,11 +984,17 @@ function _T7BuildDrills(mod,allVideos){
       vid=(pts[0]||'').trim();hash=(pts[1]||'').trim();
     }
     var bv=best?best.v:{};
+    /* Subtitle for each skill = "Schwierigkeit – Kategorie", pulled from the
+       matched Supabase videos row (difficulty + category columns). */
     var meta=[(bv.difficulty||''),(bv.category||'')].filter(Boolean).join(' – ')||'Challenge';
-    var star=mod.progressive?(i+1):1;
+    /* Locking removed for drills: every challenge/mini drill is open from the
+       start (star=1), ignoring the module's `progressive` flag — applies to
+       both challenges (First Touch, First Touch Air) and the tp minis.
+       Certificates are unaffected: their final upload row is gated separately
+       by T7Cert (allDone — all videos rated ≥4), not by drill star. */
+    var star=1;
     var nd=challenges.length,last=(i===nd-1);
-    var next=last?('Alle '+nd+' Challenges abgeschlossen!'):
-      (mod.progressive?('Challenge '+(i+2)+' ist jetzt offen!'):('Weiter so!'));
+    var next=last?('Alle '+nd+' Challenges abgeschlossen!'):'Weiter so!';
     return{title:drill.title,eye:'Challenge '+String(i+1).padStart(2,'0'),
       meta:meta,vid:vid,hash:hash,type:'rate',xp:drill.xp||10,star:star,next:next};
   });

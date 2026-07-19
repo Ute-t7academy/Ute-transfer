@@ -1016,3 +1016,27 @@
   border-color: rgba(194, 65, 12, .4);
   background: rgba(194, 65, 12, .1);
 }
+
+/* ============================================================
+   Utility classes — moved out of Challenges.html so the markup
+   stays free of inline styles (needed for clean WordPress embed).
+============================================================ */
+
+/* Loading / placeholder text inside builder filter rows
+   (replaces inline style="font-size:11px;color:var(--muted)") */
+.bf-loading{
+  font-size:11px;
+  color:var(--muted);
+}
+
+/* Identity overlay: hidden until the engine opens it
+   (replaces inline style="display:none") */
+#t7-id-overlay{
+  display:none;
+}
+
+/* Big ball emoji at the top of the identity overlay
+   (replaces inline style="font-size:44px") */
+.ov-emoji{
+  font-size:44px;
+}
