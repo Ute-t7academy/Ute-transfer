@@ -65,7 +65,7 @@
   var DIARY_AUDIO_STORE = 'diary_audio';    // keyPath 'id'  (voice notes)
 
   /* Watch-time threshold for "Video gesehen" tile */
-  var SEEN_THRESHOLD_SEC = 30;
+  var SEEN_THRESHOLD_SEC = 10;
 
   /* Module metadata — must mirror the Challenges page configs */
   var CHALLENGE_MODULES = [
@@ -432,11 +432,7 @@
     }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
   }
 
-  /* ---- Challenge des Monats helpers ----
-     The monthly module_key is always 'monats_<currentYYYY_MM>' (built from
-     today's date on the Challenges page, independent of how the row stores
-     its month). We only read the monthly_challenges row for the drill TOTAL
-     and its display name. */
+  /* ---- Challenge des Monats helpers ---- */
   function currentMonthKey(){
     var d = new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
@@ -465,10 +461,7 @@
     return Array.isArray(arr) ? arr.length : 0;
   }
 
-  /* ---- Dynamic module list (mirrors the Challenges page) ----
-     Loads the `modules` table so the home cards never drift from Supabase.
-     Totals come from each module's `challenges` array. Falls back to the
-     hardcoded CHALLENGE_MODULES / CERT_MODULES if the fetch fails. */
+  /* ---- Dynamic module list (mirrors the Challenges page) ---- */
   var _modCache = null;
   function countChallenges(raw){
     var arr = [];
@@ -493,7 +486,6 @@
       .catch(function(){ cb({ challenges: CHALLENGE_MODULES, certs: CERT_MODULES }); });
   }
 
-  /* ---- Small render helpers for the challenge cards ---- */
   function xpHeader(xp){
     return '<div class="po-xp">⚡ ' + (xp || 0) + ' XP</div>';
   }
@@ -507,14 +499,9 @@
     '</div>';
   }
 
-  /* ============================================================
-     CHALLENGE CARDS — four separate cards, each with its own XP:
-       Technik (po-technik-body), Zertifikate (po-certs-body),
-       Eigene Challenges (po-builder-body), Challenge des Monats
-       (po-monats-body). XP per card = sum of that category's
-       drill_attempts.xp, so the four add up to the hero total.
-     Also feeds the hero Sterne-Zertifikat badge + total XP.
-  ============================================================ */
+  /* Four challenge cards (Technik / Zertifikate / Builder / Monats), each
+     with its own XP = sum of that category's drill_attempts.xp. Also feeds
+     the hero Sterne-Zertifikat badge + total XP. */
   function renderChallengeCards(profileId){
     var elTech = $('po-technik-body'), elCert = $('po-certs-body'),
         elBuild = $('po-builder-body'), elMon = $('po-monats-body');
@@ -529,12 +516,10 @@
       ]).then(function(res){
         var attempts = res[0] || [], monthly = res[1] || [], statsRow = (res[2] || [])[0] || {};
 
-        /* Feed hero: stars + total XP */
         var earnedStars = Number(statsRow.stars || 0);
         renderHeroStars(earnedStars);
         if (typeof statsRow.total_xp === 'number') { cumulativeHeroStats.xp = statsRow.total_xp; flushHeroStats(); }
 
-        /* best rating per drill + summed xp per module key */
         var best = {}, xpByKey = {};
         attempts.forEach(function(a){
           if (!best[a.module_key]) best[a.module_key] = {};
@@ -557,13 +542,10 @@
         var isBuilder = function(k){ return k === 'builder' || k.indexOf('builder_') === 0; };
         var isMonats  = function(k){ return k.indexOf('monats_') === 0; };
 
-        /* --- Technik --- */
         if (elTech) {
           elTech.innerHTML = xpHeader(catXP(function(k){ return challengeKeys[k]; })) +
             mods.challenges.map(function(m){ return barRow(esc(m.label), doneCount(m.key), m.total, 'cyan'); }).join('');
         }
-
-        /* --- Zertifikate --- */
         if (elCert) {
           elCert.innerHTML = xpHeader(catXP(function(k){ return certKeys[k]; })) +
             mods.certs.map(function(m){
@@ -571,8 +553,6 @@
               return barRow(esc(m.label) + star, doneCount(m.key), m.total, 'gold');
             }).join('');
         }
-
-        /* --- Eigene Challenges (Builder) --- */
         if (elBuild) {
           var builtKeys = {}, mastered = 0;
           Object.keys(best).forEach(function(k){
@@ -582,8 +562,6 @@
             '<div class="po-mod-row"><span class="po-mod-name">🔧 Challenges gebaut</span><span class="po-mod-stat">' + Object.keys(builtKeys).length + '</span></div>' +
             '<div class="po-mod-row"><span class="po-mod-name">★ Drills gemeistert</span><span class="po-mod-stat">' + mastered + '</span></div>';
         }
-
-        /* --- Challenge des Monats --- */
         if (elMon) {
           var mRow = null;
           for (var i = 0; i < monthly.length; i++) { if (String(monthly[i].month).trim() === currentMonthKey()) { mRow = monthly[i]; break; } }
