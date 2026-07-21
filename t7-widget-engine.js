@@ -18,7 +18,18 @@ var T7Identity=(function(){
     var label=(nm||'?').trim();
     var parts=label.split(/\s+/);
     var ini=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():label.slice(0,2).toUpperCase();
-    var av=document.getElementById('navAvatar');if(av)av.textContent=ini;
+    var av=document.getElementById('navAvatar');
+    if(av){
+      av.textContent=ini;
+      /* Local-only profile photo (set on the Home page, stored in
+         localStorage per profile). localStorage is shared across all
+         t7academy.com pages, so this shows the photo in the nav
+         everywhere without any server round-trip. */
+      try{
+        var _pic=id&&localStorage.getItem('t7_avatar_v1__'+id);
+        if(_pic){av.style.backgroundImage="url('"+_pic+"')";av.style.backgroundSize='cover';av.style.backgroundPosition='center';av.textContent='';av.classList.add('has-photo');}
+      }catch(e){}
+    }
     _q.forEach(function(cb){cb(id,nm);});_q=[];
   }
   function _readGlobalId(){

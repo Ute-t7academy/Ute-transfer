@@ -300,6 +300,37 @@
     }
   }
 
+  /* ---- AVATAR — LOCAL ONLY (GDPR) --------------------------------
+     The profile photo never leaves the device. It's resized to a small
+     square thumbnail and kept in localStorage, namespaced per profile
+     (so two players on one device don't share). localStorage is shared
+     across all t7academy.com pages, and t7-widget-engine.js reads the
+     same key to show it in the nav on every page. */
+  function avatarLocalKey(profileId){ return 't7_avatar_v1__' + (profileId || 'anon'); }
+
+  /* Resize an image File to a square thumbnail data URL (cover-crop). */
+  function avatarResize(file, size){
+    return new Promise(function(resolve, reject){
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function(){
+        try {
+          var s = size || 256;
+          var canvas = document.createElement('canvas');
+          canvas.width = s; canvas.height = s;
+          var ctx = canvas.getContext('2d');
+          var scale = Math.max(s / img.width, s / img.height);  /* cover */
+          var w = img.width * scale, h = img.height * scale;
+          ctx.drawImage(img, (s - w) / 2, (s - h) / 2, w, h);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        } catch (e) { URL.revokeObjectURL(url); reject(e); }
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+      img.src = url;
+    });
+  }
+
   function initAvatar(profileId){
     var side  = $('avatarSide');
     var cta   = $('avatarSideCta');
@@ -326,50 +357,25 @@
       return;
     }
 
-    /* Pull existing avatar URL */
-    sbGet('player_profiles?id=eq.' + encodeURIComponent(profileId) + '&select=avatar_url')
-      .then(function(rows){ applyAvatar(rows && rows[0] && rows[0].avatar_url); });
+    /* Load existing photo from local storage (never leaves the device). */
+    try {
+      var saved = localStorage.getItem(avatarLocalKey(profileId));
+      if (saved) applyAvatar(saved);
+    } catch (e) {}
 
-    /* Upload on file pick */
+    /* Store on file pick — resized so it fits localStorage and stays crisp
+       at nav / hero sizes. Nothing is uploaded. */
     input.addEventListener('change', function(){
       var file = input.files && input.files[0];
       if (!file) return;
-      if (file.size > 8 * 1024 * 1024) {
-        alert('Das Bild ist zu groß (max. 8 MB).');
-        input.value = '';
-        return;
-      }
+      if (!/^image\//.test(file.type || '')) { alert('Bitte ein Bild auswählen.'); input.value = ''; return; }
       side.classList.add('uploading');
-
-      var ext  = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      var path = profileId + '.' + ext;
-      var uploadUrl = SB_URL + '/storage/v1/object/' + AVATAR_BUCKET + '/' + path;
-
-      fetch(uploadUrl, {
-        method: 'POST',
-        headers: {
-          apikey: SB_KEY,
-          Authorization: 'Bearer ' + SB_KEY,
-          'Content-Type': file.type || 'image/jpeg',
-          'x-upsert': 'true'
-        },
-        body: file
-      }).then(function(r){
-        if (!r.ok) throw new Error('upload failed (' + r.status + ')');
-        var publicUrl = SB_URL + '/storage/v1/object/public/' + AVATAR_BUCKET + '/' + path + '?t=' + Date.now();
-        return fetch(SB_URL + '/rest/v1/player_profiles?id=eq.' + encodeURIComponent(profileId), {
-          method: 'PATCH',
-          headers: sbHeaders({ Prefer: 'return=minimal' }),
-          body: JSON.stringify({ avatar_url: publicUrl })
-        }).then(function(r2){
-          if (!r2.ok) console.warn('[T7 Home] avatar uploaded but PATCH player_profiles failed (' + r2.status + '). Did you add the avatar_url column?');
-          return publicUrl;
-        });
-      }).then(function(publicUrl){
-        applyAvatar(publicUrl);
+      avatarResize(file, 256).then(function(dataUrl){
+        try { localStorage.setItem(avatarLocalKey(profileId), dataUrl); }
+        catch (e) { alert('Das Bild konnte nicht gespeichert werden (Speicher voll?).'); throw e; }
+        applyAvatar(dataUrl);
       }).catch(function(err){
-        console.error('[T7 Home] avatar upload', err);
-        alert('Upload fehlgeschlagen. Bitte später erneut versuchen.');
+        console.error('[T7 Home] avatar (local)', err);
       }).then(function(){
         side.classList.remove('uploading');
         input.value = '';
