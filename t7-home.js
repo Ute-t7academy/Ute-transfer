@@ -3,43 +3,25 @@
    ------------------------------------------------------------
    Single home-page script.
 
-   CLOUD (Supabase) — unchanged from before:
+   CLOUD (Supabase):
      - Identity (T7Identity)
      - Progress: Sevens / Sterne video watch counts
-     - Challenges progress + XP        (player_stats.xp)
+     - Challenges progress + XP        (player_stats.total_xp)
      - Sterne-Zertifikat (star count)  (player_stats.stars)
-     - Avatar URL                      (player_profiles.avatar_url)
 
    LOCAL ONLY (GDPR — never leaves the device):
      - Diary entries           → localStorage
      - Player video uploads    → IndexedDB
+     - Profile photo (avatar)  → localStorage (resized thumbnail,
+       namespaced per profile; t7-widget-engine.js reads the same key
+       to show it in the nav on every page)
      - With download / upload backup for switching devices.
-     - Both live behind a teaser card on the home page; the full
-       feature (repository / journal + archiving controls) only
-       renders once the card is opened in its modal.
 
    Vimeo watch-time tracking still lives in its own file
    (t7-vimeo-tracker.js).
 
-   ────────────────────────────────────────────────────────────
-   REQUIRED SUPABASE CHANGE
-   Just one column — the diary and clips tables are GONE.
-   ────────────────────────────────────────────────────────────
-
-     alter table player_profiles
-       add column if not exists avatar_url text;
-
-   STORAGE BUCKET (one):
-     - "player-avatars"  → public read, authenticated write.
-       Storage policy:
-
-         create policy "avatars_self_write" on storage.objects for insert
-           with check (
-             bucket_id = 'player-avatars'
-             and split_part(name, '.', 1) = auth.uid()::text
-           );
-
-   That's it for backend.  Diary + clips never touch the network.
+   No backend setup needed — the avatar is device-local (no bucket /
+   no avatar_url column), and diary + clips never touch the network.
    ============================================================ */
 
 (function(){
@@ -52,8 +34,6 @@
   ============================================================ */
   var SB_URL = window.T7_SB_URL || 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
   var SB_KEY = window.T7_SB_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
-
-  var AVATAR_BUCKET = 'player-avatars';
 
   /* Local storage keys & IDB names — namespaced per profile so two
      players on the same device don't see each other's data. */
@@ -271,9 +251,9 @@
 
 
   /* ============================================================
-     AVATAR (cloud) — sidebar uploader + nav thumb
-     Stored at  player-avatars/{profile_id}.{ext}
-     URL kept on player_profiles.avatar_url
+     AVATAR (local) — sidebar uploader + nav thumb
+     The photo is stored in localStorage (see initAvatar); this just
+     paints it onto the hero slot (#avatarSideImg) and nav (#navAvatar).
   ============================================================ */
   function applyAvatar(url){
     var img   = $('avatarSideImg');
@@ -300,15 +280,13 @@
     }
   }
 
-  /* ---- AVATAR — LOCAL ONLY (GDPR) --------------------------------
-     The profile photo never leaves the device. It's resized to a small
-     square thumbnail and kept in localStorage, namespaced per profile
-     (so two players on one device don't share). localStorage is shared
-     across all t7academy.com pages, and t7-widget-engine.js reads the
-     same key to show it in the nav on every page. */
+  /* Profile photo is LOCAL only — resized to a small square thumbnail
+     and kept in localStorage, namespaced per profile. Nothing is uploaded.
+     localStorage is shared across all t7academy.com pages, and
+     t7-widget-engine.js reads the same key to show it in the nav
+     everywhere. */
   function avatarLocalKey(profileId){ return 't7_avatar_v1__' + (profileId || 'anon'); }
 
-  /* Resize an image File to a square thumbnail data URL (cover-crop). */
   function avatarResize(file, size){
     return new Promise(function(resolve, reject){
       var url = URL.createObjectURL(file);
@@ -319,7 +297,7 @@
           var canvas = document.createElement('canvas');
           canvas.width = s; canvas.height = s;
           var ctx = canvas.getContext('2d');
-          var scale = Math.max(s / img.width, s / img.height);  /* cover */
+          var scale = Math.max(s / img.width, s / img.height);  /* cover-crop */
           var w = img.width * scale, h = img.height * scale;
           ctx.drawImage(img, (s - w) / 2, (s - h) / 2, w, h);
           URL.revokeObjectURL(url);
