@@ -1,0 +1,1801 @@
+/* ==========================================================================
+   T7 Academy — OUTSIDE (pre-subscription) shared stylesheet
+   --------------------------------------------------------------------------
+   Used by the two outside landing pages:
+     • T7-academy-home-outside  (home / marketing)
+     • Freemium                 (taster: stars + sevens 1-2 + skill-path)
+
+   Combines:
+     • Foundational rules from t7-base.css (reset, WP overrides, themes,
+       fonts, topnav, theme-toggle, lp-* primitives)
+     • All inline page styles that are shared OR specific to the two
+       outside pages
+
+   Subscriber-only rules (.t7w, .ch-*, .sb-*, .po-*, .news-*, .home-hero,
+   .card grid, .modal-overlay, .search-wrap, .pill-*, .home-section, etc.)
+   are intentionally NOT included — they belong to the subscribed
+   environment and should stay in t7-base.css.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. RESET
+   ========================================================================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Force the HTML `hidden` attribute to actually hide. WordPress and our own
+   flex rules can override the native behaviour. */
+[hidden] { display: none !important; }
+
+
+/* ==========================================================================
+   2. WORDPRESS LAYOUT OVERRIDES
+   Strip default WP container padding so the landing pages can run
+   edge-to-edge.
+   ========================================================================== */
+.wp-block-post-title,
+h1.entry-title,
+.page-title,
+.entry-header,
+.wp-block-group .wp-block-heading:first-child { display: none !important; }
+
+.wp-block-html {
+    width: calc(100vw - 1px) !important;
+    position: relative !important;
+    left: 50% !important;
+    right: 50% !important;
+    margin-left: calc(-50vw + 0.5px) !important;
+    margin-right: calc(-50vw + 0.5px) !important;
+    max-width: calc(100vw - 1px) !important;
+}
+.entry-content,
+.wp-block-post-content,
+.is-layout-constrained > * { max-width: 100% !important; padding: 0.5px !important; margin: 0 !important; }
+.wp-site-blocks,
+.wp-block-group,
+.is-layout-flow,
+.is-layout-constrained { padding: 0.5px !important; margin: 0 !important; }
+.site-content,
+.entry,
+.post,
+.page { padding: 0.5px !important; margin: 0 !important; }
+body.page .site-main { padding: 0.5px !important; margin: 0 !important; }
+
+
+/* ==========================================================================
+   3. THEME TOKENS
+   Combined dark / light variables for both the base shell and the
+   landing-page (lp-*) layer used by these outside pages.
+   ========================================================================== */
+[data-theme="dark"],
+body[data-theme="dark"] {
+    --bg: #080f1e;
+    --surface: #0d1528;
+    --surface2: #1a2640;
+    --border: rgba(0, 229, 255, 0.12);
+    --accent: #00E5FF;
+    --accent2: #1f80ff;
+    --accent3: #1800ad;
+    --text: #e8f4ff;
+    --muted: rgba(232, 244, 255, 0.45);
+    --nav-bg: rgba(10, 22, 40, 0.72);
+    --nav-border: rgba(255, 255, 255, 0.08);
+
+    /* Landing-page tokens — outside variants */
+    --lp-gold: #FFD700;
+    --lp-gold-deep: #e9a900;   /* Freemium skill-path: deep gold for gradients */
+    --lp-red: #E4002B;
+    --lp-green: #22C55E;
+    --lp-brazil: #F7DC1F;
+    --lp-muted: rgba(255, 255, 255, 0.65);
+    --lp-faint: rgba(255, 255, 255, 0.4);
+    --lp-rule: rgba(255, 255, 255, 0.08);
+    --lp-section-y: clamp(40px, 5vw, 68px);
+}
+
+[data-theme="light"],
+body[data-theme="light"] {
+    --bg: #E8EDF3;
+    --surface: #FFFFFF;
+    --surface2: #E2E8F0;
+    --border: rgba(15, 23, 42, 0.08);
+    --accent: #00e0ff;
+    --accent2: #1f80ff;
+    --accent3: #1800ad;
+    --text: #0F172A;
+    --muted: rgba(15, 23, 42, 0.72);
+    --nav-bg: rgba(255, 255, 255, 0.78);
+    --nav-border: rgba(15, 23, 42, 0.08);
+
+    /* Landing-page tokens — light variants */
+    --lp-gold: #ca8309;
+    --lp-gold-deep: #a06a08;
+    --lp-red: #BE123C;
+    --lp-green: #199848;
+    --lp-brazil: #cda609;
+    --lp-muted: rgba(15, 23, 42, 0.72);
+    --lp-faint: rgba(15, 23, 42, 0.48);
+    --lp-rule: rgba(15, 23, 42, 0.08);
+    --lp-section-y: clamp(40px, 5vw, 68px);
+}
+
+
+/* ==========================================================================
+   4. BODY / HTML BASE
+   ========================================================================== */
+html,
+body {
+    font-family: 'Open Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.2s, color 0.2s;
+}
+
+/* Solid light background (no transparency) */
+[data-theme="light"] body,
+body[data-theme="light"] { background: #E8EDF3 !important; }
+
+
+/* ==========================================================================
+   5. TOP NAV (shared between both outside pages)
+   ========================================================================== */
+.topnav {
+    position: sticky;
+    top: 0;
+    z-index: 300;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--nav-border);
+    padding: 0 24px;
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: min-height 0.25s, padding 0.25s;
+}
+.nav-logo { display: flex; align-items: center; }
+.nav-logo img { height: 48px; width: auto; transition: height 0.25s; }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+
+/* Shrink-on-scroll states (toggled by JS .nav-shrunk class — optional) */
+.topnav.nav-shrunk { min-height: 50px; }
+.topnav.nav-shrunk .nav-logo img { height: 30px; }
+.topnav.nav-shrunk .nav-logo,
+.topnav.nav-shrunk .nav-right { height: 50px; }
+
+/* Theme toggle button (in nav-right) */
+.theme-toggle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--muted);
+    transition: all 0.15s;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--accent); }
+
+/* Mobile nav stack */
+@media (max-width: 720px) {
+    .topnav { padding: 0 18px; flex-wrap: wrap; min-height: auto; }
+    .nav-logo { height: 56px; flex: 1; }
+    .nav-right { height: 56px; order: 1; }
+}
+@media (max-width: 520px) { .topnav { padding: 0 16px; } }
+
+
+/* ==========================================================================
+   6. TOP-NAV CTAs (outside-page action buttons in the nav)
+   ========================================================================== */
+.nav-ctas { display: flex; align-items: center; gap: 12px; }
+.nav-cta {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 10px 22px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.nav-cta-primary {
+    background: var(--accent);
+    color: #000;
+    margin-left: 40px;
+}
+.nav-cta-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    border: 1px solid rgba(0, 229, 255, 0.25);
+}
+.nav-cta-secondary:hover {
+    background: rgba(0, 229, 255, 0.12);
+    border-color: rgba(0, 229, 255, 0.5);
+}
+.nav-cta-primary:hover {
+    background: #1ce6ff;
+    box-shadow: 0 0 24px rgba(0, 229, 255, 0.4);
+}
+@media (max-width: 1100px) {
+    .nav-cta-secondary { display: none; }
+    .nav-cta-primary { margin-left: 0; }
+}
+
+/* Light-mode nav adjustments */
+body[data-theme="light"] .topnav {
+    background: #FFFFFF !important;
+    border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+}
+body[data-theme="light"] .nav-cta-secondary {
+    background: rgba(8, 145, 178, 0.05);
+    border-color: rgba(8, 145, 178, 0.4);
+}
+body[data-theme="light"] .nav-cta-secondary:hover {
+    background: rgba(8, 145, 178, 0.12);
+    border-color: rgba(8, 145, 178, 0.6);
+}
+
+
+/* ==========================================================================
+   7. LP PRIMITIVES — shared section-header building blocks
+   lp-wrap / lp-section / lp-eye / lp-title / lp-sub
+   ========================================================================== */
+.lp-wrap { margin: 0; padding: 0 clamp(24px, 5vw, 64px); }
+
+.lp-section {
+    padding: var(--lp-section-y) 0 !important;
+    position: relative;
+}
+.lp-section + .lp-section { border-top: 1px solid var(--lp-rule); }
+
+/* Anchors land below the sticky nav */
+[id^="section-"] { scroll-margin-top: 80px; }
+
+/* Section reveal animation (lazy-loaded sections from card clicks) */
+.section-reveal { animation: section-reveal 0.45s ease-out; }
+@keyframes section-reveal {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.lp-eye {
+    font-family: 'Antonio', 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+.lp-eye::before {
+    content: '';
+    display: inline-block;
+    width: 28px;
+    height: 1px;
+    background: var(--accent);
+}
+
+.lp-title {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    line-height: 1.04;
+    font-size: clamp(30px, 4.4vw, 52px);
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 16px;
+}
+
+/* Unified italic Fraunces highlight inside titles */
+.lp-title .accent,
+.lp-title .gold,
+.lp-title .challenge-word,
+.lp-title em {
+    font-family: 'Fraunces', 'Garet W05 Bold', serif;
+    font-style: italic;
+    font-weight: 700;
+    padding-right: 0.04em;
+}
+.lp-title .accent,
+.lp-title em.accent { color: var(--accent); }
+.lp-title .gold,
+.lp-title em.gold { color: var(--lp-gold); }
+.lp-title .challenge-word { color: var(--lp-gold); }
+
+.lp-sub {
+    font-size: clamp(15px, 1.4vw, 18px);
+    color: var(--lp-muted);
+    line-height: 1.6;
+    max-width: 720px;
+}
+
+
+/* ==========================================================================
+   8. LP HERO (shared by both outside pages — home-outside & Freemium)
+   ========================================================================== */
+.lp-hero {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--lp-rule);
+}
+.lp-hero-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    min-height: 400px;        /* Freemium uses 480, home-outside uses 520; */
+}                              /* the larger floor still works for both. */
+.lp-hero-text {
+    padding: 52px clamp(24px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+.lp-hero-eye {
+    font-family: 'Antonio', 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+.lp-hero-eye::before {
+    content: '';
+    width: 36px;
+    height: 1px;
+    background: var(--accent);
+}
+.lp-hero h1 {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    /* Range covers both pages: Freemium 36-60, home-outside 36-68 */
+    font-size: clamp(26px, 3.2vw, 40px);
+    line-height: 1.0;
+    letter-spacing: -0.018em;
+    color: var(--text);
+    margin-bottom: 22px;
+}
+.lp-hero h1 em {
+    font-family: 'Fraunces', 'Garet W05 Bold', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--accent);
+    padding-right: 0.08em;
+}
+.lp-hero p {
+    font-size: clamp(15px, 1.4vw, 19px);
+    line-height: 1.55;
+    color: var(--lp-muted);
+    max-width: 520px;
+    margin-bottom: 32px;
+}
+.lp-hero p strong { color: var(--text); font-weight: 700; }
+
+/* Hero stats row (home-outside) */
+.lp-hero-stats {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding-top: 24px;
+    border-top: 1px solid var(--lp-rule);
+    max-width: 560px;
+}
+.lp-hero-stat { display: flex; flex-direction: column; }
+.lp-hero-stat-num {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 600;
+    font-size: clamp(38px, 3.8vw, 48px);
+    line-height: 1;
+    color: var(--lp-gold);
+    margin-bottom: 8px;
+}
+.lp-hero-stat-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--lp-faint);
+}
+
+/* Hero image columns */
+.lp-hero-image {
+    /* Home-outside hero image — Freemium overrides this in markup or by class. */
+    background: url('https://ute-t7academy.github.io/Assets/Home_Hero_Pic.png') center/cover no-repeat;
+    position: relative;
+}
+.lp-hero-image.lp-hero-image-challenges {
+    background-image: url('https://ute-t7academy.github.io/Assets/Challenges_Hero_Pic.png');
+}
+.lp-hero-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(8, 15, 30, 0.65) 0%, rgba(8, 15, 30, 0.15) 30%, transparent 60%);
+}
+body[data-theme="light"] .lp-hero-image::after {
+    background: linear-gradient(90deg, rgba(232, 237, 243, 0.55) 0%, rgba(232, 237, 243, 0.15) 30%, transparent 60%) !important;
+}
+
+@media (max-width: 880px) {
+    .lp-hero-grid { grid-template-columns: 1fr; min-height: auto; }
+    .lp-hero-image { height: 280px; order: -1; }
+    .lp-hero-text { padding: 48px 24px; }
+}
+
+
+/* ==========================================================================
+   9. LP CLOSER (shared call-to-action section at the bottom of both pages)
+   ========================================================================== */
+.lp-closer {
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 229, 255, 0.04) 100%);
+}
+.lp-closer-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+}
+@media (max-width: 880px) {
+    .lp-closer-grid { grid-template-columns: 1fr; gap: 32px; }
+    .lp-closer-ctas { align-items: flex-start; }
+}
+.lp-closer .lp-title {
+    font-size: clamp(28px, 5vw, 56px);   /* Covers both pages' ranges */
+    max-width: 700px;
+    margin-bottom: 18px;
+}
+.lp-closer-sub {
+    font-size: clamp(16px, 1.4vw, 19px);
+    color: var(--lp-muted);
+    line-height: 1.55;
+    max-width: 580px;
+    margin-bottom: 0;
+}
+.lp-closer-ctas {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: stretch;
+}
+.lp-closer-cta {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 16px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.18s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+}
+.lp-closer-primary {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 8px 24px rgba(0, 229, 255, 0.35);
+}
+.lp-closer-primary:hover {
+    background: #1ce6ff;
+    transform: translateY(-2px);
+}
+.lp-closer-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    border: 1px solid rgba(0, 229, 255, 0.25);
+}
+.lp-closer-secondary:hover {
+    background: rgba(0, 229, 255, 0.1);
+    border-color: rgba(0, 229, 255, 0.5);
+}
+body[data-theme="light"] .lp-closer-secondary {
+    background: rgba(8, 145, 178, 0.05);
+    border-color: rgba(8, 145, 178, 0.4);
+}
+body[data-theme="light"] .lp-closer-secondary:hover {
+    background: rgba(8, 145, 178, 0.12);
+    border-color: rgba(8, 145, 178, 0.6);
+}
+
+
+/* ==========================================================================
+   10. HOME-OUTSIDE — ALUMNI ROLL
+   ========================================================================== */
+.lp-alumni-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+}
+@media (max-width: 880px) {
+    .lp-alumni-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+.alumni-roll {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.4em;
+    row-gap: 0.35em;
+    letter-spacing: -0.02em;
+    font-size: clamp(19px, 2.8vw, 36px);
+}
+.alumni-name {
+    color: var(--text);
+    position: relative;
+    transition: transform 0.3s ease;
+}
+.alumni-name:hover { transform: translateY(-4px); }
+.alumni-name .place {
+    display: block;
+    font-style: normal;
+    font-family: 'Antonio', 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 0.25em;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lp-faint);
+    margin-top: 0.5em;
+    line-height: 1;
+}
+.alumni-name.c1 { color: var(--accent); }
+.alumni-name.c2 { color: var(--lp-gold); }
+.alumni-name.c3 {
+    color: var(--text);
+}
+.alumni-name.size-sm,
+.alumni-name.size-md { font-size: 0.95em; }
+.alumni-dot {
+    color: var(--lp-gold);
+    font-weight: 400;
+    opacity: 0.5;
+    font-size: 0.5em;
+    line-height: 1;
+    transform: translateY(-0.3em);
+    display: inline-block;
+}
+
+
+/* ==========================================================================
+   11. HOME-OUTSIDE — THEORY (two cards: freestyle + street)
+   ========================================================================== */
+.lp-theory-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 12px;
+}
+@media (max-width: 880px) { .lp-theory-grid { grid-template-columns: 1fr; } }
+
+.lp-theory-card {
+    background: transparent;
+    padding: 12px 4px 24px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.lp-theory-card.t-freestyle { --theory-c1: #00E5FF; --theory-c2: #A855F7; }
+.lp-theory-card.t-street    { --theory-c1: var(--lp-brazil); --theory-c2: var(--lp-green); }
+body[data-theme="light"] .lp-theory-card.t-freestyle { --theory-c1: #0891B2; }
+
+.lp-theory-num {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--theory-c1);
+    margin-bottom: 14px;
+}
+.lp-theory-h {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+.lp-theory-h em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--theory-c1);
+}
+.lp-theory-tags {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--lp-faint);
+    margin-bottom: 14px;
+}
+.lp-theory-body {
+    font-size: 14px;
+    color: var(--lp-muted);
+    line-height: 1.55;
+    margin-bottom: 18px;
+}
+.lp-theory-body strong { color: var(--text); font-weight: 700; }
+.lp-theory-pull {
+    border-left: 3px solid var(--theory-c1);
+    padding: 4px 0 4px 14px;
+    margin: auto 0 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.4;
+}
+.lp-theory-vids { display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+.lp-theory-vid {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    text-decoration: none;
+    transition: transform 0.18s;
+    border-bottom: 1px solid var(--lp-rule);
+}
+.lp-theory-vid:last-child { border-bottom: none; }
+.lp-theory-vid:hover { transform: translateX(3px); }
+.lp-theory-play {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--theory-c1);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+.lp-theory-vl { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+.lp-theory-vm {
+    font-family: 'Antonio', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--lp-faint);
+}
+
+
+/* ==========================================================================
+   12. HOME-OUTSIDE — HOW IT WORKS (three steps)
+   ========================================================================== */
+.lp-how-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+    margin-top: 12px;
+    position: relative;
+}
+@media (max-width: 880px) { .lp-how-grid { grid-template-columns: 1fr; } }
+
+.lp-how-step {
+    background: transparent;
+    padding: 12px 4px 24px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.lp-how-step.s-1 { --s-c: var(--accent); }
+.lp-how-step.s-2 { --s-c: var(--lp-gold); }
+.lp-how-step.s-3 { --s-c: var(--lp-green); }
+.lp-how-eye {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--s-c);
+    margin-bottom: 14px;
+}
+.lp-how-step-h {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+.lp-how-step-body {
+    font-size: 14px;
+    color: var(--lp-muted);
+    line-height: 1.55;
+}
+.lp-how-step-body strong { color: var(--text); }
+
+
+/* ==========================================================================
+   13. HOME-OUTSIDE — PROGRAMS GRID (minis / sevens / sterne / challenges)
+   ========================================================================== */
+.lp-prog-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 12px;
+}
+@media (max-width: 1000px) { .lp-prog-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px)  { .lp-prog-grid { grid-template-columns: 1fr; } }
+
+.lp-prog {
+    background: transparent;
+    padding: 12px 4px 24px;
+    text-decoration: none;
+    position: relative;
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+.lp-prog:hover { transform: translateY(-2px); }
+.lp-prog.p-minis      { --p-c: var(--lp-red); }
+.lp-prog.p-sevens     { --p-c: var(--accent); }
+.lp-prog.p-sterne     { --p-c: var(--lp-gold); }
+.lp-prog.p-challenges { --p-c: #1bcb26; }
+body[data-theme="light"] .lp-prog.p-challenges { --p-c: #15803D; }
+
+.lp-prog-age {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--p-c);
+    margin-bottom: 14px;
+}
+.lp-prog-icon {
+    font-size: 40px;
+    line-height: 1;
+    margin-bottom: 14px;
+}
+.lp-prog-h {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+.lp-prog-tag {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--lp-faint);
+    margin-bottom: 14px;
+}
+.lp-prog-desc {
+    font-size: 14px;
+    color: var(--lp-muted);
+    line-height: 1.55;
+    margin-bottom: 18px;
+    flex: 1;
+}
+.lp-prog-link {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--p-c);
+    margin-top: auto;
+}
+.lp-prog-link::after { content: ' →'; }
+
+
+/* ==========================================================================
+   14. FREEMIUM — NAME SETUP + PLAYER STATS (in the hero)
+   ========================================================================== */
+.name-setup {
+    display: flex;
+    gap: 10px;
+    max-width: 480px;
+    margin-top: 6px;
+}
+.name-input {
+    flex: 1;
+    padding: 13px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.18s, background 0.18s;
+}
+.name-input:focus {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.08);
+}
+.name-input::placeholder { color: var(--lp-faint); }
+body[data-theme="light"] .name-input {
+    background: rgba(8, 145, 178, 0.05);
+    border-color: rgba(8, 145, 178, 0.4);
+}
+body[data-theme="light"] .name-input:focus {
+    border-color: var(--accent);
+    background: rgba(8, 145, 178, 0.08);
+}
+.name-save {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 13px 22px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+}
+.name-save:hover {
+    background: #1ce6ff;
+    box-shadow: 0 0 24px rgba(0, 229, 255, 0.4);
+}
+
+.player-stats {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+.xp-badge {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 12px 22px;
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 10px;
+}
+body[data-theme="light"] .xp-badge {
+    background: rgba(202, 131, 9, 0.08);
+    border-color: rgba(202, 131, 9, 0.4);
+}
+.xp-num {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--lp-gold);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.xp-num.pop { transform: scale(1.25); }
+.xp-label {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lp-faint);
+}
+.change-name {
+    background: none;
+    border: none;
+    color: var(--lp-muted);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: rgba(127, 127, 127, 0.4);
+    text-underline-offset: 3px;
+    padding: 0;
+}
+.change-name:hover { color: var(--text); }
+
+
+/* ==========================================================================
+   15. FREEMIUM — OVERVIEW CARDS (three cards: stars / sevens / challenge)
+   ========================================================================== */
+.section-overview { border-bottom: 1px solid var(--lp-rule); }
+
+.overview-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 4px;
+}
+@media (max-width: 880px) {
+    .overview-cards { grid-template-columns: 1fr; gap: 16px; }
+}
+
+.overview-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 26px 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--lp-rule);
+    border-radius: 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    min-height: 220px;
+    cursor: pointer;
+}
+.overview-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 229, 255, 0.45);
+    background: rgba(0, 229, 255, 0.04);
+    box-shadow: 0 10px 30px rgba(0, 229, 255, 0.10);
+}
+.overview-card.is-active {
+    border-color: rgba(0, 229, 255, 0.6);
+    background: rgba(0, 229, 255, 0.07);
+}
+
+/* Challenge card variant (gold accent) */
+.overview-card-challenge {
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.05) 0%, rgba(228, 0, 43, 0.025) 100%);
+    border-color: rgba(255, 215, 0, 0.22);
+}
+.overview-card-challenge:hover {
+    border-color: rgba(255, 215, 0, 0.55);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.09) 0%, rgba(228, 0, 43, 0.04) 100%);
+    box-shadow: 0 12px 32px rgba(255, 215, 0, 0.16);
+}
+.overview-card-challenge.is-active {
+    border-color: rgba(255, 215, 0, 0.7);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.13) 0%, rgba(228, 0, 43, 0.06) 100%);
+}
+
+/* Light-mode overview cards — solid white surfaces */
+body[data-theme="light"] .overview-card {
+    background: #FFFFFF;
+    border-color: rgba(15, 23, 42, 0.10);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+body[data-theme="light"] .overview-card:hover {
+    background: #FFFFFF;
+    border-color: rgba(8, 145, 178, 0.55);
+    box-shadow: 0 10px 26px rgba(8, 145, 178, 0.14);
+}
+body[data-theme="light"] .overview-card.is-active {
+    border-color: rgba(8, 145, 178, 0.7);
+    background: rgba(8, 145, 178, 0.05);
+}
+body[data-theme="light"] .overview-card-challenge {
+    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 215, 0, 0.06) 100%);
+    border-color: rgba(202, 131, 9, 0.32);
+}
+body[data-theme="light"] .overview-card-challenge:hover {
+    border-color: rgba(202, 131, 9, 0.6);
+    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 215, 0, 0.12) 100%);
+    box-shadow: 0 12px 30px rgba(202, 131, 9, 0.18);
+}
+body[data-theme="light"] .overview-card-challenge.is-active {
+    border-color: rgba(202, 131, 9, 0.75);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 215, 0, 0.14) 100%);
+}
+
+/* Cyan accent unreadable on white — swap to the darker home-outside light cyan */
+body[data-theme="light"] .overview-step,
+body[data-theme="light"] .overview-tag,
+body[data-theme="light"] .overview-arrow,
+body[data-theme="light"] .overview-title em {
+    color: #0891B2;
+}
+/* Challenge card keeps its gold in light mode */
+body[data-theme="light"] .overview-card-challenge .overview-step,
+body[data-theme="light"] .overview-card-challenge .overview-tag,
+body[data-theme="light"] .overview-card-challenge .overview-arrow,
+body[data-theme="light"] .overview-card-challenge .overview-title em {
+    color: var(--lp-gold);
+}
+
+.overview-step {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 600;
+    font-size: 28px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 14px;
+    opacity: 0.55;
+}
+.overview-card-challenge .overview-step { color: var(--lp-gold); opacity: 0.75; }
+
+.overview-tag {
+    font-family: 'Antonio', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.overview-card-challenge .overview-tag {
+    color: var(--lp-gold);
+    font-weight: 700;
+    letter-spacing: 0.20em;
+}
+
+.overview-title {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    font-size: clamp(20px, 1.8vw, 24px);
+    color: var(--text);
+    margin: 0 0 10px;
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+}
+.overview-title em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--accent);
+    padding-right: 0.04em;
+}
+.overview-card-challenge .overview-title em { color: var(--lp-gold); }
+
+.overview-desc {
+    font-size: 14px;
+    color: var(--lp-muted);
+    line-height: 1.45;
+    margin: 0 0 16px;
+    flex-grow: 1;
+}
+.overview-arrow {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    transition: transform 0.2s ease;
+    align-self: flex-start;
+}
+.overview-card-challenge .overview-arrow { color: var(--lp-gold); }
+.overview-card:hover .overview-arrow { transform: translateX(4px); }
+
+
+/* ==========================================================================
+   16. FREEMIUM — VIDEO GRID (stars + sevens listings)
+   ========================================================================== */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    margin-top: 16px;
+}
+@media (max-width: 1100px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 680px)  { .video-grid { grid-template-columns: 1fr; } }
+
+.video-card { display: flex; flex-direction: column; gap: 12px; }
+
+.video-thumb {
+    display: block;
+    position: relative;
+    aspect-ratio: 16/9;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+body[data-theme="light"] .video-thumb { background: rgba(15, 23, 42, 0.06); }
+.video-thumb:hover { transform: translateY(-2px); }
+.video-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.video-thumb-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(168, 85, 247, 0.18));
+    font-size: 52px;
+    color: rgba(255, 255, 255, 0.7);
+}
+body[data-theme="light"] .video-thumb-placeholder {
+    background: linear-gradient(135deg, rgba(8, 145, 178, 0.18), rgba(168, 85, 247, 0.12));
+    color: rgba(15, 23, 42, 0.45);
+}
+
+.video-meta { padding: 0 2px; display: flex; flex-direction: column; gap: 6px; }
+.video-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.video-title-row .video-title { flex: 1 1 auto; min-width: 0; margin: 0; }
+.video-title-row .video-tag { flex: 0 0 auto; }
+.video-tag {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 229, 255, 0.25);
+    background: rgba(0, 229, 255, 0.06);
+    white-space: nowrap;
+}
+body[data-theme="light"] .video-tag {
+    background: rgba(8, 145, 178, 0.06);
+    border-color: rgba(8, 145, 178, 0.25);
+}
+.video-title {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    color: var(--text);
+    line-height: 1.3;
+    margin: 0;
+}
+
+.grid-status {
+    padding: 32px 0;
+    color: var(--lp-muted);
+    font-size: 14px;
+}
+.grid-status.error { color: var(--lp-red); }
+
+
+/* ==========================================================================
+   17. FREEMIUM — SKILL PATH (challenge section)
+   ========================================================================== */
+.skill-path {
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+}
+.skill-node {
+    display: flex;
+    gap: 0;
+    position: relative;
+    min-height: 130px;
+}
+.skill-node-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    flex-shrink: 0;
+}
+.skill-node-marker {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a2540 0%, #0b1220 100%);
+    border: 2px solid var(--lp-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--lp-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.18);
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+body[data-theme="light"] .skill-node-marker {
+    background: linear-gradient(135deg, #FFF7E0 0%, #FFFFFF 100%);
+}
+.skill-node.practiced .skill-node-marker {
+    background: linear-gradient(135deg, var(--lp-gold) 0%, var(--lp-gold-deep) 100%);
+    color: #1a1500;
+    box-shadow: 0 0 28px rgba(255, 215, 0, 0.5);
+}
+.skill-node-check {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 22px;
+    height: 22px;
+    background: var(--lp-green);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    border: 2px solid #0b1220;
+}
+body[data-theme="light"] .skill-node-check { border-color: #FFFFFF; }
+.skill-node-line {
+    flex: 1;
+    width: 3px;
+    background: linear-gradient(180deg, var(--lp-gold), rgba(255, 215, 0, 0.25));
+    border-radius: 3px;
+    margin-top: -2px;
+    min-height: 30px;
+    opacity: 0.6;
+}
+
+.skill-node-card {
+    flex: 1;
+    background: rgba(255, 215, 0, 0.04);
+    border: 1px solid rgba(255, 215, 0, 0.22);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 18px;
+    margin-bottom: 18px;
+    transition: all 0.2s;
+    position: relative;
+    align-items: center;
+}
+body[data-theme="light"] .skill-node-card {
+    background: rgba(202, 131, 9, 0.05);
+    border-color: rgba(202, 131, 9, 0.35);
+}
+.skill-node-card:hover {
+    border-color: rgba(255, 215, 0, 0.55);
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.15);
+    transform: translateX(3px);
+}
+.skill-node.practiced .skill-node-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.07) 0%, rgba(255, 215, 0, 0.03) 100%);
+    border-color: rgba(255, 215, 0, 0.4);
+}
+
+.skill-node-thumb {
+    width: 160px;
+    flex-shrink: 0;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    position: relative;
+    border: 1px solid rgba(255, 215, 0, 0.18);
+}
+.skill-node-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+.skill-node-thumb:hover img { transform: scale(1.05); }
+.skill-node-thumb-ph {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: rgba(255, 215, 0, 0.5);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(228, 0, 43, 0.05));
+}
+.skill-node-play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.0);
+    transition: background 0.2s ease;
+}
+.skill-node-play-overlay::after {
+    content: '▶';
+    color: white;
+    font-size: 32px;
+    opacity: 0;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+    transition: opacity 0.2s ease;
+}
+.skill-node-thumb:hover .skill-node-play-overlay { background: rgba(0, 0, 0, 0.35); }
+.skill-node-thumb:hover .skill-node-play-overlay::after { opacity: 1; }
+
+.skill-node-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.skill-node-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.skill-node-title-row .skill-node-title { flex: 1 1 auto; min-width: 0; margin: 0; }
+.skill-node-title-row .skill-node-tag { flex: 0 0 auto; }
+.skill-node-tag {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    background: rgba(255, 215, 0, 0.08);
+    white-space: nowrap;
+}
+body[data-theme="light"] .skill-node-tag {
+    background: rgba(202, 131, 9, 0.08);
+    border-color: rgba(202, 131, 9, 0.4);
+}
+.skill-node-title {
+    font-family: 'Garet W05 Bold', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    color: var(--text);
+    margin: 0 0 8px;
+    line-height: 1.2;
+}
+.skill-node-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.skill-btn {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+.skill-btn-watch {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    border: 1px solid var(--lp-rule);
+}
+body[data-theme="light"] .skill-btn-watch { background: rgba(15, 23, 42, 0.04); }
+.skill-btn-watch:hover {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.4);
+    color: var(--lp-gold);
+}
+.skill-btn-xp {
+    background: linear-gradient(135deg, var(--lp-gold) 0%, var(--lp-gold-deep) 100%);
+    color: #1a1500;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.25);
+}
+.skill-btn-xp:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(255, 215, 0, 0.4);
+}
+.skill-btn-xp:active { transform: translateY(0); }
+.skill-btn-xp.bump { animation: btn-bump 0.3s ease; }
+
+/* INVERSE-PROMINENCE before first practice ---------------------------------
+   Before the user has practiced a node, the "Noch nicht geübt" label is the
+   prominent badge (gold pill) and "+25 XP" steps back to a quiet style.
+   After first practice the rule inverts. */
+.skill-node:not(.practiced) .skill-btn-xp {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--lp-muted);
+    border: 1px solid var(--lp-rule);
+    box-shadow: none;
+    font-weight: 500;
+}
+.skill-node:not(.practiced) .skill-btn-xp:hover {
+    background: rgba(255, 215, 0, 0.10);
+    color: var(--lp-gold);
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.15);
+    transform: translateY(-1px);
+}
+body[data-theme="light"] .skill-node:not(.practiced) .skill-btn-xp {
+    background: rgba(15, 23, 42, 0.04);
+    color: var(--lp-muted);
+    border-color: rgba(15, 23, 42, 0.12);
+}
+body[data-theme="light"] .skill-node:not(.practiced) .skill-btn-xp:hover {
+    background: rgba(202, 131, 9, 0.10);
+    color: var(--lp-gold);
+    border-color: rgba(202, 131, 9, 0.5);
+}
+
+.skill-node:not(.practiced) .skill-node-count {
+    color: var(--lp-gold);
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid rgba(255, 215, 0, 0.45);
+    padding: 5px 11px;
+    border-radius: 99px;
+    margin-left: 0;
+}
+body[data-theme="light"] .skill-node:not(.practiced) .skill-node-count {
+    color: var(--lp-gold);
+    background: rgba(202, 131, 9, 0.12);
+    border-color: rgba(202, 131, 9, 0.5);
+}
+
+@keyframes btn-bump {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+.skill-node-count {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    color: var(--lp-faint);
+    margin-left: 6px;
+}
+.skill-node.practiced .skill-node-count { color: var(--lp-gold); }
+
+/* Progress strip at the top of the skill path */
+.skill-path-progress {
+    margin-top: 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    border-radius: 999px;
+    max-width: 520px;
+}
+body[data-theme="light"] .skill-path-progress {
+    background: rgba(202, 131, 9, 0.10);
+    border-color: rgba(202, 131, 9, 0.45);
+}
+.skill-path-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 215, 0, 0.12);
+    border-radius: 999px;
+    overflow: hidden;
+}
+body[data-theme="light"] .skill-path-bar { background: rgba(202, 131, 9, 0.18); }
+.skill-path-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lp-gold), var(--lp-red));
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+body[data-theme="light"] .skill-path-bar-fill {
+    background: linear-gradient(90deg, #a06a08, #9F1239);
+}
+.skill-path-stats {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--lp-gold);
+    white-space: nowrap;
+}
+body[data-theme="light"] .skill-path-stats { color: #a06a08; }
+.skill-path-stats strong { font-size: 18px; font-weight: 700; }
+
+/* Floating +XP feedback (positioned via JS at the moment of award) */
+.xp-fly {
+    position: fixed;
+    z-index: 99999;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--lp-gold);
+    text-shadow: 0 0 16px rgba(255, 215, 0, 0.8);
+    pointer-events: none;
+    will-change: transform, opacity;
+    transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.9s ease-out;
+}
+
+@media (max-width: 680px) {
+    .skill-node-rail { width: 60px; }
+    .skill-node-marker { width: 44px; height: 44px; font-size: 18px; }
+    .skill-node-card {
+        flex-direction: column;
+        gap: 12px;
+        padding: 14px;
+        align-items: stretch;
+    }
+    .skill-node-thumb { width: 100%; }
+}
+
+
+/* ==========================================================================
+   18. FREEMIUM — CHALLENGE SECTION BACKGROUND (gold/red atmosphere)
+   ========================================================================== */
+.lp-section-challenge {
+    position: relative;
+    background:
+        radial-gradient(ellipse at top, rgba(255, 215, 0, 0.07) 0%, transparent 55%),
+        linear-gradient(180deg, rgba(228, 0, 43, 0.04) 0%, transparent 100%);
+    border-top: none !important;
+}
+.lp-section-challenge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--lp-gold) 20%, var(--lp-red) 50%, var(--lp-gold) 80%, transparent 100%);
+}
+body[data-theme="light"] .lp-section-challenge {
+    background:
+        radial-gradient(ellipse at top, rgba(202, 131, 9, 0.10) 0%, transparent 55%),
+        linear-gradient(180deg, rgba(190, 18, 60, 0.04) 0%, transparent 100%);
+}
+
+.lp-eye-challenge {
+    color: var(--lp-gold) !important;
+    font-weight: 700;
+    letter-spacing: 0.26em;
+}
+.lp-eye-challenge::before {
+    background: linear-gradient(90deg, var(--lp-gold), var(--lp-red)) !important;
+    width: 40px !important;
+    height: 2px !important;
+}
+.lp-eye-challenge .challenge-icon {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+    margin-right: 2px;
+}
+
+
+/* ==========================================================================
+   19. FREEMIUM — SECTION HEAD (back button + eyebrow on one row)
+   ========================================================================== */
+.section-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.section-head .lp-eye { margin: 0; }
+
+.section-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 229, 255, 0.18);
+    border: 1.5px solid rgba(0, 229, 255, 0.55);
+    color: var(--accent);
+    padding: 8px 16px;
+    border-radius: 99px;
+    font-family: 'Antonio', 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin: 0;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.section-back:hover {
+    background: rgba(0, 229, 255, 0.28);
+    border-color: rgba(0, 229, 255, 0.8);
+    box-shadow: 0 4px 14px rgba(0, 229, 255, 0.18);
+    transform: translateX(-3px);
+}
+body[data-theme="light"] .section-back {
+    background: rgba(8, 145, 178, 0.10);
+    border-color: rgba(8, 145, 178, 0.55);
+    color: #0891B2;
+}
+body[data-theme="light"] .section-back:hover {
+    background: rgba(8, 145, 178, 0.18);
+    border-color: rgba(8, 145, 178, 0.8);
+    box-shadow: 0 4px 14px rgba(8, 145, 178, 0.18);
+}
+
+/* Gold back button inside the challenge section */
+.lp-section-challenge .section-back {
+    background: rgba(255, 215, 0, 0.14);
+    border-color: rgba(255, 215, 0, 0.55);
+    color: var(--lp-gold);
+}
+.lp-section-challenge .section-back:hover {
+    background: rgba(255, 215, 0, 0.24);
+    border-color: rgba(255, 215, 0, 0.8);
+    box-shadow: 0 4px 14px rgba(255, 215, 0, 0.20);
+}
+body[data-theme="light"] .lp-section-challenge .section-back {
+    background: rgba(202, 131, 9, 0.12);
+    border-color: rgba(202, 131, 9, 0.55);
+    color: var(--lp-gold);
+}
+body[data-theme="light"] .lp-section-challenge .section-back:hover {
+    background: rgba(202, 131, 9, 0.22);
+    border-color: rgba(202, 131, 9, 0.8);
+    box-shadow: 0 4px 14px rgba(202, 131, 9, 0.18);
+}
+
+
+/* ==========================================================================
+   20. FREEMIUM — VIDEO SUBTITLES (so_what → ultimate_goal)
+   Shown under each video title in the grid + skill nodes, and below the
+   modal title when a video is opened. Cyan accent in normal sections,
+   gold inside the challenge section.
+   ========================================================================== */
+.video-subtitles,
+.skill-node-subtitles {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--lp-muted);
+    margin-top: 2px;
+}
+.skill-node-subtitles { margin: 0 0 8px; }
+.vsub-so-what {
+    font-family: 'Fraunces', 'Garet W05 Bold', serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--accent);
+}
+body[data-theme="light"] .vsub-so-what { color: #0891B2; }
+.lp-section-challenge .vsub-so-what,
+.skill-node-subtitles .vsub-so-what,
+.fm-modal-subtitles .vsub-so-what { color: var(--lp-gold); }
+.vsub-goal { color: var(--lp-muted); font-weight: 600; }
+.vsub-arrow { color: var(--lp-faint); font-weight: 600; }
+
+
+/* ==========================================================================
+   21. FREEMIUM — VIDEO MODAL
+   ========================================================================== */
+.fm-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.fm-modal.open { display: flex; }
+.fm-modal-inner {
+    background: var(--surface, #0b1220);
+    border: 1px solid var(--lp-rule);
+    border-radius: 14px;
+    max-width: 920px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 20px;
+    position: relative;
+}
+body[data-theme="light"] .fm-modal-inner {
+    background: #FFFFFF;
+    border-color: rgba(15, 23, 42, 0.12);
+}
+.fm-modal-back {
+    background: transparent;
+    border: 1px solid var(--lp-rule);
+    color: var(--text);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 14px;
+}
+.fm-modal-back:hover { border-color: var(--accent); color: var(--accent); }
+
+.fm-video-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.fm-video-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+.fm-modal-title {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--text);
+    margin: 16px 0 8px;
+}
+.fm-modal-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+.fm-meta-tag {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    color: var(--accent);
+}
+body[data-theme="light"] .fm-meta-tag {
+    background: rgba(8, 145, 178, 0.08);
+    border-color: rgba(8, 145, 178, 0.3);
+    color: #0891B2;
+}
+
+/* Modal subtitle row + Ablauf playerhint */
+.fm-modal-subtitles {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
+    color: var(--lp-muted);
+    margin: -4px 0 12px;
+}
+.fm-modal-subtitles .vsub-arrow { font-size: 18px; }
+
+.fm-modal-hint {
+    margin-top: 18px;
+    padding: 16px 18px 12px;
+    background: rgba(0, 229, 255, 0.05);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+}
+body[data-theme="light"] .fm-modal-hint {
+    background: rgba(8, 145, 178, 0.05);
+    border-left-color: #0891B2;
+}
+.fm-hint-label {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+body[data-theme="light"] .fm-hint-label { color: #0891B2; }
+.fm-hint-list {
+    margin: 0;
+    padding-left: 22px;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.55;
+}
+.fm-hint-list li { margin: 6px 0; }
+.fm-hint-list li::marker { color: var(--accent); font-weight: 700; }
+body[data-theme="light"] .fm-hint-list li::marker { color: #0891B2; }
