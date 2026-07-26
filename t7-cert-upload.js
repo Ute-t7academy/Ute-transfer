@@ -151,8 +151,13 @@
 
   // ── Pre-check: pending submission ────────────────────────
   function checkExisting(stars, email){
+    // Scope the duplicate check to THIS profile, not the shared account
+    // email — otherwise a sibling on the same email (e.g. Ute) blocks Fynn.
+    var profileId = window.T7_PROFILE_ID || null;
     var url = SB_URL + '/rest/v1/certification_submissions'
-      + '?player_email=eq.' + encodeURIComponent(email)
+      + '?' + (profileId
+          ? 'profile_id=eq.' + encodeURIComponent(profileId)
+          : 'player_email=eq.' + encodeURIComponent(email))
       + '&stars=eq.' + stars
       + '&status=eq.pending'
       + '&select=id,submitted_at';
@@ -375,6 +380,7 @@
       }),
       body: JSON.stringify({
         player_email:       email,
+        profile_id:         window.T7_PROFILE_ID || null,
         stars:              stars,
         video_path:         path,
         consent_confirmed:  true,
