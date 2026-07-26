@@ -567,8 +567,12 @@ function T7Cert(cfg){
     // Final-video submission: T7CertUpload fires 't7cert-submitted' on successful upload.
     window.addEventListener('t7cert-submitted',function(ev){
       if(ev&&ev.detail&&parseInt(ev.detail.stars,10)===parseInt(cfg.stars,10)){
+        // Upload only marks the submission as PENDING expert review.
+        // The star is granted server-side when the expert APPROVES the
+        // submission (certifications insert -> player_stats.stars). The
+        // client must never award the star itself, otherwise the badge
+        // shows "certified" the instant a video is uploaded.
         S.submitted=true;save();refresh();
-        if(S.id)T7SB.setStars(S.id,parseInt(cfg.stars,10));
       }
     });
     window.addEventListener('t7xpupdate',function(){if(S.id)T7SB.getTotalXP(S.id,function(t){S.sbTotal=t;updXP();});});
