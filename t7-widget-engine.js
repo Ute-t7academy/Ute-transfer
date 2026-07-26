@@ -77,16 +77,23 @@ var T7SB={
     .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length&&typeof rows[0].total_xp==='number'?rows[0].total_xp:0);}).catch(function(){cb(0);});
   },
   getStats:function(id,cb){
-    fetch(T7_SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(id)+'&select=total_xp,stars,stars_awarded_at,player_profiles(first_name)',{headers:this._hdr()})
+    fetch(T7_SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(id)+'&select=total_xp,stars,stars_awarded_at,stars_note,player_profiles(first_name)',{headers:this._hdr()})
     .then(function(r){return r.json();}).then(function(rows){
       var row=rows&&rows.length?rows[0]:null;
       cb(row?{
         total_xp:Number(row.total_xp||0),
         stars:row.stars||null,
         stars_awarded_at:row.stars_awarded_at||null,
+        stars_note:row.stars_note||null,
         first_name:(row.player_profiles&&row.player_profiles.first_name)||null
       }:null);
     }).catch(function(){cb(null);});
+  },
+  /* Latest certification submission for this profile — used to show the
+     player their pending / rejected status and the expert's feedback. */
+  getLatestSubmission:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/certification_submissions?profile_id=eq.'+encodeURIComponent(id)+'&select=status,notes,stars,reviewed_at,submitted_at&order=submitted_at.desc&limit=1',{headers:this._hdr()})
+    .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length?rows[0]:null);}).catch(function(){cb(null);});
   },
   getStars:function(id,cb){
     fetch(T7_SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(id)+'&select=stars,stars_awarded_at',{headers:this._hdr()})
@@ -733,7 +740,8 @@ function T7Badge(containerId){
   cont.innerHTML='<div class="t7f-loading">Lade\u2026</div>';
   function starsHtml(){return '\u2b50';}
   function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
-  function showBadge(n,at,nm){
+  function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function showBadge(n,at,nm,note){
     cont.innerHTML='<div class="t7-cert">'+
       '<div class="t7-cert-top"></div>'+
       '<div class="t7-cert-bottom"></div>'+
@@ -746,12 +754,28 @@ function T7Badge(containerId){
       '<div class="t7-cert-line"></div>'+
       (nm?'<div class="t7-cert-name">'+nm+'</div>':'')+
       '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong>'+(at?' \u00b7 '+fmtDate(at):'')+'</div>'+
+      (note?'<div class="t7-cert-feedback" style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.45">\ud83d\udcac '+esc(note)+'</div>':'')+
     '</div>';
+  }
+  function showStatus(kind,title,msg){
+    var accent=kind==='rejected'?'#DC2626':'#00E5FF';
+    cont.innerHTML='<div class="t7f-status t7f-status-'+kind+'" style="padding:16px;border:1px solid '+accent+'55;border-left:3px solid '+accent+';border-radius:10px;background:rgba(255,255,255,.03)">'+
+      '<div class="t7f-status-title" style="font-weight:800;font-size:14px;color:'+accent+';margin-bottom:6px">'+esc(title)+'</div>'+
+      (msg?'<div class="t7f-status-msg" style="font-size:13px;color:rgba(255,255,255,.78);line-height:1.45">'+esc(msg)+'</div>':'')+'</div>';
   }
   function fetchBadge(id){
     T7SB.getStats(id,function(s){
-      if(s&&s.stars)showBadge(s.stars,s.stars_awarded_at,s.first_name);
-      else cont.innerHTML='<div class="t7f-empty">Noch kein Zertifikat.</div>';
+      if(s&&s.stars){showBadge(s.stars,s.stars_awarded_at,s.first_name,s.stars_note);return;}
+      // No star yet \u2014 surface the player's latest submission status + feedback.
+      T7SB.getLatestSubmission(id,function(sub){
+        if(sub&&sub.status==='pending'){
+          showStatus('pending','\u23f3 In Pr\u00fcfung','Dein Video wurde eingereicht. Der Experte pr\u00fcft es und du erh\u00e4ltst dein Zertifikat, sobald es best\u00e4tigt ist.');
+        }else if(sub&&sub.status==='rejected'){
+          showStatus('rejected','\u274c Nicht best\u00e4tigt',(sub.notes?sub.notes+' ':'')+'Bitte \u00fcberarbeite dein Video und reiche es erneut ein.');
+        }else{
+          cont.innerHTML='<div class="t7f-empty">Noch kein Zertifikat.</div>';
+        }
+      });
     });
   }
   T7Identity.resolve(function(id){if(id)fetchBadge(id);else cont.innerHTML='<div class="t7f-empty">Kein Spieler erkannt.</div>';});
@@ -817,11 +841,14 @@ function T7MobileSheet(){
       new Promise(function(res){T7SB.getAllAttempts(st.id,res);})
     ]).then(function(out){
       var s=out[0],att=out[1]||[];
-      if(s){st.totalXP=s.total_xp;st.stars=s.stars||0;st.starsAt=s.stars_awarded_at;if(s.first_name)st.name=s.first_name;}
+      if(s){st.totalXP=s.total_xp;st.stars=s.stars||0;st.starsAt=s.stars_awarded_at;st.starsNote=s.stars_note||null;if(s.first_name)st.name=s.first_name;}
       st.weekXP=calcWeekXP(att);st.streak=calcStreak(att);
       st.fortLoaded=true;st.certLoaded=true;updateFAB();
       if(st.open&&st.tab==='fort')$('t7-sheet-content').innerHTML=renderFort();
       if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();
+      // If not certified yet, pull the latest submission so the cert tab
+      // can show the player their pending / rejected status + feedback.
+      if(!st.stars){T7SB.getLatestSubmission(st.id,function(sub){st.sub=sub||null;if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();});}
     });
   }
   function loadRang(){
@@ -858,9 +885,16 @@ function T7MobileSheet(){
     }).join('');
     return '<div>'+rows+'</div>';
   }
+  function mEsc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function renderCert(){
     if(!st.certLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
-    if(!st.stars)return '<div class="t7m-empty">Noch kein Zertifikat. \u00dcbe weiter und reiche dein Final-Video ein!</div>';
+    if(!st.stars){
+      if(st.sub&&st.sub.status==='pending')
+        return '<div class="t7m-empty" style="border-left:3px solid #00E5FF;text-align:left;padding:16px"><div style="font-weight:800;color:#00E5FF;margin-bottom:6px">\u23f3 In Pr\u00fcfung</div>Dein Video wurde eingereicht. Du erh\u00e4ltst dein Zertifikat, sobald der Experte es best\u00e4tigt.</div>';
+      if(st.sub&&st.sub.status==='rejected')
+        return '<div class="t7m-empty" style="border-left:3px solid #DC2626;text-align:left;padding:16px"><div style="font-weight:800;color:#DC2626;margin-bottom:6px">\u274c Nicht best\u00e4tigt</div>'+(st.sub.notes?mEsc(st.sub.notes)+' ':'')+'Bitte \u00fcberarbeite dein Video und reiche es erneut ein.</div>';
+      return '<div class="t7m-empty">Noch kein Zertifikat. \u00dcbe weiter und reiche dein Final-Video ein!</div>';
+    }
     function starsHtml(){return '\u2b50';}
     function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:Date.parse(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
     return '<div class="t7-cert">'+
@@ -874,6 +908,7 @@ function T7MobileSheet(){
       '<div class="t7-cert-line"></div>'+
       '<div class="t7-cert-name">'+(st.name||'Spieler')+'</div>'+
       '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong>'+(st.starsAt?' \u00b7 '+fmtDate(st.starsAt):'')+'</div>'+
+      (st.starsNote?'<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.45">\ud83d\udcac '+mEsc(st.starsNote)+'</div>':'')+
     '</div>';
   }
 
