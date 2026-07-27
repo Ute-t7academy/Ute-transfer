@@ -140,7 +140,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
   background:url('https://ute-t7academy.github.io/Assets/Challenges_Hero_Pic.png') center/cover no-repeat;
   position:relative;
 }
-.hero-image.hero-stars{background-image:url('https://ute-t7academy.github.io/Assets/Stars_Hero_Pic.png');}
+.hero-image.hero-stars{background-image:url('https://ute-t7academy.github.io/Assets/Assets/Stars_Hero_Pic.png');}
 .hero-image.hero-sevens{background-image:url('https://ute-t7academy.github.io/Assets/Sevens_Hero_Pic.png');}
 /* Dark-mode overlay: dark navy bleed from the left of the image into the text column. */
 .hero-image::after{
@@ -850,7 +850,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .t7-cert-star-block{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px}
 .t7-cert-num{font-size:70px;font-weight:800;line-height:1;color:#FFD700;text-shadow:0 0 30px rgba(255,215,0,.5)}
 .t7-cert-stars{font-size:22px;line-height:1.3;filter:drop-shadow(0 0 8px rgba(255,215,0,.6))}
-.t7-cert-name{font-size:20px;font-weight:800;letter-spacing:.03em;color:#00E5FF;text-transform:uppercase;margin-bottom:5px;text-shadow:0 0 18px rgba(0,229,255,.6);word-break:break-word}
+.t7-cert-name{font-size:20px;font-weight:800;letter-spacing:.03em;color:#FFD700;text-transform:uppercase;margin-bottom:5px;text-shadow:0 0 18px rgba(255,215,0,.55);word-break:break-word}
 .t7-cert-official{font-size:10px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.04em;text-transform:uppercase;line-height:1.5}
 .t7-cert-official strong{color:#FFD700;font-weight:700}
 /* Light mode cert badge */
@@ -859,7 +859,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 [data-theme="light"] .t7-cert-line{opacity:.6}
 [data-theme="light"] .t7-cert-num{color:#ca8309;text-shadow:0 0 18px rgba(202,131,9,.3)}
 [data-theme="light"] .t7-cert-stars{filter:drop-shadow(0 0 6px rgba(202,131,9,.4))}
-[data-theme="light"] .t7-cert-name{color:#0891B2;text-shadow:0 0 14px rgba(8,145,178,.35)}
+[data-theme="light"] .t7-cert-name{color:#ca8309;text-shadow:0 0 14px rgba(202,131,9,.3)}
 [data-theme="light"] .t7-cert-official{color:rgba(15,23,42,.55)}
 [data-theme="light"] .t7-cert-official strong{color:#ca8309}
 .rl-header{text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(0,229,255,.1)}

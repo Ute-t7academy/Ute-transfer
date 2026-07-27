@@ -95,6 +95,12 @@ var T7SB={
     fetch(T7_SB_URL+'/rest/v1/certification_submissions?profile_id=eq.'+encodeURIComponent(id)+'&select=status,notes,stars,reviewed_at,submitted_at&order=submitted_at.desc&limit=1',{headers:this._hdr()})
     .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length?rows[0]:null);}).catch(function(){cb(null);});
   },
+  /* All expert messages for this profile over time (approved feedback +
+     rejection reasons), newest first — for the messaging box. */
+  getExpertMessages:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/certification_submissions?profile_id=eq.'+encodeURIComponent(id)+'&notes=not.is.null&select=notes,status,stars,reviewed_at&order=reviewed_at.desc&limit=20',{headers:this._hdr()})
+    .then(function(r){return r.json();}).then(function(rows){cb(Array.isArray(rows)?rows.filter(function(x){return x.notes&&String(x.notes).trim();}):[]);}).catch(function(){cb([]);});
+  },
   getStars:function(id,cb){
     fetch(T7_SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(id)+'&select=stars,stars_awarded_at',{headers:this._hdr()})
     .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length&&rows[0].stars?rows[0]:null);}).catch(function(){cb(null);});
@@ -741,7 +747,7 @@ function T7Badge(containerId){
   function starsHtml(){return '\u2b50';}
   function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
   function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-  function showBadge(n,at,nm,note){
+  function showBadge(n,nm){
     cont.innerHTML='<div class="t7-cert">'+
       '<div class="t7-cert-top"></div>'+
       '<div class="t7-cert-bottom"></div>'+
@@ -753,28 +759,50 @@ function T7Badge(containerId){
       '</div>'+
       '<div class="t7-cert-line"></div>'+
       (nm?'<div class="t7-cert-name">'+nm+'</div>':'')+
-      '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong>'+(at?' \u00b7 '+fmtDate(at):'')+'</div>'+
-      (note?'<div class="t7-cert-feedback" style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.45">\ud83d\udcac '+esc(note)+'</div>':'')+
+      '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong></div>'+
     '</div>';
   }
   function showStatus(kind,title,msg){
     var accent=kind==='rejected'?'#DC2626':'#00E5FF';
-    cont.innerHTML='<div class="t7f-status t7f-status-'+kind+'" style="padding:16px;border:1px solid '+accent+'55;border-left:3px solid '+accent+';border-radius:10px;background:rgba(255,255,255,.03)">'+
+    cont.innerHTML='<div class="t7f-status t7f-status-'+kind+'" style="padding:16px;border:1px solid '+accent+'55;border-left:3px solid '+accent+';border-radius:10px;background:var(--surface)">'+
       '<div class="t7f-status-title" style="font-weight:800;font-size:14px;color:'+accent+';margin-bottom:6px">'+esc(title)+'</div>'+
-      (msg?'<div class="t7f-status-msg" style="font-size:13px;color:rgba(255,255,255,.78);line-height:1.45">'+esc(msg)+'</div>':'')+'</div>';
+      (msg?'<div class="t7f-status-msg" style="font-size:13px;color:var(--text);line-height:1.45">'+esc(msg)+'</div>':'')+'</div>';
+  }
+  // Small messaging box below the certificate: the expert's short messages
+  // over time (approval feedback + rejection reasons), newest first.
+  function renderMessages(id){
+    cont.insertAdjacentHTML('beforeend','<div id="t7-msgbox"></div>');
+    T7SB.getExpertMessages(id,function(msgs){
+      var box=document.getElementById('t7-msgbox');if(!box)return;
+      if(!msgs||!msgs.length){box.innerHTML='';return;}
+      var items=msgs.map(function(m){
+        var color=m.status==='rejected'?'#DC2626':'var(--accent)';
+        var icon=m.status==='approved'?'\u2705':m.status==='rejected'?'\u21bb':'\ud83d\udcac';
+        var date=m.reviewed_at?fmtDate(m.reviewed_at):'';
+        return '<div style="padding:8px 0;border-top:1px solid var(--border)">'+
+          '<div style="font-size:12.5px;color:var(--text);line-height:1.4">'+esc(m.notes)+'</div>'+
+          '<div style="font-size:10.5px;color:'+color+';margin-top:3px;opacity:.9">'+icon+(date?' \u00b7 '+date:'')+'</div>'+
+        '</div>';
+      }).join('');
+      box.innerHTML='<div style="margin-top:12px;padding:10px 14px 4px;border:1px solid var(--border);border-radius:10px;background:var(--surface);max-height:220px;overflow:auto">'+
+        '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">\ud83d\udcac Nachrichten vom Experten</div>'+
+        items+
+      '</div>';
+    });
   }
   function fetchBadge(id){
     T7SB.getStats(id,function(s){
-      if(s&&s.stars){showBadge(s.stars,s.stars_awarded_at,s.first_name,s.stars_note);return;}
-      // No star yet \u2014 surface the player's latest submission status + feedback.
+      if(s&&s.stars){showBadge(s.stars,s.first_name);renderMessages(id);return;}
+      // No star yet \u2014 surface the player's latest submission status.
       T7SB.getLatestSubmission(id,function(sub){
         if(sub&&sub.status==='pending'){
           showStatus('pending','\u23f3 In Pr\u00fcfung','Dein Video wurde eingereicht. Der Experte pr\u00fcft es und du erh\u00e4ltst dein Zertifikat, sobald es best\u00e4tigt ist.');
         }else if(sub&&sub.status==='rejected'){
-          showStatus('rejected','\u274c Nicht best\u00e4tigt',(sub.notes?sub.notes+' ':'')+'Bitte \u00fcberarbeite dein Video und reiche es erneut ein.');
+          showStatus('rejected','\u274c Nicht best\u00e4tigt','Bitte \u00fcberarbeite dein Video und reiche es erneut ein.');
         }else{
           cont.innerHTML='<div class="t7f-empty">Noch kein Zertifikat.</div>';
         }
+        renderMessages(id);
       });
     });
   }
@@ -849,6 +877,7 @@ function T7MobileSheet(){
       // If not certified yet, pull the latest submission so the cert tab
       // can show the player their pending / rejected status + feedback.
       if(!st.stars){T7SB.getLatestSubmission(st.id,function(sub){st.sub=sub||null;if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();});}
+      T7SB.getExpertMessages(st.id,function(msgs){st.msgs=msgs||[];if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();});
     });
   }
   function loadRang(){
@@ -886,14 +915,25 @@ function T7MobileSheet(){
     return '<div>'+rows+'</div>';
   }
   function mEsc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function mMsgBox(){
+    if(!st.msgs||!st.msgs.length)return '';
+    function fmt(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:Date.parse(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
+    var items=st.msgs.map(function(m){
+      var color=m.status==='rejected'?'#DC2626':'var(--accent)';
+      var icon=m.status==='approved'?'✅':m.status==='rejected'?'↻':'💬';
+      var date=m.reviewed_at?fmt(m.reviewed_at):'';
+      return '<div style="padding:8px 0;border-top:1px solid var(--border)"><div style="font-size:12.5px;color:var(--text);line-height:1.4">'+mEsc(m.notes)+'</div><div style="font-size:10.5px;color:'+color+';margin-top:3px;opacity:.9">'+icon+(date?' · '+date:'')+'</div></div>';
+    }).join('');
+    return '<div style="margin-top:12px;padding:10px 14px 4px;border:1px solid var(--border);border-radius:10px;background:var(--surface);max-height:220px;overflow:auto"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">💬 Nachrichten vom Experten</div>'+items+'</div>';
+  }
   function renderCert(){
     if(!st.certLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
     if(!st.stars){
       if(st.sub&&st.sub.status==='pending')
-        return '<div class="t7m-empty" style="border-left:3px solid #00E5FF;text-align:left;padding:16px"><div style="font-weight:800;color:#00E5FF;margin-bottom:6px">\u23f3 In Pr\u00fcfung</div>Dein Video wurde eingereicht. Du erh\u00e4ltst dein Zertifikat, sobald der Experte es best\u00e4tigt.</div>';
+        return '<div class="t7m-empty" style="border-left:3px solid #00E5FF;text-align:left;padding:16px"><div style="font-weight:800;color:#00E5FF;margin-bottom:6px">\u23f3 In Pr\u00fcfung</div>Dein Video wurde eingereicht. Du erh\u00e4ltst dein Zertifikat, sobald der Experte es best\u00e4tigt.</div>'+mMsgBox();
       if(st.sub&&st.sub.status==='rejected')
-        return '<div class="t7m-empty" style="border-left:3px solid #DC2626;text-align:left;padding:16px"><div style="font-weight:800;color:#DC2626;margin-bottom:6px">\u274c Nicht best\u00e4tigt</div>'+(st.sub.notes?mEsc(st.sub.notes)+' ':'')+'Bitte \u00fcberarbeite dein Video und reiche es erneut ein.</div>';
-      return '<div class="t7m-empty">Noch kein Zertifikat. \u00dcbe weiter und reiche dein Final-Video ein!</div>';
+        return '<div class="t7m-empty" style="border-left:3px solid #DC2626;text-align:left;padding:16px"><div style="font-weight:800;color:#DC2626;margin-bottom:6px">\u274c Nicht best\u00e4tigt</div>Bitte \u00fcberarbeite dein Video und reiche es erneut ein.</div>'+mMsgBox();
+      return '<div class="t7m-empty">Noch kein Zertifikat. \u00dcbe weiter und reiche dein Final-Video ein!</div>'+mMsgBox();
     }
     function starsHtml(){return '\u2b50';}
     function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:Date.parse(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
@@ -907,9 +947,8 @@ function T7MobileSheet(){
       '</div>'+
       '<div class="t7-cert-line"></div>'+
       '<div class="t7-cert-name">'+(st.name||'Spieler')+'</div>'+
-      '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong>'+(st.starsAt?' \u00b7 '+fmtDate(st.starsAt):'')+'</div>'+
-      (st.starsNote?'<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.45">\ud83d\udcac '+mEsc(st.starsNote)+'</div>':'')+
-    '</div>';
+      '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong></div>'+
+    '</div>'+mMsgBox();
   }
 
   function openSheet(){st.open=true;$('t7-sheet').classList.add('open');$('t7-sheet-overlay').classList.add('open');renderActive();}
