@@ -40,6 +40,17 @@ var T7Identity=(function(){
     for(var i=0;i<ws.length;i++){
       try{if(ws[i].T7_PROFILE_ID)return String(ws[i].T7_PROFILE_ID);}catch(e){}
     }
+    // Sandbox-only test hook: on non-production hosts, allow ?pid=<uuid> in
+    // the URL to impersonate a player. Ignored on t7academy.com so the live
+    // site can never be driven by a URL parameter.
+    try{
+      var host=(location.hostname||'').toLowerCase();
+      var isProd=/(^|\.)t7academy\.com$/.test(host);
+      if(!isProd){
+        var qp=new URLSearchParams(location.search).get('pid');
+        if(qp&&/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(qp))return qp;
+      }
+    }catch(e){}
     return null;
   }
   function _fetchName(id,cb){
@@ -63,7 +74,18 @@ var T7Identity=(function(){
       _q.push(cb);if(!_going){_going=true;_go();}
     },
     fire:function(id,nm){_fire(id,nm);},
-    get:function(){return _done?{id:_id,name:_name}:null;}
+    get:function(){return _done?{id:_id,name:_name}:null;},
+    /* Testing helper: clear cached identity, re-read T7_PROFILE_ID and
+       re-render the widgets. Use from the console after setting the id:
+         window.T7_PROFILE_ID = '…'; T7Identity.reset();
+       (No effect on production behaviour — it just re-runs resolution.) */
+    reset:function(cb){
+      _id=null;_name=null;_done=false;_going=false;_q=[];
+      this.resolve(function(id,nm){
+        try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+        if(cb)cb(id,nm);
+      });
+    }
   };
 })();
 
@@ -95,11 +117,48 @@ var T7SB={
     fetch(T7_SB_URL+'/rest/v1/certification_submissions?profile_id=eq.'+encodeURIComponent(id)+'&select=status,notes,stars,reviewed_at,submitted_at&order=submitted_at.desc&limit=1',{headers:this._hdr()})
     .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length?rows[0]:null);}).catch(function(){cb(null);});
   },
-  /* All expert messages for this profile over time (approved feedback +
-     rejection reasons), newest first — for the messaging box. */
-  getExpertMessages:function(id,cb){
-    fetch(T7_SB_URL+'/rest/v1/certification_submissions?profile_id=eq.'+encodeURIComponent(id)+'&notes=not.is.null&select=notes,status,stars,reviewed_at&order=reviewed_at.desc&limit=20',{headers:this._hdr()})
-    .then(function(r){return r.json();}).then(function(rows){cb(Array.isArray(rows)?rows.filter(function(x){return x.notes&&String(x.notes).trim();}):[]);}).catch(function(){cb([]);});
+  /* === Messaging (general expert<->player inbox, `messages` table) === */
+  /* Full thread for this profile, oldest first. */
+  getMessages:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/messages?profile_id=eq.'+encodeURIComponent(id)+'&select=id,sender,sender_name,body,created_at,read_by_player&order=created_at.asc',{headers:this._hdr()})
+    .then(function(r){return r.json();}).then(function(rows){cb(Array.isArray(rows)?rows:[]);}).catch(function(){cb([]);});
+  },
+  /* Unified inbox: general messages + permanent certification feedback,
+     merged into one chronological list (oldest first). Each item:
+       {kind:'message'|'cert', sender, sender_name, body, ts, status} */
+  getInbox:function(id,cb){
+    var self=this;
+    Promise.all([
+      new Promise(function(res){ self.getMessages(id,res); }),
+      new Promise(function(res){
+        fetch(T7_SB_URL+'/rest/v1/certification_submissions?profile_id=eq.'+encodeURIComponent(id)+'&notes=not.is.null&select=notes,status,reviewed_at&order=reviewed_at.asc',{headers:self._hdr()})
+        .then(function(r){return r.json();}).then(function(rows){res(Array.isArray(rows)?rows:[]);}).catch(function(){res([]);});
+      })
+    ]).then(function(out){
+      var list=[];
+      (out[0]||[]).forEach(function(m){ list.push({kind:'message',sender:m.sender,sender_name:m.sender_name,body:m.body,ts:new Date(m.created_at).getTime()||0,status:null}); });
+      (out[1]||[]).forEach(function(c){ if(c.notes&&String(c.notes).trim()) list.push({kind:'cert',sender:'expert',sender_name:'T7 Academy Expert',body:c.notes,ts:c.reviewed_at?(new Date(c.reviewed_at).getTime()||0):0,status:c.status}); });
+      list.sort(function(a,b){return a.ts-b.ts;});
+      cb(list);
+    }).catch(function(){cb([]);});
+  },
+  /* Count of expert messages the player hasn't read yet (envelope badge). */
+  getUnreadCount:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/messages?profile_id=eq.'+encodeURIComponent(id)+'&sender=eq.expert&read_by_player=eq.false&select=id',{headers:this._hdr({'Prefer':'count=exact'})})
+    .then(function(r){var cr=r.headers.get('content-range');var n=cr&&cr.indexOf('/')>=0?parseInt(cr.split('/')[1],10):0;cb(isNaN(n)?0:n);}).catch(function(){cb(0);});
+  },
+  /* Mark all expert messages as read (starts the 7-day retention clock). */
+  markMessagesRead:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/messages?profile_id=eq.'+encodeURIComponent(id)+'&sender=eq.expert&read_by_player=eq.false',
+      {method:'PATCH',headers:this._hdr({'Prefer':'return=minimal'}),body:JSON.stringify({read_by_player:true,read_at:new Date().toISOString()})})
+    .then(function(){if(cb)cb();}).catch(function(){if(cb)cb();});
+  },
+  /* Player sends a reply. */
+  sendMessage:function(id,name,body,cb){
+    if(!id||!body){if(cb)cb(false);return;}
+    fetch(T7_SB_URL+'/rest/v1/messages',{method:'POST',headers:this._hdr({'Prefer':'return=minimal'}),
+      body:JSON.stringify({profile_id:id,sender:'player',sender_name:name||'Spieler',body:body,read_by_player:true,read_by_expert:false})})
+    .then(function(r){if(cb)cb(r.ok);}).catch(function(){if(cb)cb(false);});
   },
   getStars:function(id,cb){
     fetch(T7_SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(id)+'&select=stars,stars_awarded_at',{headers:this._hdr()})
@@ -747,6 +806,8 @@ function T7Badge(containerId){
   function starsHtml(){return '\u2b50';}
   function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
   function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var badgeName='Spieler';
+  // Challenges: certificate visual only. Notes + messages live on Home.
   function showBadge(n,nm){
     cont.innerHTML='<div class="t7-cert">'+
       '<div class="t7-cert-top"></div>'+
@@ -768,31 +829,46 @@ function T7Badge(containerId){
       '<div class="t7f-status-title" style="font-weight:800;font-size:14px;color:'+accent+';margin-bottom:6px">'+esc(title)+'</div>'+
       (msg?'<div class="t7f-status-msg" style="font-size:13px;color:var(--text);line-height:1.45">'+esc(msg)+'</div>':'')+'</div>';
   }
-  // Small messaging box below the certificate: the expert's short messages
-  // over time (approval feedback + rejection reasons), newest first.
-  function renderMessages(id){
-    cont.insertAdjacentHTML('beforeend','<div id="t7-msgbox"></div>');
-    T7SB.getExpertMessages(id,function(msgs){
-      var box=document.getElementById('t7-msgbox');if(!box)return;
-      if(!msgs||!msgs.length){box.innerHTML='';return;}
-      var items=msgs.map(function(m){
-        var color=m.status==='rejected'?'#DC2626':'var(--accent)';
-        var icon=m.status==='approved'?'\u2705':m.status==='rejected'?'\u21bb':'\ud83d\udcac';
-        var date=m.reviewed_at?fmtDate(m.reviewed_at):'';
-        return '<div style="padding:8px 0;border-top:1px solid var(--border)">'+
-          '<div style="font-size:12.5px;color:var(--text);line-height:1.4">'+esc(m.notes)+'</div>'+
-          '<div style="font-size:10.5px;color:'+color+';margin-top:3px;opacity:.9">'+icon+(date?' \u00b7 '+date:'')+'</div>'+
+  // General two-way inbox (messages table): expert updates + player replies.
+  // Separate from the certification note above.
+  function renderInbox(id){
+    if(!document.getElementById('t7-msgbox')) cont.insertAdjacentHTML('beforeend','<div id="t7-msgbox"></div>');
+    function load(){
+      T7SB.getMessages(id,function(msgs){
+        var b=document.getElementById('t7-msgbox');if(!b)return;
+        var items=(msgs&&msgs.length)?msgs.map(function(m){
+          var mine=m.sender==='player';
+          var when=new Date(m.created_at).toLocaleString('de-AT');
+          return '<div style="margin-bottom:8px;text-align:'+(mine?'right':'left')+'">'+
+            '<div style="display:inline-block;max-width:88%;padding:8px 10px;border-radius:10px;text-align:left;background:'+(mine?'var(--surface2)':'rgba(0,229,255,.10)')+'">'+
+              '<div style="font-size:12.5px;color:var(--text);line-height:1.4">'+esc(m.body)+'</div>'+
+              '<div style="font-size:10px;color:var(--muted);margin-top:3px">'+esc(m.sender_name||(mine?'Du':'Experte'))+' \u00b7 '+when+'</div>'+
+            '</div></div>';
+        }).join(''):'<div style="font-size:12px;color:var(--muted);padding:4px 0">Noch keine Nachrichten.</div>';
+        b.innerHTML='<div style="margin-top:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface)">'+
+          '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">\ud83d\udcac Nachrichten</div>'+
+          '<div style="max-height:220px;overflow:auto;margin-bottom:8px">'+items+'</div>'+
+          '<div style="display:flex;gap:6px">'+
+            '<input id="t7-msg-input" type="text" placeholder="Antworten\u2026" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:13px">'+
+            '<button id="t7-msg-send" type="button" style="background:var(--accent);color:#001018;border:none;border-radius:8px;padding:0 14px;font-weight:800;cursor:pointer">Senden</button>'+
+          '</div>'+
         '</div>';
-      }).join('');
-      box.innerHTML='<div style="margin-top:12px;padding:10px 14px 4px;border:1px solid var(--border);border-radius:10px;background:var(--surface);max-height:220px;overflow:auto">'+
-        '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">\ud83d\udcac Nachrichten vom Experten</div>'+
-        items+
-      '</div>';
-    });
+        var send=function(){
+          var inp=document.getElementById('t7-msg-input');var v=(inp.value||'').trim();if(!v)return;
+          var btn=document.getElementById('t7-msg-send');btn.disabled=true;
+          T7SB.sendMessage(id,badgeName,v,function(ok){btn.disabled=false;if(ok){inp.value='';load();}});
+        };
+        document.getElementById('t7-msg-send').onclick=send;
+        document.getElementById('t7-msg-input').addEventListener('keydown',function(e){if(e.key==='Enter')send();});
+        T7SB.markMessagesRead(id);
+        window.dispatchEvent(new CustomEvent('t7msg-read'));
+      });
+    }
+    load();
   }
   function fetchBadge(id){
     T7SB.getStats(id,function(s){
-      if(s&&s.stars){showBadge(s.stars,s.first_name);renderMessages(id);return;}
+      if(s&&s.stars){showBadge(s.stars,s.first_name);return;}
       // No star yet \u2014 surface the player's latest submission status.
       T7SB.getLatestSubmission(id,function(sub){
         if(sub&&sub.status==='pending'){
@@ -802,7 +878,6 @@ function T7Badge(containerId){
         }else{
           cont.innerHTML='<div class="t7f-empty">Noch kein Zertifikat.</div>';
         }
-        renderMessages(id);
       });
     });
   }
@@ -820,17 +895,18 @@ function T7MobileSheet(){
       '<span>\u26a1</span>'+
       '<span id="t7-fab-xp">0 XP</span>'+
       '<span style="opacity:.5"> | </span>'+
-      '<span id="t7-fab-streak">0 Wochen</span>'+
+      '<span id="t7-fab-msg" style="position:relative;display:inline-block">✉<span id="t7-fab-msgdot" style="display:none;position:absolute;top:-5px;right:-6px;width:8px;height:8px;border-radius:50%;background:#DC2626"></span></span>'+
     '</button>'+
     '<div id="t7-sheet-overlay"></div>'+
     '<div id="t7-sheet">'+
       '<div class="t7-sheet-handle"></div>'+
       '<div class="t7-sheet-header">'+
-        '<div class="t7-sheet-title" id="t7-sheet-title">Mein Fortschritt</div>'+
+        '<div class="t7-sheet-title" id="t7-sheet-title">Deine Nachrichten</div>'+
         '<button class="t7-sheet-close" id="t7-sheet-close" type="button">\u2715</button>'+
       '</div>'+
       '<div class="t7-sheet-tabs">'+
-        '<button class="t7-sheet-tab active" id="t7-tab-fort" type="button">\ud83d\udcca Fortschritt</button>'+
+        '<button class="t7-sheet-tab active" id="t7-tab-msg" type="button">\u2709 Nachrichten</button>'+
+        '<button class="t7-sheet-tab" id="t7-tab-fort" type="button">\ud83d\udcca Fortschritt</button>'+
         '<button class="t7-sheet-tab" id="t7-tab-rang" type="button">\ud83c\udfc6 Rangliste</button>'+
         '<button class="t7-sheet-tab" id="t7-tab-cert" type="button">\u2b50 Zertifikat</button>'+
       '</div>'+
@@ -839,7 +915,7 @@ function T7MobileSheet(){
   var wrap=document.createElement('div');wrap.innerHTML=sheetHTML;
   while(wrap.firstChild)document.body.appendChild(wrap.firstChild);
 
-  var st={open:false,tab:'fort',id:null,name:'Spieler',totalXP:0,weekXP:0,streak:0,stars:0,starsAt:null,players:[],fortLoaded:false,rangLoaded:false,certLoaded:false};
+  var st={open:false,tab:'msg',id:null,name:'Spieler',totalXP:0,weekXP:0,streak:0,stars:0,starsAt:null,players:[],msgs:[],unread:0,fortLoaded:false,rangLoaded:false,certLoaded:false,msgLoaded:false};
   function $(id){return document.getElementById(id);}
   function ini(n){if(!n)return'?';return n.split(/\s+/).map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
   function getWeekKey(d){var x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var day=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-day);var ys=new Date(Date.UTC(x.getUTCFullYear(),0,1));return x.getUTCFullYear()+'-W'+Math.ceil((((x-ys)/86400000)+1)/7);}
@@ -877,7 +953,6 @@ function T7MobileSheet(){
       // If not certified yet, pull the latest submission so the cert tab
       // can show the player their pending / rejected status + feedback.
       if(!st.stars){T7SB.getLatestSubmission(st.id,function(sub){st.sub=sub||null;if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();});}
-      T7SB.getExpertMessages(st.id,function(msgs){st.msgs=msgs||[];if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();});
     });
   }
   function loadRang(){
@@ -888,9 +963,38 @@ function T7MobileSheet(){
   }
   function updateFAB(){
     $('t7-fab-xp').textContent=st.totalXP.toLocaleString('de-AT')+' XP';
-    $('t7-fab-streak').textContent=st.streak+' Woche'+(st.streak===1?'':'n');
+    var md=$('t7-fab-msgdot');if(md)md.style.display=st.unread>0?'block':'none';
     if(st.stars){$('t7-fab-stars-num').textContent=st.stars;$('t7-fab-stars').style.display='inline';$('t7-fab-stars-sep').style.display='inline';}
     else{$('t7-fab-stars').style.display='none';$('t7-fab-stars-sep').style.display='none';}
+  }
+  function loadUnread(){ if(st.id)T7SB.getUnreadCount(st.id,function(n){st.unread=n;updateFAB();}); }
+  function loadMsg(){
+    if(!st.id)return;
+    T7SB.getInbox(st.id,function(list){
+      st.msgs=list||[];st.msgLoaded=true;
+      if(st.open&&st.tab==='msg'){$('t7-sheet-content').innerHTML=renderMsg();wireMsg();}
+      T7SB.markMessagesRead(st.id,function(){st.unread=0;updateFAB();});
+    });
+  }
+  function msgComposeHTML(){
+    return '<div style="display:flex;gap:8px;margin-top:4px"><input id="t7m-msg-input" type="text" placeholder="Antwort an den Experten…" autocomplete="off" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;font-size:14px"><button id="t7m-msg-send" type="button" style="background:var(--accent);color:#001018;border:none;border-radius:10px;padding:0 16px;font-weight:800">Senden</button></div>';
+  }
+  function renderMsg(){
+    if(!st.msgLoaded)return '<div class="t7m-loading">Lade…</div>';
+    if(!st.msgs.length)return '<div class="t7m-empty" style="text-align:left;margin-bottom:10px">Noch keine Nachrichten. Hier meldet sich dein Experte.</div>'+msgComposeHTML();
+    var items=st.msgs.map(function(m){
+      var mine=m.sender==='player';var when=m.ts?new Date(m.ts).toLocaleString('de-AT'):'';
+      var who=mine?'Du':(m.sender_name||'Experte');var tag=m.kind==='cert'?'⭐ Zertifikat · ':'';
+      var bg=mine?'var(--surface2)':(m.kind==='cert'?'rgba(255,215,0,.12)':'rgba(0,229,255,.10)');
+      var bd=m.kind==='cert'?'border:1px solid rgba(255,215,0,.35);':'';
+      return '<div style="margin-bottom:10px;display:flex;justify-content:'+(mine?'flex-end':'flex-start')+'"><div style="max-width:82%;padding:9px 12px;border-radius:12px;background:'+bg+';'+bd+'"><div style="font-size:13px;color:var(--text);line-height:1.45;white-space:pre-wrap;word-break:break-word">'+mEsc(m.body)+'</div><div style="font-size:10.5px;color:var(--muted);margin-top:4px">'+tag+mEsc(who)+(when?' · '+when:'')+'</div></div></div>';
+    }).join('');
+    return '<div style="max-height:46vh;overflow:auto;margin-bottom:10px">'+items+'</div>'+msgComposeHTML();
+  }
+  function wireMsg(){
+    var inp=$('t7m-msg-input'),btn=$('t7m-msg-send');if(!inp||!btn)return;
+    function send(){var v=(inp.value||'').trim();if(!v)return;btn.disabled=true;T7SB.sendMessage(st.id,st.name,v,function(ok){btn.disabled=false;if(ok){inp.value='';loadMsg();}});}
+    btn.onclick=send;inp.addEventListener('keydown',function(e){if(e.key==='Enter')send();});
   }
   function renderFort(){
     if(!st.fortLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
@@ -915,16 +1019,11 @@ function T7MobileSheet(){
     return '<div>'+rows+'</div>';
   }
   function mEsc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  // Permanent CERTIFICATION note under the mobile certificate (stars_note).
+  // The general messages inbox lives on the Fortschritt tab (see FAB step).
   function mMsgBox(){
-    if(!st.msgs||!st.msgs.length)return '';
-    function fmt(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:Date.parse(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
-    var items=st.msgs.map(function(m){
-      var color=m.status==='rejected'?'#DC2626':'var(--accent)';
-      var icon=m.status==='approved'?'✅':m.status==='rejected'?'↻':'💬';
-      var date=m.reviewed_at?fmt(m.reviewed_at):'';
-      return '<div style="padding:8px 0;border-top:1px solid var(--border)"><div style="font-size:12.5px;color:var(--text);line-height:1.4">'+mEsc(m.notes)+'</div><div style="font-size:10.5px;color:'+color+';margin-top:3px;opacity:.9">'+icon+(date?' · '+date:'')+'</div></div>';
-    }).join('');
-    return '<div style="margin-top:12px;padding:10px 14px 4px;border:1px solid var(--border);border-radius:10px;background:var(--surface);max-height:220px;overflow:auto"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">💬 Nachrichten vom Experten</div>'+items+'</div>';
+    if(!st.starsNote)return '';
+    return '<div style="margin-top:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface)"><div style="font-size:12.5px;font-style:italic;color:var(--muted);line-height:1.45">💬 '+mEsc(st.starsNote)+'</div></div>';
   }
   function renderCert(){
     if(!st.certLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
@@ -955,14 +1054,16 @@ function T7MobileSheet(){
   function closeSheet(){st.open=false;$('t7-sheet').classList.remove('open');$('t7-sheet-overlay').classList.remove('open');}
   function switchTab(t){
     st.tab=t;
+    $('t7-tab-msg').className='t7-sheet-tab'+(t==='msg'?' active':'');
     $('t7-tab-fort').className='t7-sheet-tab'+(t==='fort'?' active':'');
     $('t7-tab-rang').className='t7-sheet-tab'+(t==='rang'?' active':'');
     $('t7-tab-cert').className='t7-sheet-tab'+(t==='cert'?' active':'');
-    $('t7-sheet-title').textContent=t==='fort'?'Mein Fortschritt':t==='rang'?'Rangliste':'Mein Zertifikat';
+    $('t7-sheet-title').textContent=t==='msg'?'Deine Nachrichten':t==='fort'?'Mein Fortschritt':t==='rang'?'Rangliste':'Mein Zertifikat';
     renderActive();
   }
   function renderActive(){
-    if(st.tab==='fort'){if(!st.fortLoaded&&st.id)loadFort();$('t7-sheet-content').innerHTML=renderFort();}
+    if(st.tab==='msg'){if(!st.msgLoaded&&st.id)loadMsg();$('t7-sheet-content').innerHTML=renderMsg();wireMsg();}
+    else if(st.tab==='fort'){if(!st.fortLoaded&&st.id)loadFort();$('t7-sheet-content').innerHTML=renderFort();}
     else if(st.tab==='rang'){if(!st.rangLoaded)loadRang();$('t7-sheet-content').innerHTML=renderRang();}
     else{if(!st.certLoaded&&st.id)loadFort();$('t7-sheet-content').innerHTML=renderCert();}
   }
@@ -970,6 +1071,7 @@ function T7MobileSheet(){
   $('t7-fab').onclick=openSheet;
   $('t7-sheet-close').onclick=closeSheet;
   $('t7-sheet-overlay').onclick=closeSheet;
+  $('t7-tab-msg').onclick=function(){switchTab('msg');};
   $('t7-tab-fort').onclick=function(){switchTab('fort');};
   $('t7-tab-rang').onclick=function(){switchTab('rang');};
   $('t7-tab-cert').onclick=function(){switchTab('cert');};
@@ -981,8 +1083,9 @@ function T7MobileSheet(){
     if(!id)return;
     st.id=id;st.name=name||'Spieler';
     loadFort();
+    loadUnread();
   });
-  window.addEventListener('t7xpupdate',function(){if(st.id){st.fortLoaded=false;st.certLoaded=false;loadFort();if(st.rangLoaded){st.rangLoaded=false;loadRang();}}});
+  window.addEventListener('t7xpupdate',function(){if(st.id){st.fortLoaded=false;st.certLoaded=false;st.msgLoaded=false;loadFort();loadUnread();if(st.rangLoaded){st.rangLoaded=false;loadRang();}}});
 }
 
 
@@ -1288,6 +1391,92 @@ function T7LoadMonats(containerId){
       cont.innerHTML=hint('Fehler beim Laden der Challenge des Monats.<br>Details: '+e.message);
     });
 }
+
+/* ===========================================================
+   HOME MESSAGING BAR — self-injecting (no page markup needed).
+   Mounts under the top nav on the HOME page only. One inbox:
+   expert messages + certification feedback, with replies.
+   =========================================================== */
+function T7HomeInbox(){
+  var nav=document.querySelector('.topnav');
+  var hero=document.querySelector('.lp-hero');
+  if(!nav||!hero)return;                              // home page only
+  if(document.getElementById('homeMsgbar'))return;    // manual WP markup present — let that handle it
+  if(document.getElementById('t7hi-bar'))return;      // already mounted
+  if(!window.T7SB)return;
+
+  if(!document.getElementById('t7hi-style')){
+    var st=document.createElement('style');st.id='t7hi-style';
+    st.textContent=
+      '.t7hi-bar{width:100%;margin:0 0 14px}'
+      +'.t7hi-btn{width:100%;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;cursor:pointer;color:var(--text);font-family:inherit;font-size:14px;font-weight:700}'
+      +'.t7hi-btn:hover{border-color:var(--accent)}'
+      +'.t7hi-ico{font-size:16px;line-height:1}.t7hi-label{flex:1;text-align:left}'
+      +'.t7hi-dot{width:9px;height:9px;border-radius:50%;background:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,.18);flex:0 0 auto}'
+      +'.t7hi-chev{opacity:.6;transition:transform .2s}.t7hi-bar.open .t7hi-chev{transform:rotate(180deg)}'
+      +'.t7hi-panel{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;margin:-1px 0 0;padding:14px 16px}'
+      +'.t7hi-bar.open .t7hi-panel{display:block}'
+      +'.t7hi-thread{max-height:340px;overflow:auto;margin-bottom:12px}'
+      +'.t7hi-row{margin-bottom:10px;display:flex}.t7hi-row.me{justify-content:flex-end}'
+      +'.t7hi-bub{max-width:80%;padding:9px 12px;border-radius:12px;background:rgba(0,229,255,.10)}'
+      +'.t7hi-row.me .t7hi-bub{background:var(--surface2)}'
+      +'.t7hi-bub.cert{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.35)}'
+      +'.t7hi-text{font-size:13px;color:var(--text);line-height:1.45;white-space:pre-wrap;word-break:break-word}'
+      +'.t7hi-meta{font-size:10.5px;color:var(--muted);margin-top:4px}'
+      +'.t7hi-empty{color:var(--muted);font-size:13px;padding:8px 0}'
+      +'.t7hi-compose{display:flex;gap:8px}'
+      +'.t7hi-compose input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;font-size:13px;font-family:inherit}'
+      +'.t7hi-compose button{background:var(--accent);color:#001018;border:none;border-radius:10px;padding:0 16px;font-weight:800;cursor:pointer;font-family:inherit}';
+    document.head.appendChild(st);
+  }
+
+  var bar=document.createElement('div');bar.className='t7hi-bar';bar.id='t7hi-bar';bar.style.display='none';
+  bar.innerHTML=
+    '<button class="t7hi-btn" id="t7hi-toggle" type="button" aria-expanded="false">'
+    +'<span class="t7hi-ico">💬</span><span class="t7hi-label">Deine Nachrichten</span>'
+    +'<span class="t7hi-dot" id="t7hi-dot" style="display:none"></span><span class="t7hi-chev">▾</span></button>'
+    +'<div class="t7hi-panel">'
+    +'<div class="t7hi-thread" id="t7hi-thread"><div class="t7hi-empty">Lade…</div></div>'
+    +'<div class="t7hi-compose"><input id="t7hi-input" type="text" placeholder="Antwort an den Experten…" autocomplete="off">'
+    +'<button id="t7hi-send" type="button">Senden</button></div></div>';
+  // Mount above the profile picture (right column), aligned to its width.
+  var col=document.querySelector('.home-hero-avatar');
+  if(col){col.insertBefore(bar,col.firstChild);}
+  else{nav.insertAdjacentElement('afterend',bar);}
+
+  function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var pid=null,pname='Spieler';
+  function refreshDot(){if(!pid)return;T7SB.getUnreadCount(pid,function(n){var d=document.getElementById('t7hi-dot');if(d)d.style.display=n>0?'inline-block':'none';});}
+  function renderThread(){
+    if(!pid)return;
+    T7SB.getInbox(pid,function(list){
+      var el=document.getElementById('t7hi-thread');if(!el)return;
+      if(!list||!list.length){el.innerHTML='<div class="t7hi-empty">Noch keine Nachrichten.</div>';return;}
+      el.innerHTML=list.map(function(m){
+        var mine=m.sender==='player';var when=m.ts?new Date(m.ts).toLocaleString('de-AT'):'';
+        var who=mine?'Du':(m.sender_name||'Experte');var tag=m.kind==='cert'?'⭐ Zertifikat · ':'';
+        return '<div class="t7hi-row'+(mine?' me':'')+'"><div class="t7hi-bub'+(m.kind==='cert'?' cert':'')+'">'
+          +'<div class="t7hi-text">'+esc(m.body)+'</div><div class="t7hi-meta">'+tag+esc(who)+(when?' · '+when:'')+'</div></div></div>';
+      }).join('');
+      el.scrollTop=el.scrollHeight;
+    });
+  }
+  document.getElementById('t7hi-toggle').onclick=function(){
+    if(bar.classList.contains('open')){bar.classList.remove('open');this.setAttribute('aria-expanded','false');}
+    else{bar.classList.add('open');this.setAttribute('aria-expanded','true');renderThread();T7SB.markMessagesRead(pid,refreshDot);}
+  };
+  function send(){var inp=document.getElementById('t7hi-input');var v=(inp.value||'').trim();if(!v||!pid)return;var b=document.getElementById('t7hi-send');b.disabled=true;T7SB.sendMessage(pid,pname,v,function(ok){b.disabled=false;if(ok){inp.value='';renderThread();}});}
+  document.getElementById('t7hi-send').onclick=send;
+  document.getElementById('t7hi-input').addEventListener('keydown',function(e){if(e.key==='Enter')send();});
+
+  function bind(id,name){pid=id;pname=name||'Spieler';if(!pid)return;bar.style.display='block';refreshDot();}
+  T7Identity.resolve(function(id){var info=T7Identity.get();bind(id,info&&info.name);});
+  window.addEventListener('t7xpupdate',function(){var info=T7Identity.get();if(info&&info.id)bind(info.id,info.name);});
+}
+(function(){
+  function m(){try{T7HomeInbox();}catch(e){}try{T7MobileSheet();}catch(e){}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',m);else m();
+})();
 
 /* ===========================================================
    T7 PUBLIC NAMESPACE  (RESTORED)
