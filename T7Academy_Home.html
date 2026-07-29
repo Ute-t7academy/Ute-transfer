@@ -7,15 +7,15 @@
 <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
 
 <!-- Base widget stylesheet (lp-* primitives, theme tokens, topnav) -->
-<link rel="stylesheet" href="https://ute-t7academy.github.io/t7-base.css?v=1">
+<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css?v=1">
 <!-- Home-specific overrides + personalization components -->
-<link rel="stylesheet" href="https://ute-t7academy.github.io/t7-home.css?v=4">
+<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-home.css?v=5">
 
 
 <!-- TOP NAV (subscribed environment: real page links + theme + avatar) -->
 <nav class="topnav">
   <div class="nav-logo">
-    <a href="/"><img src="https://ute-t7academy.github.io/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
+    <a href="/"><img src="https://ute-laureo.github.io/t7academy-widgets/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
   </div>
   <div class="nav-links">
     <a href="https://www.laureo.at/" class="nav-link active">Home</a>
@@ -29,6 +29,24 @@
     <div class="nav-avatar" id="navAvatar" title="Mein Profilbild">?</div>
   </div>
 </nav>
+
+<!-- MESSAGING BAR — under the top nav, above the hero. One inbox: expert
+     messages + certification feedback, with replies. -->
+<div class="home-msgbar" id="homeMsgbar" style="display:none">
+  <button class="home-msgbar-btn" id="homeMsgToggle" type="button" aria-expanded="false">
+    <span class="home-msgbar-ico">💬</span>
+    <span class="home-msgbar-label">Nachrichten vom Experten</span>
+    <span class="home-msgbar-dot" id="homeMsgDot" style="display:none"></span>
+    <span class="home-msgbar-chev" id="homeMsgChev">▾</span>
+  </button>
+  <div class="home-msgpanel" id="homeMsgPanel">
+    <div class="home-msg-thread" id="homeMsgThread"><div class="home-msg-empty">Lade…</div></div>
+    <div class="home-msg-compose">
+      <input type="text" id="homeMsgInput" placeholder="Antwort an den Experten…" autocomplete="off">
+      <button type="button" id="homeMsgSend">Senden</button>
+    </div>
+  </div>
+</div>
 
 
 <!-- ============================================================
@@ -100,7 +118,7 @@
 
       <!-- Row 1: the two learning paths -->
       <div class="home-prog-grid home-prog-grid-top">
-        <a class="home-prog p-sevens" href="https://www.t7academy.com/sevens/">
+        <a class="home-prog p-sevens" href="https://www.laureo.at/sevens/">
           <div class="home-prog-age">Die Grundlagen</div>
           <div class="home-prog-icon">7️⃣</div>
           <div class="home-prog-h">Sevens</div>
@@ -110,7 +128,7 @@
           <div class="home-prog-link">Zu den Sevens</div>
         </a>
 
-        <a class="home-prog p-sterne" href="https://www.t7academy.com/sterne/">
+        <a class="home-prog p-sterne" href="https://www.laureo.at/sterne/">
           <div class="home-prog-age">Alle Skills der Profis</div>
           <div class="home-prog-icon">⭐</div>
           <div class="home-prog-h">Sterne</div>
@@ -123,7 +141,7 @@
 
       <!-- Row 2: the four challenge cards -->
       <div class="home-prog-grid home-prog-grid-ch">
-        <a class="home-prog p-challenges" href="https://www.t7academy.com/challenges/">
+        <a class="home-prog p-challenges" href="https://www.laureo.at/challenges/">
           <div class="home-prog-age">Trainiere &amp; Sammle XP</div>
           <div class="home-prog-icon">⚡</div>
           <div class="home-prog-h">Technik Challenges</div>
@@ -133,7 +151,7 @@
           <div class="home-prog-link">Zu den Challenges</div>
         </a>
 
-        <a class="home-prog p-certs" href="https://www.t7academy.com/challenges/#cert-container">
+        <a class="home-prog p-certs" href="https://www.laureo.at/challenges/#cert-container">
           <div class="home-prog-age">1- bis 5-Sterne</div>
           <div class="home-prog-icon">🏆</div>
           <div class="home-prog-h">Zertifikate</div>
@@ -143,7 +161,7 @@
           <div class="home-prog-link">Zu den Zertifikaten</div>
         </a>
 
-        <a class="home-prog p-build" href="https://www.t7academy.com/challenges/#builder-container">
+        <a class="home-prog p-build" href="https://www.laureo.at/challenges/#builder-container">
           <div class="home-prog-age">Auswählen, los gehts!</div>
           <div class="home-prog-icon">🔧</div>
           <div class="home-prog-h">Deine eigene Challenge</div>
@@ -153,7 +171,7 @@
           <div class="home-prog-link">Selbst zusammenstellen</div>
         </a>
 
-        <a class="home-prog p-monats" href="https://www.t7academy.com/challenges/#monats-container">
+        <a class="home-prog p-monats" href="https://www.laureo.at/challenges/#monats-container">
           <div class="home-prog-age">Vom T7 Expert kuratiert</div>
           <div class="home-prog-icon">🔥</div>
           <div class="home-prog-h">Challenge des Monats</div>
@@ -429,6 +447,6 @@
      SCRIPTS — engine for identity/Supabase (avatar URL only),
      vimeo tracker, and the single centralised home-page script.
 ============================================================ -->
-<script src="https://ute-t7academy.github.io/t7-widget-engine.js"></script>
-<script src="https://ute-t7academy.github.io/t7-vimeo-tracker.js"></script>
-<script src="https://ute-t7academy.github.io/t7-home.js?v=5"></script>
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-widget-engine.js"></script>
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-vimeo-tracker.js"></script>
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-home.js?v=6"></script>

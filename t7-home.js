@@ -1870,6 +1870,59 @@
   ============================================================ */
   var currentProfileId = null;
 
+  /* ============================================================
+     MESSAGING — one inbox (expert messages + certification feedback)
+     in a bar under the top nav, above the hero.
+  ============================================================ */
+  function initMessaging(profileId){
+    var bar = document.getElementById('homeMsgbar');
+    if (!bar || !profileId || !window.T7SB) return;
+    var toggle  = document.getElementById('homeMsgToggle');
+    var dot     = document.getElementById('homeMsgDot');
+    var thread  = document.getElementById('homeMsgThread');
+    var input   = document.getElementById('homeMsgInput');
+    var sendBtn = document.getElementById('homeMsgSend');
+    var playerName = (window.T7Identity && T7Identity.get() && T7Identity.get().name) || 'Spieler';
+    bar.style.display = 'block';
+
+    function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+    function refreshDot(){
+      T7SB.getUnreadCount(profileId, function(n){ dot.style.display = n>0 ? 'inline-block' : 'none'; });
+    }
+    function renderThread(){
+      T7SB.getInbox(profileId, function(list){
+        if (!list || !list.length){ thread.innerHTML = '<div class="home-msg-empty">Noch keine Nachrichten.</div>'; return; }
+        thread.innerHTML = list.map(function(m){
+          var mine = m.sender === 'player';
+          var when = m.ts ? new Date(m.ts).toLocaleString('de-AT') : '';
+          var who  = mine ? 'Du' : (m.sender_name || 'Experte');
+          var cls  = 'home-msg-bubble' + (m.kind === 'cert' ? ' cert' : '');
+          var tag  = m.kind === 'cert' ? '⭐ Zertifikat · ' : '';
+          return '<div class="home-msg-row'+(mine?' me':'')+'"><div class="'+cls+'">'+
+            '<div class="home-msg-text">'+esc(m.body)+'</div>'+
+            '<div class="home-msg-meta">'+tag+esc(who)+(when?' · '+when:'')+'</div>'+
+          '</div></div>';
+        }).join('');
+        thread.scrollTop = thread.scrollHeight;
+      });
+    }
+    function openPanel(){
+      bar.classList.add('open'); toggle.setAttribute('aria-expanded','true');
+      renderThread();
+      T7SB.markMessagesRead(profileId, function(){ refreshDot(); });
+    }
+    function closePanel(){ bar.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }
+    toggle.onclick = function(){ bar.classList.contains('open') ? closePanel() : openPanel(); };
+    function send(){
+      var v = (input.value||'').trim(); if (!v) return;
+      sendBtn.disabled = true;
+      T7SB.sendMessage(profileId, playerName, v, function(ok){ sendBtn.disabled = false; if (ok){ input.value=''; renderThread(); } });
+    }
+    sendBtn.onclick = send;
+    input.addEventListener('keydown', function(e){ if (e.key === 'Enter') send(); });
+    refreshDot();
+  }
+
   function boot(){
     initThemeAndNav();
     initHomeModals();
@@ -1882,6 +1935,7 @@
       initMyVideos(profileId);
       initDiary(profileId);
       initGoals(profileId);
+      initMessaging(profileId);
     });
   }
 

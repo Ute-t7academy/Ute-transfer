@@ -152,7 +152,7 @@
 }
 
 .lp-hero-image {
-  background: url('https://ute-t7academy.github.io/Assets/Home_Hero_Pic.png') center/cover no-repeat;
+  background: url('https://ute-laureo.github.io/t7academy-widgets/Assets/Home_Hero_Pic.png') center/cover no-repeat;
   position: relative;
 }
 .lp-hero-image::after {
@@ -1517,3 +1517,27 @@ body.home-modal-open { overflow: hidden; }
     padding: 24px 20px 32px;
   }
 }
+
+/* === Messaging bar (home: one inbox — expert messages + cert feedback) === */
+.home-msgbar{max-width:1200px;margin:14px auto 0;padding:0 clamp(16px,4vw,40px)}
+.home-msgbar-btn{width:100%;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;cursor:pointer;color:var(--text);font-family:inherit;font-size:14px;font-weight:700;transition:background .15s,border-color .15s}
+.home-msgbar-btn:hover{border-color:var(--accent)}
+.home-msgbar-ico{font-size:16px;line-height:1}
+.home-msgbar-label{flex:1;text-align:left}
+.home-msgbar-dot{width:9px;height:9px;border-radius:50%;background:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,.18);flex:0 0 auto}
+.home-msgbar-chev{opacity:.6;transition:transform .2s}
+.home-msgbar.open .home-msgbar-chev{transform:rotate(180deg)}
+.home-msgpanel{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;margin:-1px 0 0;padding:14px 16px}
+.home-msgbar.open .home-msgpanel{display:block}
+.home-msg-thread{max-height:340px;overflow:auto;margin-bottom:12px}
+.home-msg-empty{color:var(--muted);font-size:13px;padding:8px 0}
+.home-msg-row{margin-bottom:10px;display:flex}
+.home-msg-row.me{justify-content:flex-end}
+.home-msg-bubble{max-width:80%;padding:9px 12px;border-radius:12px;background:rgba(0,229,255,.10)}
+.home-msg-row.me .home-msg-bubble{background:var(--surface2)}
+.home-msg-bubble.cert{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.35)}
+.home-msg-text{font-size:13px;color:var(--text);line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.home-msg-meta{font-size:10.5px;color:var(--muted);margin-top:4px}
+.home-msg-compose{display:flex;gap:8px}
+.home-msg-compose input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;font-size:13px;font-family:inherit}
+.home-msg-compose button{background:var(--accent);color:#001018;border:none;border-radius:10px;padding:0 16px;font-weight:800;cursor:pointer;font-family:inherit}
