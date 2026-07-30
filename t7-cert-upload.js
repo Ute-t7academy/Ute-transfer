@@ -151,13 +151,13 @@
 
   // ── Pre-check: pending submission ────────────────────────
   function checkExisting(stars, email){
-    // Scope the duplicate check to THIS profile, not the shared account
-    // email — otherwise a sibling on the same email (e.g. Ute) blocks Fynn.
-    var profileId = window.T7_PROFILE_ID || null;
+    // Scope the duplicate check to THIS profile. `email` here is actually the
+    // resolved profile UUID (T7Identity gives the player_profiles.id), so it
+    // and window.T7_PROFILE_ID are the same value.
+    var profileId = window.T7_PROFILE_ID || email || null;
+    if (!profileId) return;
     var url = SB_URL + '/rest/v1/certification_submissions'
-      + '?' + (profileId
-          ? 'profile_id=eq.' + encodeURIComponent(profileId)
-          : 'player_email=eq.' + encodeURIComponent(email))
+      + '?profile_id=eq.' + encodeURIComponent(profileId)
       + '&stars=eq.' + stars
       + '&status=eq.pending'
       + '&select=id,submitted_at';
@@ -379,8 +379,9 @@
         'Prefer': 'return=representation'
       }),
       body: JSON.stringify({
-        player_email:       email,
-        profile_id:         window.T7_PROFILE_ID || null,
+        // `email` is the resolved profile UUID (player_profiles.id). Store it
+        // as profile_id — the single, correctly-named link used everywhere.
+        profile_id:         window.T7_PROFILE_ID || email || null,
         stars:              stars,
         video_path:         path,
         consent_confirmed:  true,
