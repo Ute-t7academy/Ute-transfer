@@ -359,11 +359,17 @@ function T7Challenge(cfg){
   function toggleRec(){
     if(!S.ms)return;
     if(!S.rec){
-      S.ch=[];var opt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].filter(function(t){return MediaRecorder.isTypeSupported(t);})[0]||'';
-      S.mr=new MediaRecorder(S.ms,opt?{mimeType:opt}:{});
+      S.ch=[];
+      // Firefox reports 'video/webm;codecs=vp8' as supported but then refuses to
+      // start when the stream carries an audio track. Probe codec strings that
+      // include an audio codec (opus) first, and fall back / try-catch safely.
+      var _cand=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm;codecs=opus,vp9','video/webm;codecs=opus,vp8','video/webm','video/mp4'];
+      var opt='';for(var _i=0;_i<_cand.length;_i++){if(window.MediaRecorder&&MediaRecorder.isTypeSupported(_cand[_i])){opt=_cand[_i];break;}}
+      try{S.mr=opt?new MediaRecorder(S.ms,{mimeType:opt}):new MediaRecorder(S.ms);}catch(_e){try{S.mr=new MediaRecorder(S.ms);}catch(_e2){var _er=el('camerr');if(_er){_er.style.display='block';_er.textContent='Aufnahme wird von diesem Browser nicht unterst\u00FCtzt.';}return;}}
       S.mr.ondataavailable=function(e){if(e.data&&e.data.size>0)S.ch.push(e.data);};
       S.mr.onstop=function(){var blob=new Blob(S.ch,{type:S.mr.mimeType||'video/webm'});var pv=el('prev');pv.src=URL.createObjectURL(blob);pv.load();el('camlive').style.display='none';el('prevw').style.display='block';hide('skiprow');stopCam();};
-      S.mr.start();S.rec=true;el('recbtn').textContent='\u2B1B Stopp';el('recbtn').style.background='#DC2626';el('rectim').style.display='block';
+      try{S.mr.start();}catch(_e3){var _er3=el('camerr');if(_er3){_er3.style.display='block';_er3.textContent='Aufnahme konnte nicht starten: '+(_e3&&_e3.message||_e3);}return;}
+      S.rec=true;el('recbtn').textContent='\u2B1B Stopp';el('recbtn').style.background='#DC2626';el('rectim').style.display='block';
     }else{if(S.mr&&S.mr.state!=='inactive')S.mr.stop();S.rec=false;el('recbtn').textContent='\u25CF Aufnahme';el('rectim').style.display='none';}
   }
   // Init player
@@ -586,7 +592,15 @@ function T7Cert(cfg){
   function resetCam(){stopCam();var v=el('camv');if(v)v.srcObject=null;el('camlive').style.display='none';var pw=el('prevw');if(pw)pw.style.display='none';var pv=el('prev');if(pv){pv.pause();pv.src='';}show('camcard');el('skiprow').style.display='flex';}
   function toggleRec(){
     if(!S.ms)return;
-    if(!S.rec){S.ch=[];var opt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].filter(function(t){return MediaRecorder.isTypeSupported(t);})[0]||'';S.mr=new MediaRecorder(S.ms,opt?{mimeType:opt}:{});S.mr.ondataavailable=function(e){if(e.data&&e.data.size>0)S.ch.push(e.data);};S.mr.onstop=function(){var blob=new Blob(S.ch,{type:S.mr.mimeType||'video/webm'});var pv=el('prev');pv.src=URL.createObjectURL(blob);pv.load();el('camlive').style.display='none';el('prevw').style.display='block';hide('skiprow');stopCam();};S.mr.start();S.rec=true;el('recbtn').textContent='\u2B1B Stopp';el('recbtn').style.background='#DC2626';el('rectim').style.display='block';}
+    if(!S.rec){S.ch=[];
+      // Firefox reports vp8 as supported but refuses to start with an audio
+      // track present \u2014 probe audio-inclusive codecs first, try-catch safely.
+      var _cand=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm;codecs=opus,vp9','video/webm;codecs=opus,vp8','video/webm','video/mp4'];
+      var opt='';for(var _i=0;_i<_cand.length;_i++){if(window.MediaRecorder&&MediaRecorder.isTypeSupported(_cand[_i])){opt=_cand[_i];break;}}
+      try{S.mr=opt?new MediaRecorder(S.ms,{mimeType:opt}):new MediaRecorder(S.ms);}catch(_e){try{S.mr=new MediaRecorder(S.ms);}catch(_e2){var _er=el('camerr');if(_er){_er.style.display='block';_er.textContent='Aufnahme wird von diesem Browser nicht unterst\u00FCtzt.';}return;}}
+      S.mr.ondataavailable=function(e){if(e.data&&e.data.size>0)S.ch.push(e.data);};S.mr.onstop=function(){var blob=new Blob(S.ch,{type:S.mr.mimeType||'video/webm'});var pv=el('prev');pv.src=URL.createObjectURL(blob);pv.load();el('camlive').style.display='none';el('prevw').style.display='block';hide('skiprow');stopCam();};
+      try{S.mr.start();}catch(_e3){var _er3=el('camerr');if(_er3){_er3.style.display='block';_er3.textContent='Aufnahme konnte nicht starten: '+(_e3&&_e3.message||_e3);}return;}
+      S.rec=true;el('recbtn').textContent='\u2B1B Stopp';el('recbtn').style.background='#DC2626';el('rectim').style.display='block';}
     else{if(S.mr&&S.mr.state!=='inactive')S.mr.stop();S.rec=false;el('recbtn').textContent='\u25cf Aufnahme';el('rectim').style.display='none';}
   }
   // Final-video submission is handled entirely by T7CertUpload (see t7-cert-upload.js).
