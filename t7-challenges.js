@@ -92,6 +92,40 @@ T7.loadMonats('monats-container');
   /* Pretty-print difficulty / category strings */
   function clean(s){return (s==null?'':String(s)).trim();}
 
+  /* The videos.players column is a JSON array of superstar names, e.g.
+       ["Dembele","Barcola","Messi"]
+     PostgREST returns it as a real JS array. This helper is defensive so the
+     builder keeps working during the migration away from player_1/2/3:
+       - already an array  -> returned as-is
+       - a JSON string     -> parsed
+       - a delimited string -> split on comma/semicolon, quotes/brackets stripped
+     Always returns a plain array of (possibly untrimmed) name strings. */
+  function asPlayerArray(v){
+    if(Array.isArray(v))return v;
+    if(v==null)return [];
+    if(typeof v==='string'){
+      var s=v.trim();
+      if(!s)return [];
+      try{var j=JSON.parse(s);if(Array.isArray(j))return j;}catch(e){}
+      return s.replace(/^[\[{]/,'').replace(/[\]}]$/,'')
+        .split(/[;,]/)
+        .map(function(x){return x.replace(/^\s*["']?/,'').replace(/["']?\s*$/,'');})
+        .filter(Boolean);
+    }
+    return [];
+  }
+
+  /* Does a video row feature any of the currently selected superstars?
+     Compared trimmed + case-insensitively so trailing spaces or casing in the
+     stored data (e.g. "Cubarsi ") never hide a match. */
+  function rowHasSelectedPlayer(row){
+    if(!state.player.size)return true;
+    var names=asPlayerArray(row.players).map(function(p){return clean(p).toLowerCase();});
+    return Array.from(state.player).some(function(sel){
+      return names.indexOf(clean(sel).toLowerCase())>=0;
+    });
+  }
+
   /* Stable, order-independent signature for a set of picked video rows.
      Uses the videos-table id (falls back to vimeo_code), sorts, and hashes
      to a short base36 string. Same video set -> same signature -> same
@@ -156,23 +190,19 @@ T7.loadMonats('monats-container');
       var cats=Array.from(state.category).map(function(v){return '"'+v+'"';}).join(',');
       q.push('category=in.('+cats+')');
     }
-    /* Player: search across player_1/2/3 */
-    if(state.player.size){
-      var pl=Array.from(state.player);
-      var orPl=[];
-      pl.forEach(function(p){
-        var pe='"'+p+'"';
-        orPl.push('player_1.eq.'+pe,'player_2.eq.'+pe,'player_3.eq.'+pe);
-      });
-      q.push('or=('+orPl.join(',')+')');
-    }
+    /* Player: the `players` column is a JSON array of superstar names
+       (e.g. ["Dembele","Barcola"]). It is filtered client-side in refresh()
+       via rowHasSelectedPlayer, so trailing spaces / casing / array parsing
+       are all handled robustly — no server-side player clause is added here. */
     if(state.title.trim()){
       q.push('or=(title_DE.ilike.*'+encodeURIComponent(state.title.trim())+'*,title_EN.ilike.*'+encodeURIComponent(state.title.trim())+'*)');
     }
     /* Only videos that actually have a vimeo_code */
     q.push('vimeo_code=not.is.null');
-    q.push('select=id,"title_DE","title_EN",vimeo_code,vimeo_url,stars,sevens,difficulty,category,player_1,player_2,player_3');
-    q.push('limit=30');
+    q.push('select=id,"title_DE","title_EN",vimeo_code,vimeo_url,stars,sevens,difficulty,category,players');
+    /* Higher cap so client-side player filtering still has enough rows to
+       narrow from when a superstar is the only (or a broad) filter. */
+    q.push('limit=200');
     return q.join('&');
   }
 
@@ -200,7 +230,9 @@ T7.loadMonats('monats-container');
     fetch(SB_URL+'/rest/v1/videos?'+buildQuery(),{headers:hdr()})
       .then(function(r){return r.json();})
       .then(function(rows){
-        lastMatches=Array.isArray(rows)?rows:[];
+        var raw=Array.isArray(rows)?rows:[];
+        /* Superstar filter is applied here, client-side (see buildQuery note). */
+        lastMatches=state.player.size?raw.filter(rowHasSelectedPlayer):raw;
         if(!lastMatches.length){
           countEl.innerHTML='Keine Videos gefunden &mdash; passe deine Filter an';
           btn.disabled=true;
@@ -335,7 +367,7 @@ T7.loadMonats('monats-container');
 
   /* Populate Stars, Sevens, difficulty, category, player from Supabase */
   function loadDistinct(){
-    fetch(SB_URL+'/rest/v1/videos?select=stars,sevens,difficulty,category,player_1,player_2,player_3&vimeo_code=not.is.null',{headers:hdr()})
+    fetch(SB_URL+'/rest/v1/videos?select=stars,sevens,difficulty,category,players&vimeo_code=not.is.null',{headers:hdr()})
       .then(function(r){return r.json();})
       .then(function(rows){
         if(!Array.isArray(rows))return;
@@ -345,7 +377,7 @@ T7.loadMonats('monats-container');
           if(r.sevens!=null) sevens[String(r.sevens)]=1;
           var d=clean(r.difficulty);if(d)diff[d]=1;
           var c=clean(r.category);if(c)cat[c]=1;
-          [r.player_1,r.player_2,r.player_3].forEach(function(p){var n=clean(p);if(n)pl[n]=1;});
+          asPlayerArray(r.players).forEach(function(p){var n=clean(p);if(n)pl[n]=1;});
         });
         var starSort=function(a,b){return Number(a)-Number(b);};
         fillStarPills('bf-stars',Object.keys(stars).sort(starSort),'⭐');
