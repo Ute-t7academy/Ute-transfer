@@ -1,0 +1,166 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T7 Academy — Freemium</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;family=Antonio:wght@400;500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;display=swap" rel="stylesheet">
+<link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
+
+<!-- Outside-environment stylesheet (replaces t7-base.css here and contains
+     all per-page styling that used to live in the inline <style> block). -->
+<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-outside.css?v=1">
+
+<!-- Supabase SDK (Freemium fetches stars/sevens/challenges from supabase) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<!-- Outside-environment script (theme toggle + Freemium logic). Loads before
+     the body so its synchronous early-theme block runs first to avoid FOUC.
+     The rest is wrapped in an IIFE that waits for DOMContentLoaded. -->
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-outside.js?v=1"></script>
+
+
+    <!-- TOP NAV -->
+    <nav class="topnav">
+        <div class="nav-logo">
+            <a href="/"><img src="https://ute-laureo.github.io/t7academy-widgets/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
+        </div>
+        <div class="nav-ctas">
+            <a href="/" class="nav-cta nav-cta-secondary">Zur Startseite</a>
+            <a href="https://www.laureo.at/subscription" class="nav-cta nav-cta-primary">Direkt zur T7 Academy</a>
+        </div>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="lp-hero">
+        <div class="lp-hero-grid">
+            <div class="lp-hero-text">
+                <div class="lp-hero-eye">T7 Academy · Freemium</div>
+                <h1>Willkommen<span id="greetingName">!</span></h1>
+                <p id="welcomeMsg">Schön, dass du da bist. Wie heißt du?</p>
+
+                <!-- shown if no name -->
+                <div class="name-setup" id="nameSetup">
+                    <input class="name-input" id="nameInput" type="text" placeholder="Dein Name" maxlength="30" autocomplete="given-name">
+                    <button class="name-save" id="nameSave">Los geht's →</button>
+                </div>
+
+                <!-- shown once name is set -->
+                <div class="player-stats" id="playerStats" hidden="">
+                    <div class="xp-badge">
+                        <span class="xp-num" id="xpNum">0</span>
+                        <span class="xp-label">XP gesammelt</span>
+                    </div>
+                    <button class="change-name" id="changeName">Nicht <span id="nameDisplay">…</span>? Name ändern</button>
+                </div>
+            </div>
+            <!-- Freemium uses the Challenges hero image — add the modifier class. -->
+            <div class="lp-hero-image lp-hero-image-challenges" aria-hidden="true"></div>
+        </div>
+    </section>
+
+    <!-- OVERVIEW: three cards (the only "first view" content) -->
+    <section class="lp-section section-overview">
+        <div class="lp-wrap">
+            <div class="overview-cards">
+                <a href="#section-stars" class="overview-card" data-section="stars">
+                    <div class="overview-step">01</div>
+                    <div class="overview-tag">Sterne · Level 1 &amp; 2</div>
+                    <h3 class="overview-title">Erste <em>Sterne-Skills</em>.</h3>
+                    <p class="overview-desc">Die Freestyle-Basics. Zwei Sterne sind dein Ziel.</p>
+                    <span class="overview-arrow">Tricks ansehen →</span>
+                </a>
+                <a href="#section-sevens" class="overview-card" data-section="sevens">
+                    <div class="overview-step">02</div>
+                    <div class="overview-tag">Sevens · Level 1 &amp; 2</div>
+                    <h3 class="overview-title">Das <em>Technik-Fundament</em>.</h3>
+                    <p class="overview-desc">Pass, Schuss, Annahme — die Skills für jedes Spiel.</p>
+                    <span class="overview-arrow">Übungen ansehen →</span>
+                </a>
+                <a href="#section-challenges" class="overview-card overview-card-challenge" data-section="challenges">
+                    <div class="overview-step">03</div>
+                    <div class="overview-tag"><span class="challenge-icon">⚡</span> Skill-Pfad</div>
+                    <h3 class="overview-title">Deine erste <em>eigene Challenge</em>.</h3>
+                    <p class="overview-desc">3-, 4- &amp; 3 bis 5-Sterne-Skills plus eine Sevens Übung Level 3. <strong>Sammle XP.</strong></p>
+                    <span class="overview-arrow">Pfad öffnen →</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 1: STARS 1—2 (hidden until card clicked) -->
+    <section class="lp-section" id="section-stars" hidden="">
+        <div class="lp-wrap">
+            <div class="section-head">
+                <button class="section-back" type="button">← Übersicht</button>
+                <div class="lp-eye">Sterne · 1 und 2</div>
+            </div>
+            <h2 class="lp-title">Deine <em class="accent">ersten Skills</em>.</h2>
+            <p class="lp-sub" id="t-stars-sub">Starte mit den klassischen Freestyle-Moves. Zwei Sterne sind dein erstes Ziel.</p>
+            <div class="video-grid" id="grid-stars"><div class="grid-status">Lädt…</div></div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: SEVENS 1—2 (hidden until card clicked) -->
+    <section class="lp-section" id="section-sevens" hidden="">
+        <div class="lp-wrap">
+            <div class="section-head">
+                <button class="section-back" type="button">← Übersicht</button>
+                <div class="lp-eye">Sevens · Level 1 und 2</div>
+            </div>
+            <h2 class="lp-title">Das <em class="accent">Technik-Fundament</em>.</h2>
+            <p class="lp-sub" id="t-sevens-sub">Pass, Schuss, Annahme — die Technik, die du jedes Spiel brauchst.</p>
+            <div class="video-grid" id="grid-sevens"><div class="grid-status">Lädt…</div></div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: SKILL-PFAD (hidden until card clicked) -->
+    <section class="lp-section lp-section-challenge" id="section-challenges" hidden="">
+        <div class="lp-wrap">
+            <div class="section-head">
+                <button class="section-back" type="button">← Übersicht</button>
+                <div class="lp-eye lp-eye-challenge"><span class="challenge-icon">⚡</span> Skill-Pfad</div>
+            </div>
+            <h2 class="lp-title" id="t-challenge-title">Deine erste <em class="challenge-word">Challenge</em>.</h2>
+            <p class="lp-sub" id="t-challenge-sub">Jetzt wird's ernst. 3-, 4- und 5-Sterne Freestyle plus Sevens Level 3. <strong>Jeder Übungs-Klick gibt dir +25 XP.</strong> Übe oft — XP gibt's immer wieder.</p>
+
+            <!-- progress strip -->
+            <div class="skill-path-progress" id="skillProgress" hidden="">
+                <div class="skill-path-bar"><div class="skill-path-bar-fill" id="skillProgressFill"></div></div>
+                <div class="skill-path-stats"><strong id="skillDone">0</strong>/<span id="skillTotal">0</span> geübt</div>
+            </div>
+
+            <div class="skill-path" id="grid-challenges"><div class="grid-status">Lädt…</div></div>
+        </div>
+    </section>
+
+    <!-- CLOSER -->
+    <section class="lp-section lp-closer">
+        <div class="lp-wrap">
+            <div class="lp-closer-grid">
+                <div class="lp-closer-text">
+                    <div class="lp-eye">Jetzt richtig durchstarten?</div>
+                    <h2 class="lp-title" id="t-closer-title">Bist du soweit? Jetzt mit der <em class="gold">Academy</em> starten!</h2>
+                    <p class="lp-closer-sub">Über 200 Tricks. Sterne-Zertifikat vom Experten. Tägliche Challenges mit XP-Rangliste. Alles, was du brauchst, um wirklich gut zu werden.</p>
+                </div>
+                <div class="lp-closer-ctas">
+                    <a href="https://www.laureo.at/subscription" class="lp-closer-cta lp-closer-primary">Jetzt Academy starten →</a>
+                    <a href="/" class="lp-closer-cta lp-closer-secondary">Mehr über T7</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIDEO MODAL -->
+    <div class="fm-modal" id="fmModal" role="dialog" aria-modal="true">
+        <div class="fm-modal-inner">
+            <button class="fm-modal-back" id="fmModalBack" type="button">← Zurück</button>
+            <div class="fm-video-wrap" id="fmModalVideo"></div>
+            <div class="fm-modal-title" id="fmModalTitle"></div>
+            <div class="fm-modal-subtitles" id="fmModalSubtitles" hidden=""></div>
+            <div class="fm-modal-meta" id="fmModalMeta"></div>
+            <div class="fm-modal-hint" id="fmModalHint" hidden=""></div>
+        </div>
+    </div>
