@@ -263,7 +263,7 @@
   border: none;
   border-bottom: 2px solid transparent;
   border-radius: 0;
-  background: rgba(var(--cat-rgb), .05);
+  background: transparent;   /* Home cards rest transparent — tint only on hover/active */
   color: var(--text);
   font-family: 'Open Sans', sans-serif;
   text-align: left;
@@ -275,7 +275,7 @@
   transition: background .15s, border-color .15s;
 }
 .ch-cat::-moz-focus-inner { border: 0; }
-.ch-cat:hover { background: rgba(var(--cat-rgb), .09); }
+.ch-cat:hover { background: rgba(var(--cat-rgb), .05); }
 .ch-cat:focus { outline: none; }
 .ch-cat:focus-visible {
   outline: 2px solid var(--cat-color);
@@ -283,7 +283,7 @@
 }
 .ch-cat.active {
   border-bottom-color: var(--cat-color);
-  background: rgba(var(--cat-rgb), .13);
+  background: rgba(var(--cat-rgb), .08);
 }
 
 .ch-cat-icon { font-size: 30px; line-height: 1; color: var(--cat-color); }
@@ -560,6 +560,7 @@
 .t7w .cr {
   background: transparent;
   border-color: var(--lp-rule);
+  border-radius: 14px;          /* match Home's card radius (.home-prog / .bf-card) */
   box-shadow: none;
 }
 .t7w .cr::before { content: none; }
@@ -575,6 +576,7 @@
 .t7w .t7-panel {
   background: transparent;
   border-color: var(--lp-rule);
+  border-radius: 0 0 14px 14px;   /* match the row's 14px corners */
 }
 
 /* Zertifikate widget uses a gradient-clip border trick (a layered
@@ -649,16 +651,103 @@
    instead of a mixed cyan/gold look.
 ============================================================ */
 
-/* Sidebar "Sterne Zertifikat" card (T7Badge) — only the earned
-   player name was still cyan; everything else was already gold. */
-.t7-cert-name {
+/* ------------------------------------------------------------
+   Sterne-Zertifikat card (T7Badge) — realigned to the Home hero
+   (.home-hero-stars in t7-home.css). The base.css version is a
+   framed "coin": a gold gradient border, two gradient divider
+   lines and a drop-shadowed number. Home speaks a flat vocabulary
+   instead — no frame, no rules, Antonio type, one clean gold ★
+   beside a big gold number, an uppercase eyebrow and sub. We adopt
+   that here so Challenges and Home render the certificate the same.
+------------------------------------------------------------ */
+
+/* Flat certificate: drop the gradient border, fill and shadow, but
+   keep a neutral hairline frame + rounded corners so it still reads
+   as a "certificate" rather than loose text. Same border language as
+   Home's cards (.home-prog / .bf-card). */
+.t7-cert {
+  background: none !important;
+  background-image: none !important;
+  border: 1px solid var(--lp-gold) !important;
+  border-radius: 16px;
+  box-shadow: none !important;
+  padding: 28px 22px;
+  overflow: visible;
+}
+/* Remove the three gradient divider lines. */
+.t7-cert-top,
+.t7-cert-bottom,
+.t7-cert-line { display: none !important; }
+
+/* Eyebrow ("T7 Academy Zertifikat") = .home-hero-stars-eye */
+.t7-cert-brand {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  margin: 0 0 16px;
+}
+
+/* Number + star row = .home-hero-stars-big (baseline aligned) */
+.t7-cert-star-block {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.t7-cert-num {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: clamp(64px, 8vw, 88px);
+  line-height: .85;
   color: var(--lp-gold);
-  text-shadow: 0 0 18px rgba(255, 215, 0, .5);
+  text-shadow: none;
 }
-[data-theme="light"] .t7-cert-name {
-  color: #9A6708;
-  text-shadow: 0 0 14px rgba(154, 103, 8, .3);
+
+/* One flat ★ in the shared gold = .home-hero-stars-icon.
+   The widget engine prints a multicolor ⭐ emoji; hide it and
+   inject a crisp, theme-aware text star instead. */
+.t7-cert-stars {
+  font-size: 0;
+  filter: none;
 }
+.t7-cert-stars::before {
+  content: '\2605';                   /* ★ */
+  font-size: clamp(34px, 5vw, 46px);
+  line-height: 1;
+  color: var(--lp-gold);
+  filter: drop-shadow(0 0 18px rgba(255, 215, 0, .45));
+}
+[data-theme="light"] .t7-cert-stars::before {
+  filter: drop-shadow(0 0 12px rgba(202, 131, 9, .4));
+}
+
+/* Player name — the gold identity line, in the shared gold
+   (clean #ca8309 in light instead of the old muddy brown). */
+.t7-cert-name {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: var(--lp-gold);
+  text-shadow: none;
+  margin-bottom: 8px;
+}
+[data-theme="light"] .t7-cert-name { color: var(--lp-gold); }
+
+/* "Zertifiziert von …" = .home-hero-stars-sub */
+.t7-cert-official {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+  line-height: 1.5;
+}
+.t7-cert-official strong { color: var(--lp-gold); font-weight: 600; }
 
 /* Zertifikate module-list widget — re-point its accent variables
    from cyan to gold so badge / button / XP pill / avatar all pick
@@ -849,6 +938,28 @@
 .ch-sidebar .sb-label.gold { color: var(--lp-gold); }
 [data-theme="light"] .ch-sidebar .sb-label { color: #0E7490; }
 [data-theme="light"] .ch-sidebar .sb-label.gold { color: #9A6708; }
+
+/* Certificate title ("⭐ Sterne Zertifikat") — swap the leading dash
+   for a full-width gold underline so it reads as the framed card's
+   title. display:flex (block-level) makes the underline span the whole
+   sidebar column, not just the text. */
+.ch-sidebar .sb-label.gold {
+  display: flex;
+  border-bottom: 2px solid currentColor;
+  padding-bottom: 10px;
+}
+.ch-sidebar .sb-label.gold::before { display: none; }
+
+/* Fortschritt stat tiles ("306 GESAMT XP" / "+151 DIESE WOCHE") —
+   base.css renders these as solid white/tinted mini-boxes. Flatten
+   them to the same transparent + hairline card language Home uses,
+   so nothing in the sidebar keeps a filled white background. */
+.ch-sidebar .po-stat-tile,
+.ch-sidebar .t7f-stat-card {
+  background: transparent !important;
+  border: 1px solid var(--lp-rule) !important;
+  border-radius: 10px;
+}
 
 
 /* ============================================================
