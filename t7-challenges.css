@@ -901,10 +901,15 @@
    Home uses for every section eyebrow.
 ============================================================ */
 .ch-sidebar .sb-card {
-  background: transparent;
-  border: none;
+  /* !important: on the live WP site t7-challenges.css is enqueued BEFORE
+     t7-base.css, so base's [data-theme="light"] .sb-card{background:#fff}
+     would otherwise win the equal-specificity tie and repaint the card
+     white. Force transparent in both themes. */
+  background: transparent !important;
+  border: none !important;
   border-radius: 0;
   padding: 0;
+  box-shadow: none !important;
 }
 .ch-sidebar .sb-card + .sb-card {
   margin-top: 28px;
@@ -950,15 +955,24 @@
 }
 .ch-sidebar .sb-label.gold::before { display: none; }
 
-/* Fortschritt stat tiles ("306 GESAMT XP" / "+151 DIESE WOCHE") —
-   base.css renders these as solid white/tinted mini-boxes. Flatten
-   them to the same transparent + hairline card language Home uses,
-   so nothing in the sidebar keeps a filled white background. */
+/* Fortschritt + Rangliste inner boxes — base.css gives these tinted
+   (cyan) or white fills that differ per widget and per theme (the
+   .t7f-hero / .t7f-streak / .t7f-stat-card boxes and every .rank-row).
+   Strip the fills, borders and shadows so the whole sidebar reads like
+   the certificate: content sitting on the page, no boxes. !important
+   because base.css is enqueued AFTER this file on the live site, so its
+   [data-theme="light"] .rank-row{background:#f7fafc} etc. would win the
+   cascade otherwise. Avatars (.t7f-avatar / .r-avatar) and the streak
+   dashes (.t7f-streak-day) keep their fills — they're content, not
+   card chrome. */
+.ch-sidebar .t7f-hero,
+.ch-sidebar .t7f-streak,
+.ch-sidebar .t7f-stat-card,
 .ch-sidebar .po-stat-tile,
-.ch-sidebar .t7f-stat-card {
+.ch-sidebar .rank-row {
   background: transparent !important;
-  border: 1px solid var(--lp-rule) !important;
-  border-radius: 10px;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 
