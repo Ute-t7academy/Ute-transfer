@@ -242,28 +242,27 @@
 .ch-cat-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  margin-top: 10px;
-  border-top: 1px solid var(--lp-rule);
-  border-bottom: 1px solid var(--lp-rule);
+  gap: 18px;
+  margin-top: 18px;
 }
 @media (max-width: 880px) { .ch-cat-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .ch-cat-grid { grid-template-columns: 1fr; } }
 
+/* Same silhouette as Home's .home-prog card: neutral hairline box at
+   rest, color only shows up on hover/active — not the tab-strip look
+   this used to have (shared top/bottom rule, no individual border). */
 .ch-cat {
   --cat-color: var(--accent);
   --cat-rgb: 0, 229, 255;
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 6px;
   align-items: flex-start;
-  padding: 20px 18px 18px;
+  padding: 20px 22px 22px;
   margin: 0;
-  border: none;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  background: transparent;   /* Home cards rest transparent — tint only on hover/active */
+  border: 1.5px solid var(--lp-rule);
+  border-radius: 14px;
+  background: transparent;
   color: var(--text);
   font-family: 'Open Sans', sans-serif;
   text-align: left;
@@ -272,42 +271,46 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   outline: none;
-  transition: background .15s, border-color .15s;
+  transition: transform .2s, border-color .18s, background .18s;
 }
 .ch-cat::-moz-focus-inner { border: 0; }
-.ch-cat:hover { background: rgba(var(--cat-rgb), .05); }
+.ch-cat:hover {
+  transform: translateY(-2px);
+  border-color: var(--cat-color);
+  background: rgba(128, 140, 160, .04);
+}
 .ch-cat:focus { outline: none; }
 .ch-cat:focus-visible {
   outline: 2px solid var(--cat-color);
   outline-offset: -2px;
 }
 .ch-cat.active {
-  border-bottom-color: var(--cat-color);
-  background: rgba(var(--cat-rgb), .08);
+  border-color: var(--cat-color);
+  background: rgba(var(--cat-rgb), .06);
 }
 
-.ch-cat-icon { font-size: 30px; line-height: 1; color: var(--cat-color); }
+.ch-cat-icon { font-size: 38px; line-height: 1; margin-bottom: 14px; color: var(--cat-color); }
 .ch-cat-title {
   font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 900;
   letter-spacing: -.01em;
   color: var(--text);
   line-height: 1.2;
-  margin-top: 2px;
+  margin-bottom: 10px;
 }
-.ch-cat-sub { font-size: 12px; color: var(--lp-muted); line-height: 1.4; }
-/* Eyebrow-style meta, matching .home-prog-age exactly. */
+.ch-cat-sub { font-size: 13px; color: var(--lp-muted); line-height: 1.5; flex: 1; }
+/* Eyebrow-style meta, matching .home-prog-link (color + trailing arrow). */
 .ch-cat-count {
-  margin-top: auto;
-  padding-top: 10px;
+  margin-top: 18px;
   font-family: 'Antonio', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: .16em;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--cat-color);
 }
+.ch-cat-count::after { content: ' →'; }
 
 .ch-cat-tech    { --cat-color: var(--accent);  --cat-rgb: 0, 229, 255; }
 .ch-cat-cert    { --cat-color: var(--lp-gold); --cat-rgb: 255, 215, 0; }
@@ -977,42 +980,18 @@
 
 
 /* ============================================================
-   9. MOBILE CATEGORY TABS — Technikschule / Zertifikate / Builder
-   / Monats were indistinguishable once the grid collapses to a
-   single column: same padding, no divider between rows, and the
-   only "active" cue (a bottom border) doesn't read in a stacked
-   list. Below 520px this switches to a clear horizontal list —
-   icon + title on one line, a hairline divider between each row,
-   and the active tab marked with a left accent bar instead. The
-   resting-state color tint from §2 carries through automatically.
+   9. MOBILE CATEGORY CARDS — Technikschule / Zertifikate / Builder
+   / Monats stay genuine home-prog cards at every width (§2's grid
+   already collapses to 1 column below 520px) — just compacted a
+   touch so a full-height card doesn't feel oversized stacked
+   single-file: smaller icon, tighter padding, no dead space below
+   the intro line before the eyebrow.
 ============================================================ */
 @media (max-width: 520px) {
-  .ch-cat-grid { border-bottom: none; }
-  .ch-cat {
-    flex-direction: row;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 4px 16px 12px;
-    border-bottom: 1px solid var(--lp-rule);
-    border-left: 3px solid transparent;
-  }
-  .ch-cat:last-child { border-bottom: none; }
-  .ch-cat.active {
-    border-bottom-color: var(--lp-rule);
-    border-left-color: var(--cat-color);
-    background: rgba(var(--cat-rgb), .13);
-  }
-  .ch-cat-icon { font-size: 24px; flex-shrink: 0; }
-  .ch-cat-title { margin-top: 0; }
-  .ch-cat-sub { display: none; }
-  .ch-cat-count {
-    margin-top: 0;
-    margin-left: auto;
-    padding-top: 0;
-    padding-left: 10px;
-    text-align: right;
-    flex-shrink: 0;
-  }
+  .ch-cat { padding: 16px 18px 18px; }
+  .ch-cat-icon { font-size: 28px; margin-bottom: 10px; }
+  .ch-cat-title { margin-bottom: 6px; }
+  .ch-cat-count { margin-top: 12px; }
 }
 
 
@@ -1169,6 +1148,65 @@
   border-color: rgba(194, 65, 12, .4);
   background: rgba(194, 65, 12, .1);
 }
+
+
+/* ============================================================
+   15. SEARCH & FILTER DROPDOWNS — same "neutral hairline at rest,
+   color only on interaction" principle as §2's category cards.
+   base.css gives the search input and every .pill-toggle a
+   permanent cyan (dark) / teal (light) border and tint — too loud
+   for a resting control, and inconsistent with the rest of the
+   page now that §2/§8 are flat and hairline-bordered. Border and
+   fill drop to var(--lp-rule) at rest; the identity color only
+   shows up on hover, focus, or once a filter is actually applied
+   (.has-active) — exactly like .ch-cat's hover/active states.
+   .has-personal (the red "liked"/"vorgemerkt" filter) is a status
+   color, not page chrome, so it's left untouched.
+   !important beats base.css's equal-specificity rule on the live
+   site, where this file is enqueued before it (see §8's note).
+============================================================ */
+.search-wrap input,
+.pill-toggle {
+  border-color: var(--lp-rule) !important;
+  background: rgba(128, 140, 160, .05) !important;
+}
+.search-wrap input:hover,
+.pill-toggle:hover {
+  border-color: var(--accent) !important;
+  background: rgba(0, 229, 255, .05) !important;
+}
+.search-wrap input:focus {
+  border-color: var(--accent) !important;
+  background: rgba(0, 229, 255, .08) !important;
+}
+.pill-toggle.has-active {
+  border-color: var(--accent) !important;
+  background: rgba(0, 229, 255, .1) !important;
+  color: var(--accent);
+}
+.pill-dropdown { border-color: var(--lp-rule) !important; }
+.pill-divider { background: var(--lp-rule) !important; }
+
+[data-theme="light"] .search-wrap input,
+[data-theme="light"] .pill-toggle {
+  border-color: var(--lp-rule) !important;
+  background: rgba(15, 23, 42, .03) !important;
+}
+[data-theme="light"] .search-wrap input:hover,
+[data-theme="light"] .pill-toggle:hover {
+  border-color: #0891B2 !important;
+  background: rgba(8, 145, 178, .06) !important;
+}
+[data-theme="light"] .search-wrap input:focus {
+  border-color: #0891B2 !important;
+  background: rgba(8, 145, 178, .08) !important;
+}
+[data-theme="light"] .pill-toggle.has-active {
+  border-color: #0891B2 !important;
+  background: rgba(8, 145, 178, .1) !important;
+  color: #0891B2;
+}
+
 
 /* ============================================================
    Utility classes — moved out of Challenges.html so the markup
