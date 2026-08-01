@@ -239,14 +239,26 @@
 
    (See §9 for the mobile single-column layout.)
 ============================================================ */
+/* .ch-cat-grid's column count needs to react to its own rendered
+   width, not the viewport: above 960px the sidebar is present and
+   .ch-main (this grid's parent) is only ~2/3 of the viewport, so a
+   viewport-based @media check stays "wide" long after the grid's
+   actual box has gone narrow — the row of 4 cards then refuses to
+   shrink below its min-content and spills out over the sidebar
+   column (visible as the Sterne-Zertifikat card overlapping the
+   category tiles at ~1000-1300px viewports). A container query
+   keyed to .ch-main's own inline size fixes that for every layout
+   mode (sidebar present or not) without hand-tuned viewport magic
+   numbers. */
+.ch-main { container-type: inline-size; }
 .ch-cat-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin-top: 18px;
 }
-@media (max-width: 880px) { .ch-cat-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 520px) { .ch-cat-grid { grid-template-columns: 1fr; } }
+@container (max-width: 880px) { .ch-cat-grid { grid-template-columns: repeat(2, 1fr); } }
+@container (max-width: 520px) { .ch-cat-grid { grid-template-columns: 1fr; } }
 
 /* Same silhouette as Home's .home-prog card: neutral hairline box at
    rest, color only shows up on hover/active — not the tab-strip look
