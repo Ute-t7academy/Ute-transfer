@@ -970,8 +970,8 @@
 .ch-sidebar .t7f-stat-card,
 .ch-sidebar .po-stat-tile,
 .ch-sidebar .rank-row {
-  background: transparent !important;
-  border: none !important;
+  background: transparent !important;   /* drop the tinted/white fills */
+  border: 1px solid var(--lp-rule) !important;  /* keep a neutral hairline frame, like the certificate */
   box-shadow: none !important;
 }
 
