@@ -420,21 +420,47 @@ T7.loadMonats('monats-container');
 (function Tabs(){
   var grid=document.getElementById('catGrid');
   if(!grid)return;
+
+  /* Activate a tab by name (data-tab). Optionally scroll into view. */
+  function activateTab(tab,scroll){
+    var btn=grid.querySelector('.ch-cat[data-tab="'+tab+'"]');
+    if(!btn)return false;
+    document.querySelectorAll('.ch-cat').forEach(function(c){c.classList.toggle('active',c===btn);});
+    document.querySelectorAll('.ch-panel').forEach(function(p){
+      p.classList.toggle('active',p.dataset.panel===tab);
+    });
+    if(scroll){
+      setTimeout(function(){grid.scrollIntoView({behavior:'smooth',block:'start'});},50);
+    }
+    return true;
+  }
+
   grid.addEventListener('click',function(ev){
     var btn=ev.target.closest('.ch-cat');
     if(!btn)return;
     var tab=btn.dataset.tab;
     if(!tab)return;
-    /* toggle tab + panel */
-    document.querySelectorAll('.ch-cat').forEach(function(c){c.classList.toggle('active',c===btn);});
-    document.querySelectorAll('.ch-panel').forEach(function(p){
-      p.classList.toggle('active',p.dataset.panel===tab);
-    });
     /* scroll grid into view on mobile so the panel below is visible */
-    if(window.innerWidth<880){
-      setTimeout(function(){grid.scrollIntoView({behavior:'smooth',block:'start'});},50);
-    }
+    activateTab(tab,window.innerWidth<880);
   });
+
+  /* Deep-link support: open the tab named in the URL hash.
+     Accepts #technik / #zertifikate / #builder / #monats and also the
+     legacy container ids (#ch-container, #cert-container,
+     #builder-container, #monats-container). */
+  var HASH_MAP={
+    'technik':'technik','zertifikate':'zertifikate','builder':'builder','monats':'monats',
+    'ch-container':'technik','cert-container':'zertifikate',
+    'builder-container':'builder','monats-container':'monats'
+  };
+  function openFromHash(scroll){
+    var h=(location.hash||'').replace(/^#/,'');
+    if(!h)return;
+    var tab=HASH_MAP[h];
+    if(tab)activateTab(tab,scroll);
+  }
+  openFromHash(true);
+  window.addEventListener('hashchange',function(){openFromHash(true);});
 })();
 
 /* ============================================================
