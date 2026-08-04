@@ -594,6 +594,24 @@
   border-radius: 0 0 14px 14px;   /* match the row's 14px corners */
 }
 
+/* Light-mode fix: base.css sets [data-theme="light"] .t7w .cr /
+   .t7-panel to a teal border (rgba(8,145,178,.45)); that light-
+   prefixed selector (0,3,0) outranks the un-prefixed neutral rules
+   above (0,2,0), so a blue/green hairline leaked onto every generic
+   widget row + drill panel (Technik / Builder / Monats) in light
+   mode — most visibly clashing with the orange "Challenge des
+   Monats" section. Re-pin to the neutral hairline in both themes;
+   keep the section-colored hover. !important beats base.css, which
+   is enqueued AFTER this file on the live site (see §8's note). */
+[data-theme="light"] .t7w .cr,
+[data-theme="light"] .t7w .cr.open,
+[data-theme="light"] .t7w .t7-panel {
+  border-color: var(--lp-rule) !important;
+}
+[data-theme="light"] .t7w .cr:hover {
+  border-color: rgba(var(--wa-rgb), .5) !important;
+}
+
 /* Zertifikate widget uses a gradient-clip border trick (a layered
    background-image) for its gold frame in BOTH themes — including
    a light-mode-specific version in t7-base.css that would otherwise

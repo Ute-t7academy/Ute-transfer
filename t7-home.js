@@ -554,7 +554,7 @@
           var mName = (mRow && (mRow.name || '').trim()) || 'Challenge des Monats';
           elMon.innerHTML = xpHeader(catXP(isMonats)) +
             ((mTotal || mDone)
-              ? barRow('🔥 ' + esc(mName), mDone, (mTotal || '?'), 'cyan')
+              ? barRow('🔥 ' + esc(mName), mDone, (mTotal || '?'), 'monats')
               : '<div class="po-empty">Diesen Monat noch keine Challenge.</div>');
         }
       }).catch(function(){

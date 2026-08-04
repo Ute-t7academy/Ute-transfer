@@ -531,8 +531,8 @@ body[data-theme="light"] .home-hint {
 
 .home-prog.p-sevens     { --p-c: var(--accent); }
 .home-prog.p-sterne     { --p-c: var(--lp-gold); }
-.home-prog.p-challenges { --p-c: #1bcb26; }
-body[data-theme="light"] .home-prog.p-challenges { --p-c: #15803D; }
+.home-prog.p-challenges { --p-c: var(--accent); }
+body[data-theme="light"] .home-prog.p-challenges { --p-c: #0E7490; }
 .home-prog.p-certs      { --p-c: var(--lp-gold); }
 .home-prog.p-build      { --p-c: #A855F7; }
 body[data-theme="light"] .home-prog.p-build   { --p-c: #7C3AED; }
@@ -587,6 +587,8 @@ body[data-theme="light"] .home-prog.p-monats  { --p-c: #C2410C; }
 .po-bar-fill.gold { background: var(--lp-gold); }
 .po-bar-fill.cyan { background: var(--accent); }
 .po-bar-fill.green { background: var(--lp-green); }
+.po-bar-fill.monats { background: #FF6B35; }   /* Challenge des Monats — orange identity (matches .p-monats hairline) */
+body[data-theme="light"] .po-bar-fill.monats { background: #C2410C; }
 
 /* Stat-tile pair (used by Sevens + Sterne for "Videos gesehen" / "Watch Time") */
 .po-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
