@@ -414,11 +414,11 @@ body[data-theme="light"] .nav-cta-secondary:hover {
 /* Hero image columns */
 .lp-hero-image {
     /* Home-outside hero image — Freemium overrides this in markup or by class. */
-    background: url('https://ute-t7academy.github.io/Assets/Home_Hero_Pic.png') center/cover no-repeat;
+    background: url('https://ute-laureo.github.io/t7academy-widgets/Assets/Home_Hero_Pic.png') center/cover no-repeat;
     position: relative;
 }
 .lp-hero-image.lp-hero-image-challenges {
-    background-image: url('https://ute-t7academy.github.io/Assets/Challenges_Hero_Pic.png');
+    background-image: url('https://ute-laureo.github.io/t7academy-widgets/Assets/Challenges_Hero_Pic.png');
 }
 .lp-hero-image::after {
     content: '';
@@ -1799,3 +1799,360 @@ body[data-theme="light"] .fm-hint-label { color: #0891B2; }
 .fm-hint-list li { margin: 6px 0; }
 .fm-hint-list li::marker { color: var(--accent); font-weight: 700; }
 body[data-theme="light"] .fm-hint-list li::marker { color: #0891B2; }
+
+
+/* ==========================================================================
+   22. SUBSCRIPTION (outside) — pricing plans + club enquiry
+   ========================================================================== */
+
+/* -- Pricing plans (single monthly + annual, side by side) ------------- */
+.sub-plans {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    margin-top: 22px;
+    max-width: 860px;
+    align-items: stretch;
+}
+@media (max-width: 680px) { .sub-plans { grid-template-columns: 1fr; } }
+
+.sub-plan {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 28px 28px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--lp-rule);
+    border-radius: 16px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sub-plan:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 229, 255, 0.45);
+    box-shadow: 0 12px 32px rgba(0, 229, 255, 0.10);
+}
+body[data-theme="light"] .sub-plan {
+    background: #FFFFFF;
+    border-color: rgba(15, 23, 42, 0.10);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+body[data-theme="light"] .sub-plan:hover {
+    border-color: rgba(8, 145, 178, 0.55);
+    box-shadow: 0 12px 30px rgba(8, 145, 178, 0.14);
+}
+
+/* Featured (annual) plan — gold accent */
+.sub-plan.featured {
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 215, 0, 0.02) 100%);
+    border-color: rgba(255, 215, 0, 0.35);
+}
+.sub-plan.featured:hover {
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 0 12px 32px rgba(255, 215, 0, 0.16);
+}
+body[data-theme="light"] .sub-plan.featured {
+    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 215, 0, 0.08) 100%);
+    border-color: rgba(202, 131, 9, 0.35);
+}
+
+.sub-plan-flag {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: 'Antonio', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #1a1500;
+    background: var(--lp-gold);
+    padding: 4px 11px;
+    border-radius: 99px;
+}
+
+.sub-plan-name {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+}
+.sub-plan.featured .sub-plan-name { color: var(--lp-gold); }
+body[data-theme="light"] .sub-plan .sub-plan-name { color: #0891B2; }
+body[data-theme="light"] .sub-plan.featured .sub-plan-name { color: var(--lp-gold); }
+
+.sub-plan-price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.sub-plan-amount {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    font-size: clamp(40px, 6vw, 56px);
+    line-height: 1;
+    color: var(--text);
+}
+.sub-plan-per {
+    font-family: 'Antonio', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lp-faint);
+}
+.sub-plan-note {
+    font-size: 13px;
+    color: var(--lp-muted);
+    line-height: 1.5;
+    margin-bottom: 22px;
+    min-height: 20px;
+}
+.sub-plan-note strong { color: var(--lp-gold); font-weight: 700; }
+
+.sub-plan-features {
+    list-style: none;
+    margin: 0 0 26px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    flex: 1;
+}
+.sub-plan-features li {
+    position: relative;
+    padding-left: 26px;
+    font-size: 14px;
+    color: var(--lp-muted);
+    line-height: 1.45;
+}
+.sub-plan-features li strong { color: var(--text); font-weight: 700; }
+.sub-plan-features li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--lp-green);
+    font-weight: 800;
+}
+
+.sub-plan-cta {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 15px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.18s;
+    margin-top: auto;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+}
+.sub-plan-cta:hover {
+    background: rgba(0, 229, 255, 0.12);
+    border-color: rgba(0, 229, 255, 0.6);
+}
+body[data-theme="light"] .sub-plan-cta {
+    background: rgba(8, 145, 178, 0.05);
+    border-color: rgba(8, 145, 178, 0.4);
+}
+.sub-plan.featured .sub-plan-cta {
+    background: linear-gradient(135deg, var(--lp-gold) 0%, var(--lp-gold-deep) 100%);
+    color: #1a1500;
+    border: none;
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.30);
+}
+.sub-plan.featured .sub-plan-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255, 215, 0, 0.42); }
+
+/* -- Club section — text left, "open form" button right ---------------- */
+.sub-club { margin: 6px 0 0; }
+
+.sub-club-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+.sub-club-text { flex: 1 1 460px; min-width: 0; }
+
+.sub-club-points {
+    list-style: none;
+    margin: 22px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 28px;
+}
+@media (max-width: 620px) { .sub-club-points { grid-template-columns: 1fr; } }
+.sub-club-points li {
+    position: relative;
+    padding-left: 30px;
+    font-size: 15px;
+    color: var(--lp-muted);
+    line-height: 1.5;
+}
+.sub-club-points li strong { color: var(--text); font-weight: 700; }
+.sub-club-points li::before {
+    content: '\26BD';
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* Button that reveals the enquiry form (sits to the right of the text) */
+.sub-club-cta {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 15px 28px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    box-shadow: 0 8px 24px rgba(0, 229, 255, 0.30);
+    transition: all 0.18s;
+}
+.sub-club-cta:hover { background: #1ce6ff; transform: translateY(-2px); }
+
+/* -- Club enquiry form (revealed on demand) ---------------------------- */
+.sub-form {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--lp-rule);
+    border-radius: 16px;
+    padding: 28px 26px;
+    margin-top: 28px;
+    max-width: 760px;
+}
+body[data-theme="light"] .sub-form {
+    background: #FFFFFF;
+    border-color: rgba(15, 23, 42, 0.10);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.sub-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+@media (max-width: 520px) { .sub-form-grid { grid-template-columns: 1fr; } }
+.sub-field { display: flex; flex-direction: column; gap: 6px; }
+.sub-field.full { grid-column: 1 / -1; }
+.sub-field label {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--lp-faint);
+}
+.sub-field label .req { color: var(--lp-red); }
+.sub-field input,
+.sub-field textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(0, 229, 255, 0.25);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.18s, background 0.18s;
+}
+.sub-field textarea { min-height: 92px; resize: vertical; }
+.sub-field input:focus,
+.sub-field textarea:focus {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.09);
+}
+.sub-field input::placeholder,
+.sub-field textarea::placeholder { color: var(--lp-faint); }
+body[data-theme="light"] .sub-field input,
+body[data-theme="light"] .sub-field textarea {
+    background: rgba(8, 145, 178, 0.04);
+    border-color: rgba(8, 145, 178, 0.35);
+}
+body[data-theme="light"] .sub-field input:focus,
+body[data-theme="light"] .sub-field textarea:focus {
+    border-color: var(--accent);
+    background: rgba(8, 145, 178, 0.07);
+}
+
+.sub-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+.sub-submit {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 14px 30px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 8px 24px rgba(0, 229, 255, 0.30);
+}
+.sub-submit:hover:not(:disabled) { background: #1ce6ff; transform: translateY(-2px); }
+.sub-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.sub-form-hint {
+    font-size: 12px;
+    color: var(--lp-faint);
+    line-height: 1.5;
+    margin-top: 14px;
+}
+
+.sub-form-msg {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    min-height: 20px;
+}
+.sub-form-msg.ok  { color: var(--lp-green); }
+.sub-form-msg.err { color: var(--lp-red); }
+
+/* Success state — replaces the form after a successful send */
+.sub-form-success { text-align: center; padding: 22px 10px; }
+.sub-form-success .sfx-icon { font-size: 48px; margin-bottom: 12px; }
+.sub-form-success h3 {
+    font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+.sub-form-success p {
+    font-size: 15px;
+    color: var(--lp-muted);
+    line-height: 1.55;
+    max-width: 440px;
+    margin: 0 auto;
+}
+
+/* Honeypot — kept in the DOM for bots, hidden from real users + a11y tree. */
+.sub-hp {
+    position: absolute !important;
+    left: -9999px !important;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+/* Cloudflare Turnstile widget spacing */
+.sub-turnstile { margin-top: 18px; }

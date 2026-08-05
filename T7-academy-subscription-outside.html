@@ -1,0 +1,155 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T7 Academy — Abo &amp; Preise</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;family=Antonio:wght@400;500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;display=swap" rel="stylesheet">
+<link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
+
+<!-- Outside-environment stylesheet (shared with home-outside & Freemium). -->
+<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-outside.css?v=5">
+
+<!-- Outside-environment script (theme toggle + club-enquiry form logic). -->
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-outside.js?v=5"></script>
+
+<!-- Cloudflare Turnstile (captcha) — protects the club enquiry form. -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+
+    <!-- TOP NAV -->
+    <nav class="topnav">
+        <div class="nav-logo">
+            <a href="/"><img src="https://ute-laureo.github.io/t7academy-widgets/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
+        </div>
+        <div class="nav-ctas">
+            <a href="/" class="nav-cta nav-cta-secondary">Home</a>
+            <a href="https://www.laureo.at/challenges/" class="nav-cta nav-cta-secondary">Zeige mir ein paar Tricks</a>
+            <a href="#plans" class="nav-cta nav-cta-secondary">Abo kaufen</a>
+            <a href="https://www.laureo.at/login" class="nav-cta nav-cta-primary">Direkt zur Academy — Login</a>
+        </div>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
+        </div>
+    </nav>
+
+    <!-- PLANS -->
+    <section class="lp-section" id="plans">
+        <div class="lp-wrap">
+            <div class="lp-eye">Abo &amp; Preise</div>
+            <h2 class="lp-title">Übe wie die <em>Profis</em> — <span class="accent">ab 10 €</span> im Monat.</h2>
+            <p class="lp-sub">Sammle XP und zeige was Du kannst mit der T7 Academy.</p>
+
+            <div class="sub-plans">
+                <!-- Single — monthly -->
+                <div class="sub-plan">
+                    <div class="sub-plan-name">Einzel · Monatlich</div>
+                    <div class="sub-plan-price">
+                        <span class="sub-plan-amount">10 €</span>
+                        <span class="sub-plan-per">/ Monat</span>
+                    </div>
+                    <div class="sub-plan-note">Monatlich kündbar. Für ein Kind.</div>
+                    <ul class="sub-plan-features">
+                        <li>Voller Zugang zur <strong>gesamten Academy</strong></li>
+                        <li>Alle Programme: <strong>Minis, Sevens, Sterne &amp; Challenges</strong></li>
+                        <li>Über <strong>200 Tricks und Aufgaben</strong> im System</li>
+                        <li>Neue <strong>Challenge des Monats</strong></li>
+                        <li>Sterne-<strong>Zertifikate</strong> vom Experten</li>
+                    </ul>
+                    <a href="https://www.laureo.at/login?plan=monthly" class="sub-plan-cta">Monats-Abo starten</a>
+                </div>
+
+                <!-- Single — annual (featured) -->
+                <div class="sub-plan featured">
+                    <div class="sub-plan-flag">2 Monate gratis</div>
+                    <div class="sub-plan-name">Einzel · Jährlich</div>
+                    <div class="sub-plan-price">
+                        <span class="sub-plan-amount">100 €</span>
+                        <span class="sub-plan-per">/ Jahr</span>
+                    </div>
+                    <div class="sub-plan-note">Entspricht 8,33 €/Monat — <strong>2 Monate geschenkt</strong>.</div>
+                    <ul class="sub-plan-features">
+                        <li><strong>Alles aus dem Monats-Abo</strong></li>
+                        <li>Ein Jahr voller Zugang — <strong>ohne Unterbrechung</strong></li>
+                        <li><strong>Günstigster Preis</strong> pro Monat</li>
+                        <li>Einmal zahlen, ein Jahr <strong>durchtrainieren</strong></li>
+                        <li>Sterne-<strong>Zertifikate</strong> vom Experten</li>
+                    </ul>
+                    <a href="https://www.laureo.at/login?plan=annual" class="sub-plan-cta">Jahres-Abo starten</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CLUB -->
+    <section class="lp-section" id="club">
+        <div class="lp-wrap">
+            <div class="sub-club">
+                <div class="sub-club-head">
+                    <div class="sub-club-text">
+                        <div class="lp-eye">Für Vereine</div>
+                        <h2 class="lp-title">Ein ganzes Team. <span class="gold">Ein Abo.</span></h2>
+                        <p class="lp-sub">Für Vereine und Fußballschulen bieten wir eigene Club-Abos an. Der Preis richtet sich nach der Anzahl der Kinder und Teams — sag uns kurz, wie viele Spieler ihr seid, und wir machen euch ein passendes Angebot.</p>
+                        <ul class="sub-club-points">
+                            <li><strong>Staffelpreis</strong> nach Anzahl Spieler und Teams.</li>
+                            <li><strong>Alle Programme</strong> dein Team.</li>
+                            <li>Ideal für <strong>Vereine, Fußballschulen und Camps</strong>.</li>
+                            <li>Persönliches Angebot — <strong>frag einfach an</strong>.</li>
+                        </ul>
+                    </div>
+                    <button type="button" class="sub-club-cta" id="clubFormToggle" aria-expanded="false" aria-controls="clubFormCard">Angebot für dein Team anfragen →</button>
+                </div>
+
+                <div class="sub-form" id="clubFormCard" hidden>
+                    <form id="clubEnquiryForm" novalidate>
+                        <!-- Honeypot — hidden from users; bots that fill it are dropped. -->
+                        <div class="sub-hp" aria-hidden="true">
+                            <label>Website (bitte leer lassen)
+                                <input type="text" name="company_website" tabindex="-1" autocomplete="off">
+                            </label>
+                        </div>
+                        <div class="sub-form-grid">
+                            <div class="sub-field full">
+                                <label for="cf-club">Verein / Klub <span class="req">*</span></label>
+                                <input id="cf-club" name="club_name" type="text" autocomplete="organization" placeholder="z. B. SV Musterstadt" required>
+                            </div>
+                            <div class="sub-field">
+                                <label for="cf-name">Ansprechperson <span class="req">*</span></label>
+                                <input id="cf-name" name="contact_name" type="text" autocomplete="name" placeholder="Vor- und Nachname" required>
+                            </div>
+                            <div class="sub-field">
+                                <label for="cf-email">E-Mail <span class="req">*</span></label>
+                                <input id="cf-email" name="email" type="email" autocomplete="email" placeholder="name@verein.at" required>
+                            </div>
+                            <div class="sub-field">
+                                <label for="cf-phone">Telefon</label>
+                                <input id="cf-phone" name="phone" type="tel" autocomplete="tel" placeholder="Optional">
+                            </div>
+                            <div class="sub-field">
+                                <label for="cf-teams">Anzahl Teams</label>
+                                <input id="cf-teams" name="num_teams" type="number" min="1" inputmode="numeric" placeholder="z. B. 6">
+                            </div>
+                            <div class="sub-field">
+                                <label for="cf-kids">Anzahl Kinder (gesamt)</label>
+                                <input id="cf-kids" name="num_kids" type="number" min="1" inputmode="numeric" placeholder="z. B. 90">
+                            </div>
+                            <div class="sub-field full">
+                                <label for="cf-ages">Altersgruppen</label>
+                                <input id="cf-ages" name="age_groups" type="text" placeholder="z. B. U8–U14">
+                            </div>
+                            <div class="sub-field full">
+                                <label for="cf-msg">Nachricht</label>
+                                <textarea id="cf-msg" name="message" placeholder="Erzähl uns kurz von deinem Verein und was ihr euch wünscht."></textarea>
+                            </div>
+                        </div>
+                        <!-- Turnstile mounts here (rendered by JS when the form opens). -->
+                        <div class="sub-turnstile" id="clubTurnstile" data-sitekey="0x4AAAAAAEBEHlIvFqZjvw_m"></div>
+                        <div class="sub-form-actions">
+                            <button type="submit" class="sub-submit" id="clubSubmit">Anfrage senden</button>
+                            <div class="sub-form-msg" id="clubFormMsg" role="status" aria-live="polite"></div>
+                        </div>
+                        <p class="sub-form-hint">Mit dem Absenden stimmst du zu, dass wir dich zu deiner Anfrage kontaktieren. Deine Daten werden ausschließlich dafür verwendet.</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
