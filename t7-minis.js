@@ -85,7 +85,7 @@ function miniRowsToModules(rows){
   rows.forEach(function(row){
     var ch=[]; try{ ch=(typeof row.challenges==='string')?JSON.parse(row.challenges):(row.challenges||[]); }catch(e){ ch=[]; }
     ch.sort(function(a,b){return (a.idx||0)-(b.idx||0);});
-    var drills=ch.map(function(d,i){ var v=parseVimeoCode(d.vimeo_code);
+    var drills=ch.map(function(d,i){ var v=d.vimeo_code?parseVimeoCode(d.vimeo_code):{vid:String(d.vid||''),hash:String(d.hash||'')};
       return {idx:(typeof d.idx==='number'?d.idx:i),title:d.title||('Trick '+(i+1)),emoji:d.emoji||'⚽',meta:d.meta||'',sticker:d.sticker||'⭐',vid:v.vid,hash:v.hash}; });
     var colors=(row.color&&String(row.color).indexOf(',')>=0)?String(row.color).split(',').map(function(s){return s.trim();}):null;
     out[row.key]={tier:row.tier||'base',label:row.label||row.key,emoji:row.icon||'⚽',num:row.num||'',
